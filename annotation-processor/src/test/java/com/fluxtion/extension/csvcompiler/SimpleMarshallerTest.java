@@ -18,11 +18,9 @@ public class SimpleMarshallerTest {
 
     @Test
     public void validateCsvToNewBeanPerRecordContentsTest() {
-        String input = """
-                name,age
-                tim,32
-                lisa,44
-                """;
+        String input = "name,age\n" +
+                       "tim,32\n" +
+                       "lisa,44\n";
 
         List<Person> resultList = new ArrayList<>();
 
@@ -40,11 +38,9 @@ public class SimpleMarshallerTest {
 
     @Test
     public void validateCsvToRecycledBeanPerRecordContentsTest() {
-        String input = """
-                name,age
-                tim,32
-                lisa,44
-                """;
+        String input = "name,age\n" +
+                       "tim,32\n" +
+                       "lisa,44\n";
 
         List<PersonRecycleInstance> resultList = new ArrayList<>();
 

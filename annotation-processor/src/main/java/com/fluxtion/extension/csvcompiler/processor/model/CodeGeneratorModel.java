@@ -15,23 +15,21 @@ public interface CodeGeneratorModel {
     }
 
     default String getImports() {
-        return """
-                import com.fluxtion.extension.csvcompiler.CharArrayCharSequence;
-                import com.fluxtion.extension.csvcompiler.CharArrayCharSequence.CharSequenceView;
-                import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;
-                import com.fluxtion.extension.csvcompiler.ValidationLogger;                
-                
-                import com.google.auto.service.AutoService;
-                
-                import java.io.IOException;
-                import java.io.Reader;
-                import java.util.ArrayList;
-                import java.util.HashMap;
-                import java.util.List;
-                import java.util.function.Consumer;
-                
-                import static com.fluxtion.extension.csvcompiler.Conversion.*;
-                """;
+        return "import com.fluxtion.extension.csvcompiler.CharArrayCharSequence;\n" +
+               "import com.fluxtion.extension.csvcompiler.CharArrayCharSequence.CharSequenceView;\n" +
+               "import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;\n" +
+               "import com.fluxtion.extension.csvcompiler.ValidationLogger;\n" +
+               "\n" +
+               "import com.google.auto.service.AutoService;\n" +
+               "\n" +
+               "import java.io.IOException;\n" +
+               "import java.io.Reader;\n" +
+               "import java.util.ArrayList;\n" +
+               "import java.util.HashMap;\n" +
+               "import java.util.List;\n" +
+               "import java.util.function.Consumer;\n" +
+               "\n" +
+               "import static com.fluxtion.extension.csvcompiler.Conversion.*;\n";
     }
 
     int getMappingRow();

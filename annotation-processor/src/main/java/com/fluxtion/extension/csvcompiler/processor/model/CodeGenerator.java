@@ -12,65 +12,63 @@ import java.util.stream.Collectors;
 
 public class CodeGenerator {
 
-    private static final String CODE_TEMPLATE_DECLARATIONS = """
-            package %s;
-
-            %s
-            
-            @AutoService(CsvMarshallerLoader.class)
-            public class %s implements CsvMarshallerLoader<%4$s>{
-                        
-                private %s target;
-                private int rowNumber;
-                private final HashMap fieldMap = new HashMap<>();
-                private boolean passedValidation;
-                private ValidationLogger errorLog = ValidationLogger.CONSOLE;
-                private final char[] chars = new char[4096];
-                private final int[] delimiterIndex = new int[1024];
-                private StringBuilder messageSink = new StringBuilder(256);
-                private final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);
-                private int fieldIndex = 0;
-                private int writeIndex = 0;
-                
-            %s
-                
-                public Class<%4$s> targetClass(){
-                    return %4$s.class;
-                }
-                
-            %s
-                        
-                public boolean passedValidation() {
-                    return passedValidation;
-                }
-                        
-                public int getRowNumber() {
-                    return rowNumber;
-                }
-            
-                @Override
-                public CsvMarshallerLoader<%4$s> setErrorLog(ValidationLogger errorLog) {
-                    this.errorLog = errorLog;
-                    return this;
-                }
-                
-                @Override
-                public void stream(Consumer<%4$s> consumer, Reader in) {
-                    init();
-                    int c;
-                    try {
-                        while ((c = in.read()) != -1) {
-                            if (charEvent((char) c)) {
-                                consumer.accept(target);
-                            }
-                        }
-                        eof();
-                    }catch (IOException e){
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-            """;
+    private static final String CODE_TEMPLATE_DECLARATIONS = "package %s;\n" +
+                                                             "\n" +
+                                                             "%s\n" +
+                                                             "\n" +
+                                                             "@AutoService(CsvMarshallerLoader.class)\n" +
+                                                             "public class %s implements CsvMarshallerLoader<%4$s>{\n" +
+                                                             "\n" +
+                                                             "    private %s target;\n" +
+                                                             "    private int rowNumber;\n" +
+                                                             "    private final HashMap fieldMap = new HashMap<>();\n" +
+                                                             "    private boolean passedValidation;\n" +
+                                                             "    private ValidationLogger errorLog = ValidationLogger.CONSOLE;\n" +
+                                                             "    private final char[] chars = new char[4096];\n" +
+                                                             "    private final int[] delimiterIndex = new int[1024];\n" +
+                                                             "    private StringBuilder messageSink = new StringBuilder(256);\n" +
+                                                             "    private final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);\n" +
+                                                             "    private int fieldIndex = 0;\n" +
+                                                             "    private int writeIndex = 0;\n" +
+                                                             "\n" +
+                                                             "%s\n" +
+                                                             "\n" +
+                                                             "    public Class<%4$s> targetClass(){\n" +
+                                                             "        return %4$s.class;\n" +
+                                                             "    }\n" +
+                                                             "\n" +
+                                                             "%s\n" +
+                                                             "\n" +
+                                                             "    public boolean passedValidation() {\n" +
+                                                             "        return passedValidation;\n" +
+                                                             "    }\n" +
+                                                             "\n" +
+                                                             "    public int getRowNumber() {\n" +
+                                                             "        return rowNumber;\n" +
+                                                             "    }\n" +
+                                                             "\n" +
+                                                             "    @Override\n" +
+                                                             "    public CsvMarshallerLoader<%4$s> setErrorLog(ValidationLogger errorLog) {\n" +
+                                                             "        this.errorLog = errorLog;\n" +
+                                                             "        return this;\n" +
+                                                             "    }\n" +
+                                                             "\n" +
+                                                             "    @Override\n" +
+                                                             "    public void stream(Consumer<%4$s> consumer, Reader in) {\n" +
+                                                             "        init();\n" +
+                                                             "        int c;\n" +
+                                                             "        try {\n" +
+                                                             "            while ((c = in.read()) != -1) {\n" +
+                                                             "                if (charEvent((char) c)) {\n" +
+                                                             "                    consumer.accept(target);\n" +
+                                                             "                }\n" +
+                                                             "            }\n" +
+                                                             "            eof();\n" +
+                                                             "        }catch (IOException e){\n" +
+                                                             "            throw new RuntimeException(e);\n" +
+                                                             "        }\n" +
+                                                             "    }\n" +
+                                                             "}\n";
     private final Writer writer;
     private final CodeGeneratorModel codeGeneratorModel;
 
@@ -147,150 +145,120 @@ public class CodeGenerator {
 
     @NotNull
     private static String charEventMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = """
-                    public boolean charEvent(char character) {
-                        passedValidation = true;
-                        if(character == '%s'){
-                            return false;
-                        }
-                """.formatted(StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
+        String options = ("    public boolean charEvent(char character) {\n" +
+                          "        passedValidation = true;\n" +
+                          "        if(character == '%s'){\n" +
+                          "            return false;\n" +
+                          "        }\n").formatted(StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
         if (codeGeneratorModel.isIgnoreQuotes()) {
-            options += """
-                        if(character == '\\"'){
-                            return false;
-                        }
-                    """;
+            options += "    if(character == '\\\"'){\n" +
+                       "        return false;\n" +
+                       "    }\n";
         }
         if (codeGeneratorModel.isProcessEscapeSequence()) {
-            options += """
-                        if(!processChar(character)){
-                            return false;
-                        }
-                        if (escaping) {
-                            chars[writeIndex++] = character;
-                            return false;
-                        }
-                    """;
+            options += "    if(!processChar(character)){\n" +
+                       "        return false;\n" +
+                       "    }\n" +
+                       "    if (escaping) {\n" +
+                       "        chars[writeIndex++] = character;\n" +
+                       "        return false;\n" +
+                       "    }\n";
         }
-        options += """
-                        if (character == '%s') {
-                            return processRow();
-                        }
-                        if (character == '%c') {
-                            updateFieldIndex();
-                        }
-                        chars[writeIndex++] = character;
-                        return false;
-                    }
-                """.formatted(StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
+        options += ("        if (character == '%s') {\n" +
+                    "            return processRow();\n" +
+                    "        }\n" +
+                    "        if (character == '%c') {\n" +
+                    "            updateFieldIndex();\n" +
+                    "        }\n" +
+                    "        chars[writeIndex++] = character;\n" +
+                    "        return false;\n" +
+                    "    }\n").formatted(StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
         return options;
     }
 
     private static String processEscapeSequenceMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = "";
         if (codeGeneratorModel.isProcessEscapeSequence()) {
-            options += """
-                        private boolean processChar(char character){
-                            boolean isQuote = character == '"';
-                            if (!escaping & isQuote) {//first quote
-                                prevIsQuote = false;
-                                escaping = true;
-                                return false;
-                            } else if (escaping & !prevIsQuote & isQuote) {//possible termination
-                                prevIsQuote = true;
-                                return false;
-                            } else if (escaping & prevIsQuote & !isQuote) {//actual termination
-                                prevIsQuote = false;
-                                escaping = false;
-                            } else if (escaping & prevIsQuote & isQuote) {//an escaped quote
-                                prevIsQuote = false;
-                            }\s
-                            return true;
-                        }
-                    """;
+            options += "    private boolean processChar(char character){\n" +
+                       "        boolean isQuote = character == '\"';\n" +
+                       "        if (!escaping & isQuote) {//first quote\n" +
+                       "            prevIsQuote = false;\n" +
+                       "            escaping = true;\n" +
+                       "            return false;\n" +
+                       "        } else if (escaping & !prevIsQuote & isQuote) {//possible termination\n" +
+                       "            prevIsQuote = true;\n" +
+                       "            return false;\n" +
+                       "        } else if (escaping & prevIsQuote & !isQuote) {//actual termination\n" +
+                       "            prevIsQuote = false;\n" +
+                       "            escaping = false;\n" +
+                       "        } else if (escaping & prevIsQuote & isQuote) {//an escaped quote\n" +
+                       "            prevIsQuote = false;\n" +
+                       "        } \n" +
+                       "        return true;\n" +
+                       "    }\n";
         }
         return options;
     }
 
     private static String eofMethod() {
-        return """
-                    
-                    public boolean eof(){
-                        return writeIndex==0?false:processRow();
-                    }
-                """;
+        return "\n" +
+               "    public boolean eof(){\n" +
+               "        return writeIndex==0?false:processRow();\n" +
+               "    }\n";
     }
 
     private static String processRowMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = """
-                                
-                    private boolean processRow() {
-                        boolean targetChanged = false;
-                        rowNumber++;
-                """;
+        String options = "\n" +
+                         "    private boolean processRow() {\n" +
+                         "        boolean targetChanged = false;\n" +
+                         "        rowNumber++;\n";
         if (codeGeneratorModel.isSkipCommentLines()) {
-            options += """
-                        if(chars[0]=='#'){
-                            writeIndex = 0;
-                            fieldIndex = 0;
-                            return targetChanged;    
-                        }
-                    """;
+            options += "    if(chars[0]=='#'){\n" +
+                       "        writeIndex = 0;\n" +
+                       "        fieldIndex = 0;\n" +
+                       "        return targetChanged;\n" +
+                       "    }\n";
         }
         if (codeGeneratorModel.isHeaderPresent() && codeGeneratorModel.isSkipCommentLines()) {
-            options += """
-                        if (HEADER_ROWS < rowNumber & writeIndex > 0) {
-                            targetChanged = updateTarget();
-                        }
-                    """;
+            options += "    if (HEADER_ROWS < rowNumber & writeIndex > 0) {\n" +
+                       "        targetChanged = updateTarget();\n" +
+                       "    }\n";
         } else if (codeGeneratorModel.isHeaderPresent()) {
-            options += """
-                        if (HEADER_ROWS < rowNumber) {
-                            targetChanged = updateTarget();
-                        }
-                    """;
+            options += "    if (HEADER_ROWS < rowNumber) {\n" +
+                       "        targetChanged = updateTarget();\n" +
+                       "    }\n";
         } else if (!codeGeneratorModel.isHeaderPresent() && codeGeneratorModel.isSkipCommentLines()) {
-            options += """
-                        if(writeIndex > 0){
-                            targetChanged = updateTarget();
-                        }
-                    """;
+            options += "    if(writeIndex > 0){\n" +
+                       "        targetChanged = updateTarget();\n" +
+                       "    }\n";
         } else {
             options += "    targetChanged = updateTarget();";
         }
         if (codeGeneratorModel.isMappingRowPresent()) {
-            options += """
-                        if (rowNumber==MAPPING_ROW) {
-                            mapHeader();
-                        }
-                    """;
+            options += "    if (rowNumber==MAPPING_ROW) {\n" +
+                       "        mapHeader();\n" +
+                       "    }\n";
         }
-        options += """
-                    writeIndex = 0;
-                    fieldIndex = 0;
-                    return targetChanged;    
-                }
-                """;
+        options += "    writeIndex = 0;\n" +
+                   "    fieldIndex = 0;\n" +
+                   "    return targetChanged;\n" +
+                   "}\n";
 
         return options;
     }
 
     private static String updateTargetMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = """
-                                
-                private boolean updateTarget() {
-                    int length = 0;
-                """;
+        String options = "\n" +
+                         "private boolean updateTarget() {\n" +
+                         "    int length = 0;\n";
         if (codeGeneratorModel.isNewBeanPerRecord()) {
             options += "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
         }
         if (codeGeneratorModel.isAcceptPartials()) {
             options += "int maxFieldIndex = fieldIndex;\n";
         }
-        options += """
-                try{
-                    updateFieldIndex();
-                """;
+        options += "try{\n" +
+                   "    updateFieldIndex();\n";
         final boolean acceptPartials = codeGeneratorModel.isAcceptPartials();
         final boolean trim = codeGeneratorModel.isTrim();
         options += codeGeneratorModel.fieldInfoList().stream()
@@ -314,21 +282,17 @@ public class CodeGenerator {
                             }
 
                             if (s.isDefaultOptionalField()) {
-                                out += """
-                                        if(fieldIndex > -1){
-                                            %s
-                                        }else{
-                                            %s
-                                        }
-                                        """.formatted(readField, readOptionalFiled);
+                                out += ("if(fieldIndex > -1){\n" +
+                                        "    %s\n" +
+                                        "}else{\n" +
+                                        "    %s\n" +
+                                        "}\n").formatted(readField, readOptionalFiled);
                             } else if (s.isMandatory()) {
                                 out += readField;
                             } else {
-                                out += """
-                                        if(fieldIndex > -1){
-                                            %s
-                                        }
-                                        """.formatted(readField);
+                                out += ("if(fieldIndex > -1){\n" +
+                                        "    %s\n" +
+                                        "}\n").formatted(readField);
                             }
                             out += s.getUpdateTarget();
                             if (acceptPartials) {
@@ -339,19 +303,17 @@ public class CodeGenerator {
                 )
                 .collect(Collectors.joining(""));
 
-        options += """
-                    } catch (Exception e) {
-                        logException("problem pushing '"
-                                + sequence.subSequence(delimiterIndex[fieldIndex], delimiterIndex[fieldIndex + 1] - 1).toString() + "'"
-                                + " from row:'" +rowNumber +"'", false, e);
-                        passedValidation = false;
-                        return false;
-                    } finally {
-                        fieldIndex = 0;
-                    }
-                    return true;
-                }
-                """;
+        options += "    } catch (Exception e) {\n" +
+                   "        logException(\"problem pushing '\"\n" +
+                   "                + sequence.subSequence(delimiterIndex[fieldIndex], delimiterIndex[fieldIndex + 1] - 1).toString() + \"'\"\n" +
+                   "                + \" from row:'\" +rowNumber +\"'\", false, e);\n" +
+                   "        passedValidation = false;\n" +
+                   "        return false;\n" +
+                   "    } finally {\n" +
+                   "        fieldIndex = 0;\n" +
+                   "    }\n" +
+                   "    return true;\n" +
+                   "}\n";
         return options;
     }
 
@@ -359,32 +321,24 @@ public class CodeGenerator {
         if (!codeGeneratorModel.isHeaderPresent()) {
             return "";
         }
-        String options = """
-                    private void mapHeader(){
-                        String header = new String(chars).trim();
-                """;
+        String options = "    private void mapHeader(){\n" +
+                         "        String header = new String(chars).trim();\n";
         if (codeGeneratorModel.isAsciiOnlyHeader()) {
 //            options += "    header = header.replaceAll(\"\\P{InBasic_Latin}\", \"\");";
         }
-        options += """
-                        header = header.replace("\\"", "");
-                        List<String> headers = new ArrayList();
-                        for (String colName : header.split("%c")) {
-                            headers.add(getIdentifier(colName));
-                        }
-                """.formatted(codeGeneratorModel.getDelimiter());
+        options += ("        header = header.replace(\"\\\"\", \"\");\n" +
+                    "        List<String> headers = new ArrayList();\n" +
+                    "        for (String colName : header.split(\"%c\")) {\n" +
+                    "            headers.add(getIdentifier(colName));\n" +
+                    "        }\n").formatted(codeGeneratorModel.getDelimiter());
         options += codeGeneratorModel.fieldInfoList().stream()
                 .map(s -> {
-                            String out = """
-                                    %1$s = headers.indexOf("%2$s");
-                                    fieldMap.put(%1$s, "%3$s");
-                                    """.formatted(s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
+                            String out = ("%1$s = headers.indexOf(\"%2$s\");\n" +
+                                          "fieldMap.put(%1$s, \"%3$s\");\n").formatted(s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
                             if (s.isMandatory()) {
-                                out += """
-                                            if (%s < 0) {
-                                                logHeaderProblem("problem mapping field:'%s' missing column header, index row:", true, null);
-                                            }
-                                        """.formatted(s.getFieldIdentifier(), s.getFieldName());
+                                out += ("    if (%s < 0) {\n" +
+                                        "        logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +
+                                        "    }\n").formatted(s.getFieldIdentifier(), s.getFieldName());
                             }
                             return out;
                         }
@@ -394,44 +348,40 @@ public class CodeGenerator {
     }
 
     public static String logErrorMethods(CodeGeneratorModel codeGeneratorModel) {
-        return """
-                    private void logException(String prefix, boolean fatal, Exception e) {
-                         StringBuilder sb = new StringBuilder()
-                                .append("%1$s ")
-                                .append(prefix)
-                                .append(" fieldIndex:'")
-                                .append(fieldIndex)
-                                .append("' targetMethod:'%1$s#")
-                                .append(fieldMap.get(fieldIndex))
-                                .append("' error:'")
-                                .append(e.toString())
-                                .append("'")
-                                ;
-                        if(fatal){
-                            errorLog.logFatal(sb);
-                            throw new RuntimeException(sb.toString(), e);
-                        }
-                        errorLog.logException(sb);
-                    }
-                                
-                    private void logHeaderProblem(String prefix, boolean fatal, Exception e) {
-                        StringBuilder sb = new StringBuilder().append("%1$s ").append(prefix).append(rowNumber);
-                        if(fatal){
-                            errorLog.logFatal(sb);
-                            throw new RuntimeException(sb.toString(), e);
-                        }
-                        errorLog.logException(sb);
-                    }
-                """.formatted(codeGeneratorModel.getTargetClassName());
+        return ("    private void logException(String prefix, boolean fatal, Exception e) {\n" +
+                "         StringBuilder sb = new StringBuilder()\n" +
+                "                .append(\"%1$s \")\n" +
+                "                .append(prefix)\n" +
+                "                .append(\" fieldIndex:'\")\n" +
+                "                .append(fieldIndex)\n" +
+                "                .append(\"' targetMethod:'%1$s#\")\n" +
+                "                .append(fieldMap.get(fieldIndex))\n" +
+                "                .append(\"' error:'\")\n" +
+                "                .append(e.toString())\n" +
+                "                .append(\"'\")\n" +
+                "                ;\n" +
+                "        if(fatal){\n" +
+                "            errorLog.logFatal(sb);\n" +
+                "            throw new RuntimeException(sb.toString(), e);\n" +
+                "        }\n" +
+                "        errorLog.logException(sb);\n" +
+                "    }\n" +
+                "\n" +
+                "    private void logHeaderProblem(String prefix, boolean fatal, Exception e) {\n" +
+                "        StringBuilder sb = new StringBuilder().append(\"%1$s \").append(prefix).append(rowNumber);\n" +
+                "        if(fatal){\n" +
+                "            errorLog.logFatal(sb);\n" +
+                "            throw new RuntimeException(sb.toString(), e);\n" +
+                "        }\n" +
+                "        errorLog.logException(sb);\n" +
+                "    }\n").formatted(codeGeneratorModel.getTargetClassName());
     }
 
     private static String updateFieldIndexMethod() {
-        return """
-                    private void updateFieldIndex() {
-                        fieldIndex++;
-                        delimiterIndex[fieldIndex] = writeIndex + 1;
-                    }
-                """;
+        return "    private void updateFieldIndex() {\n" +
+               "        fieldIndex++;\n" +
+               "        delimiterIndex[fieldIndex] = writeIndex + 1;\n" +
+               "    }\n";
     }
 
 

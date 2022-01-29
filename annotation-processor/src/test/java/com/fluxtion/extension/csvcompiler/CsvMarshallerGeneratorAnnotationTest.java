@@ -11,37 +11,35 @@ public class CsvMarshallerGeneratorAnnotationTest {
     public void simpleTest(){
 
         Runnable runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyRunner",
-                """
-                            package  com.fluxtion.extension.csvcompiler;
-                            
-                            import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-                            
-                            @CsvMarshaller
-                            public final class MyRunner implements Runnable{
-                            
-                                String name;
-                                String classification;
-                                int age;
-                                
-                                @Override
-                                public void run() {
-                                    System.out.println("hello world");
-                                }
-                                
-                                public String getName(){
-                                    return name;
-                                }
-                                
-                                public void setName(String name){
-                                    this.name = name;
-                                }
-                                
-                                public int getAge(){
-                                    return age;
-                                }
-                                
-                            }
-                        """);
+                "    package  com.fluxtion.extension.csvcompiler;\n" +
+                "\n" +
+                "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                "\n" +
+                "    @CsvMarshaller\n" +
+                "    public final class MyRunner implements Runnable{\n" +
+                "\n" +
+                "        String name;\n" +
+                "        String classification;\n" +
+                "        int age;\n" +
+                "\n" +
+                "        @Override\n" +
+                "        public void run() {\n" +
+                "            System.out.println(\"hello world\");\n" +
+                "        }\n" +
+                "\n" +
+                "        public String getName(){\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(String name){\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public int getAge(){\n" +
+                "            return age;\n" +
+                "        }\n" +
+                "\n" +
+                "    }\n");
         runner.run();
     }
 

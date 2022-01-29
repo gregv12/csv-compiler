@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class CharArrayCharSequence implements CharSequence {
 
     private final char[] array;
-    private StringCache cache = new StringCache();
+    private final StringCache cache = new StringCache();
 
     public CharArrayCharSequence(char[] array) {
         this.array = array;
