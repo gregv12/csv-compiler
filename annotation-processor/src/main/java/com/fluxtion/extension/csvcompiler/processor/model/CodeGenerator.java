@@ -79,7 +79,7 @@ public class CodeGenerator {
 
     @SneakyThrows
     public void writeMarshaller() {
-        String sourceString = CODE_TEMPLATE_DECLARATIONS.formatted(
+        String sourceString = String.format(CODE_TEMPLATE_DECLARATIONS,
                 codeGeneratorModel.getPackageName(),
                 codeGeneratorModel.getImports(),
                 codeGeneratorModel.getMarshallerClassName(),
@@ -145,11 +145,11 @@ public class CodeGenerator {
 
     @NotNull
     private static String charEventMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = ("    public boolean charEvent(char character) {\n" +
+        String options = String.format("    public boolean charEvent(char character) {\n" +
                           "        passedValidation = true;\n" +
                           "        if(character == '%s'){\n" +
                           "            return false;\n" +
-                          "        }\n").formatted(StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
+                          "        }\n", StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
         if (codeGeneratorModel.isIgnoreQuotes()) {
             options += "    if(character == '\\\"'){\n" +
                        "        return false;\n" +
@@ -164,7 +164,7 @@ public class CodeGenerator {
                        "        return false;\n" +
                        "    }\n";
         }
-        options += ("        if (character == '%s') {\n" +
+        options += String.format("        if (character == '%s') {\n" +
                     "            return processRow();\n" +
                     "        }\n" +
                     "        if (character == '%c') {\n" +
@@ -172,7 +172,7 @@ public class CodeGenerator {
                     "        }\n" +
                     "        chars[writeIndex++] = character;\n" +
                     "        return false;\n" +
-                    "    }\n").formatted(StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
+                    "    }\n", StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
         return options;
     }
 
@@ -276,23 +276,23 @@ public class CodeGenerator {
                             }
                             String out;
                             if (acceptPartials) {
-                                out = "if (maxFieldIndex > %s {" .formatted(fieldIdentifier);
+                                out = String.format("if (maxFieldIndex > %s {", fieldIdentifier);
                             } else {
-                                out = "fieldIndex = %s;" .formatted(fieldIdentifier);
+                                out = String.format("fieldIndex = %s;", fieldIdentifier);
                             }
 
                             if (s.isDefaultOptionalField()) {
-                                out += ("if(fieldIndex > -1){\n" +
+                                out += String.format("if(fieldIndex > -1){\n" +
                                         "    %s\n" +
                                         "}else{\n" +
                                         "    %s\n" +
-                                        "}\n").formatted(readField, readOptionalFiled);
+                                        "}\n", readField, readOptionalFiled);
                             } else if (s.isMandatory()) {
                                 out += readField;
                             } else {
-                                out += ("if(fieldIndex > -1){\n" +
+                                out += String.format("if(fieldIndex > -1){\n" +
                                         "    %s\n" +
-                                        "}\n").formatted(readField);
+                                        "}\n", readField);
                             }
                             out += s.getUpdateTarget();
                             if (acceptPartials) {
@@ -326,19 +326,19 @@ public class CodeGenerator {
         if (codeGeneratorModel.isAsciiOnlyHeader()) {
 //            options += "    header = header.replaceAll(\"\\P{InBasic_Latin}\", \"\");";
         }
-        options += ("        header = header.replace(\"\\\"\", \"\");\n" +
+        options += String.format("        header = header.replace(\"\\\"\", \"\");\n" +
                     "        List<String> headers = new ArrayList();\n" +
                     "        for (String colName : header.split(\"%c\")) {\n" +
                     "            headers.add(getIdentifier(colName));\n" +
-                    "        }\n").formatted(codeGeneratorModel.getDelimiter());
+                    "        }\n", codeGeneratorModel.getDelimiter());
         options += codeGeneratorModel.fieldInfoList().stream()
                 .map(s -> {
-                            String out = ("%1$s = headers.indexOf(\"%2$s\");\n" +
-                                          "fieldMap.put(%1$s, \"%3$s\");\n").formatted(s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
+                            String out = String.format("%1$s = headers.indexOf(\"%2$s\");\n" +
+                                          "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
                             if (s.isMandatory()) {
-                                out += ("    if (%s < 0) {\n" +
+                                out += String.format("    if (%s < 0) {\n" +
                                         "        logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +
-                                        "    }\n").formatted(s.getFieldIdentifier(), s.getFieldName());
+                                        "    }\n", s.getFieldIdentifier(), s.getFieldName());
                             }
                             return out;
                         }
@@ -348,7 +348,7 @@ public class CodeGenerator {
     }
 
     public static String logErrorMethods(CodeGeneratorModel codeGeneratorModel) {
-        return ("    private void logException(String prefix, boolean fatal, Exception e) {\n" +
+        return String.format("    private void logException(String prefix, boolean fatal, Exception e) {\n" +
                 "         StringBuilder sb = new StringBuilder()\n" +
                 "                .append(\"%1$s \")\n" +
                 "                .append(prefix)\n" +
@@ -374,7 +374,7 @@ public class CodeGenerator {
                 "            throw new RuntimeException(sb.toString(), e);\n" +
                 "        }\n" +
                 "        errorLog.logException(sb);\n" +
-                "    }\n").formatted(codeGeneratorModel.getTargetClassName());
+                "    }\n", codeGeneratorModel.getTargetClassName());
     }
 
     private static String updateFieldIndexMethod() {

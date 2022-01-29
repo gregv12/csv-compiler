@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * All the meta information required to build a csv parser and csv printer for a bean style class.
@@ -71,7 +72,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
         return fieldMap.values().stream()
                 .map(FieldModel::getCsvToFieldInfo)
                 .map(CsvToFieldInfoModel.class::cast)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Data(staticConstructor = "of")
