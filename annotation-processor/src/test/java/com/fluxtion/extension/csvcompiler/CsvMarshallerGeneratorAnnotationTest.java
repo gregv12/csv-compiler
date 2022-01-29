@@ -1,7 +1,6 @@
 package com.fluxtion.extension.csvcompiler;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class CsvMarshallerGeneratorAnnotationTest {

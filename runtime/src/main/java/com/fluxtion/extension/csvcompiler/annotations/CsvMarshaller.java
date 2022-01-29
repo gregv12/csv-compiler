@@ -19,7 +19,7 @@ public @interface CsvMarshaller {
     /**
      * number of header lines in the file, must be equal to or less than the mappingRow
      *
-     * @return
+     * @return number of header lines
      */
     int headerLines() default 1;
 
@@ -33,7 +33,7 @@ public @interface CsvMarshaller {
     /**
      * process escape sequences, slows the parser down
      *
-     * @return
+     * @return process escape sequence flag
      */
     boolean processEscapeSequences() default false;
 
@@ -48,14 +48,14 @@ public @interface CsvMarshaller {
     /**
      * The line ending character for the input file. default is '\n'
      *
-     * @return
+     * @return line ending char
      */
     char lineEnding() default '\n';
 
     /**
      * The field separator character, default is ','
      *
-     * @return
+     * @return field separator
      */
     char fieldSeparator() default ',';
 
@@ -63,7 +63,7 @@ public @interface CsvMarshaller {
      * Ignore character, useful for processing windows style line endings
      * default is '\r'
      *
-     * @return
+     * @return ignore character
      */
     char ignoredChar() default '\r';
 
@@ -103,7 +103,7 @@ public @interface CsvMarshaller {
      *
      * @return flag new instance per record
      */
-    boolean newBeanPerRecord() default false;
+    boolean newBeanPerRecord() default true;
 
     /**
      * Flag to control formatting of generated source files
