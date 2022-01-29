@@ -1,0 +1,4 @@
+# Project exclude paths
+/annotation-processor/target/
+/example/target/
+/runtime/target/
