@@ -11,8 +11,6 @@
     <name>csv-compiler :: parent pom</name>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
     </properties>
 
