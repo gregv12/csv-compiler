@@ -19,6 +19,7 @@ public interface CodeGeneratorModel {
                "import com.fluxtion.extension.csvcompiler.CharArrayCharSequence.CharSequenceView;\n" +
                "import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;\n" +
                "import com.fluxtion.extension.csvcompiler.ValidationLogger;\n" +
+               "import com.fluxtion.extension.csvcompiler.CsvProcessingException;\n" +
                "\n" +
                "import com.google.auto.service.AutoService;\n" +
                "\n" +

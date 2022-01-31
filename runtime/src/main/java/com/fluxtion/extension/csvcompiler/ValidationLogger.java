@@ -2,27 +2,25 @@ package com.fluxtion.extension.csvcompiler;
 
 public interface ValidationLogger {
     ValidationLogger NULL = new ValidationLogger() {
-        @Override
-        public void logFatal(CharSequence error) {
+        public void logFatal(CsvProcessingException csvProcessingException) {
         }
 
-        @Override
-        public void logException(CharSequence error) {
+        public void logException(CsvProcessingException csvProcessingException) {
         }
     };
 
     ValidationLogger CONSOLE = new ValidationLogger() {
-        @Override
-        public void logFatal(CharSequence error) {
-            System.out.println("validation error:" + error);
+        public void logFatal(CsvProcessingException csvProcessingException) {
+            System.out.print(csvProcessingException.getMessage());
         }
 
-        @Override
-        public void logException(CharSequence error) {
-            System.out.println("validation exception:" + error);
+        public void logException(CsvProcessingException csvProcessingException) {
+            System.out.print(csvProcessingException.getMessage());
         }
     };
 
-    void logFatal(CharSequence error);
-    void logException(CharSequence error);
+
+    void logFatal(CsvProcessingException csvProcessingException);
+
+    void logException(CsvProcessingException csvProcessingException);
 }

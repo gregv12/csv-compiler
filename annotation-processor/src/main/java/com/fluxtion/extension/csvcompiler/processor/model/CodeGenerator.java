@@ -135,7 +135,7 @@ public class CodeGenerator {
     @NotNull
     private static String initMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = "public void init(){\n" +
-                "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
+                         "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .map(s -> "fieldMap.put(" + s.getFieldIdentifier() + ", \"" + s.getTargetCalcMethodName() + "\");")
@@ -146,10 +146,10 @@ public class CodeGenerator {
     @NotNull
     private static String charEventMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = String.format("    public boolean charEvent(char character) {\n" +
-                          "        passedValidation = true;\n" +
-                          "        if(character == '%s'){\n" +
-                          "            return false;\n" +
-                          "        }\n", StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
+                                       "        passedValidation = true;\n" +
+                                       "        if(character == '%s'){\n" +
+                                       "            return false;\n" +
+                                       "        }\n", StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
         if (codeGeneratorModel.isIgnoreQuotes()) {
             options += "    if(character == '\\\"'){\n" +
                        "        return false;\n" +
@@ -165,14 +165,14 @@ public class CodeGenerator {
                        "    }\n";
         }
         options += String.format("        if (character == '%s') {\n" +
-                    "            return processRow();\n" +
-                    "        }\n" +
-                    "        if (character == '%c') {\n" +
-                    "            updateFieldIndex();\n" +
-                    "        }\n" +
-                    "        chars[writeIndex++] = character;\n" +
-                    "        return false;\n" +
-                    "    }\n", StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
+                                 "            return processRow();\n" +
+                                 "        }\n" +
+                                 "        if (character == '%c') {\n" +
+                                 "            updateFieldIndex();\n" +
+                                 "        }\n" +
+                                 "        chars[writeIndex++] = character;\n" +
+                                 "        return false;\n" +
+                                 "    }\n", StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
         return options;
     }
 
@@ -220,17 +220,25 @@ public class CodeGenerator {
                        "    }\n";
         }
         if (codeGeneratorModel.isHeaderPresent() && codeGeneratorModel.isSkipCommentLines()) {
-            options += "    if (HEADER_ROWS < rowNumber & writeIndex > 0) {\n" +
-                       "        targetChanged = updateTarget();\n" +
+            if (codeGeneratorModel.isSkipEmptyLines()) {
+                options += "    if (HEADER_ROWS < rowNumber & writeIndex > 0) {\n";
+            } else {
+                options += "    if (HEADER_ROWS < rowNumber) {\n";
+            }
+            options += "        targetChanged = updateTarget();\n" +
                        "    }\n";
         } else if (codeGeneratorModel.isHeaderPresent()) {
             options += "    if (HEADER_ROWS < rowNumber) {\n" +
                        "        targetChanged = updateTarget();\n" +
                        "    }\n";
         } else if (!codeGeneratorModel.isHeaderPresent() && codeGeneratorModel.isSkipCommentLines()) {
-            options += "    if(writeIndex > 0){\n" +
-                       "        targetChanged = updateTarget();\n" +
-                       "    }\n";
+            if (codeGeneratorModel.isSkipEmptyLines()) {
+                options += "    if(writeIndex > 0){\n" +
+                           "        targetChanged = updateTarget();\n" +
+                           "    }\n";
+            } else {
+                options += "        targetChanged = updateTarget();\n";
+            }
         } else {
             options += "    targetChanged = updateTarget();";
         }
@@ -265,7 +273,7 @@ public class CodeGenerator {
                 .map(s -> {
                             String fieldIdentifier = s.getFieldIdentifier();
                             String readField = s.getTargetCalcMethodName() + ".subSequenceNoOffset(delimiterIndex["
-                                    + s.getFieldIdentifier() + "], delimiterIndex[" + fieldIdentifier + " + 1] - 1)";
+                                               + s.getFieldIdentifier() + "], delimiterIndex[" + fieldIdentifier + " + 1] - 1)";
                             String readOptionalFiled = s.getTargetCalcMethodName() + ".subSequenceNoOffset(0,0)";
                             if (trim) {
                                 readField += ".trim();\n";
@@ -283,16 +291,16 @@ public class CodeGenerator {
 
                             if (s.isDefaultOptionalField()) {
                                 out += String.format("if(fieldIndex > -1){\n" +
-                                        "    %s\n" +
-                                        "}else{\n" +
-                                        "    %s\n" +
-                                        "}\n", readField, readOptionalFiled);
+                                                     "    %s\n" +
+                                                     "}else{\n" +
+                                                     "    %s\n" +
+                                                     "}\n", readField, readOptionalFiled);
                             } else if (s.isMandatory()) {
                                 out += readField;
                             } else {
                                 out += String.format("if(fieldIndex > -1){\n" +
-                                        "    %s\n" +
-                                        "}\n", readField);
+                                                     "    %s\n" +
+                                                     "}\n", readField);
                             }
                             out += s.getUpdateTarget();
                             if (acceptPartials) {
@@ -327,18 +335,18 @@ public class CodeGenerator {
 //            options += "    header = header.replaceAll(\"\\P{InBasic_Latin}\", \"\");";
         }
         options += String.format("        header = header.replace(\"\\\"\", \"\");\n" +
-                    "        List<String> headers = new ArrayList();\n" +
-                    "        for (String colName : header.split(\"%c\")) {\n" +
-                    "            headers.add(getIdentifier(colName));\n" +
-                    "        }\n", codeGeneratorModel.getDelimiter());
+                                 "        List<String> headers = new ArrayList();\n" +
+                                 "        for (String colName : header.split(\"%c\")) {\n" +
+                                 "            headers.add(getIdentifier(colName));\n" +
+                                 "        }\n", codeGeneratorModel.getDelimiter());
         options += codeGeneratorModel.fieldInfoList().stream()
                 .map(s -> {
                             String out = String.format("%1$s = headers.indexOf(\"%2$s\");\n" +
-                                          "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
+                                                       "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
                             if (s.isMandatory()) {
                                 out += String.format("    if (%s < 0) {\n" +
-                                        "        logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +
-                                        "    }\n", s.getFieldIdentifier(), s.getFieldName());
+                                                     "        logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +
+                                                     "    }\n", s.getFieldIdentifier(), s.getFieldName());
                             }
                             return out;
                         }
@@ -349,32 +357,35 @@ public class CodeGenerator {
 
     public static String logErrorMethods(CodeGeneratorModel codeGeneratorModel) {
         return String.format("    private void logException(String prefix, boolean fatal, Exception e) {\n" +
-                "         StringBuilder sb = new StringBuilder()\n" +
-                "                .append(\"%1$s \")\n" +
-                "                .append(prefix)\n" +
-                "                .append(\" fieldIndex:'\")\n" +
-                "                .append(fieldIndex)\n" +
-                "                .append(\"' targetMethod:'%1$s#\")\n" +
-                "                .append(fieldMap.get(fieldIndex))\n" +
-                "                .append(\"' error:'\")\n" +
-                "                .append(e.toString())\n" +
-                "                .append(\"'\")\n" +
-                "                ;\n" +
-                "        if(fatal){\n" +
-                "            errorLog.logFatal(sb);\n" +
-                "            throw new RuntimeException(sb.toString(), e);\n" +
-                "        }\n" +
-                "        errorLog.logException(sb);\n" +
-                "    }\n" +
-                "\n" +
-                "    private void logHeaderProblem(String prefix, boolean fatal, Exception e) {\n" +
-                "        StringBuilder sb = new StringBuilder().append(\"%1$s \").append(prefix).append(rowNumber);\n" +
-                "        if(fatal){\n" +
-                "            errorLog.logFatal(sb);\n" +
-                "            throw new RuntimeException(sb.toString(), e);\n" +
-                "        }\n" +
-                "        errorLog.logException(sb);\n" +
-                "    }\n", codeGeneratorModel.getTargetClassName());
+                             "         StringBuilder sb = new StringBuilder()\n" +
+                             "                .append(\"%1$s \")\n" +
+                             "                .append(prefix)\n" +
+                             "                .append(\" fieldIndex:'\")\n" +
+                             "                .append(fieldIndex)\n" +
+                             "                .append(\"' targetMethod:'%1$s#\")\n" +
+                             "                .append(fieldMap.get(fieldIndex))\n" +
+                             "                .append(\"' error:'\")\n" +
+                             "                .append(e.toString())\n" +
+                             "                .append(\"'\")\n" +
+                             "                ;\n" +
+                             "        CsvProcessingException csvProcessingException = new CsvProcessingException(sb.toString(), e, rowNumber);\n" +
+                             "        if (fatal) {\n" +
+                             "            errorLog.logFatal(csvProcessingException);\n" +
+                             "            throw csvProcessingException;\n" +
+                             "        }\n" +
+                             "        errorLog.logException(csvProcessingException);" +
+                             "    }\n" +
+                             "\n" +
+                             "    private void logHeaderProblem(String prefix, boolean fatal, Exception e) {\n" +
+                             "        StringBuilder sb = new StringBuilder().append(\"%1$s \").append(prefix).append(rowNumber);\n" +
+                             "        CsvProcessingException csvProcessingException =\n" +
+                             "                new CsvProcessingException(sb.toString(), e, rowNumber);\n" +
+                             "        if (fatal) {\n" +
+                             "            errorLog.logFatal(csvProcessingException);\n" +
+                             "            throw csvProcessingException;\n" +
+                             "        }\n" +
+                             "        errorLog.logException(csvProcessingException);\n" +
+                             "    }\n", codeGeneratorModel.getTargetClassName());
     }
 
     private static String updateFieldIndexMethod() {

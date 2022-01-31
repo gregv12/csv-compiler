@@ -18,7 +18,6 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 
 @AutoService(Processor.class)
@@ -49,7 +48,6 @@ public class CsvMarshallerGenerator implements Processor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnv.getElementsAnnotatedWith(CsvMarshaller.class).stream()
-                .peek(Objects::toString)
                 .map(TypeElement.class::cast)
                 .forEach(this::generateMarshaller);
         this.processed = true;
@@ -72,9 +70,11 @@ public class CsvMarshallerGenerator implements Processor {
     }
 
     private CsvMetaModel modelCsvMarshaller(TypeElement typeElement) {
-        final String packageName = ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString();
-        final String className = typeElement.getSimpleName().toString();
-        CsvMetaModel csvMetaModel = new CsvMetaModel(className, packageName);
+        PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(typeElement);
+        final String packageName = packageOf.getQualifiedName().toString();
+        final String targetType = StringUtils.remove(typeElement.getQualifiedName().toString(), packageName + ".");
+        final String className =  targetType.replace(".", "_");//typeElement.getSimpleName().toString();
+        CsvMetaModel csvMetaModel = new CsvMetaModel(targetType, className, packageName);
         registerGetters(csvMetaModel, typeElement);
         registerSetters(csvMetaModel, typeElement);
         setMarshallerOptions(csvMetaModel, typeElement);
@@ -90,14 +90,15 @@ public class CsvMarshallerGenerator implements Processor {
                 .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
                 .filter(el -> el.getParameters().size() == 0)
                 .filter(el -> el.getReturnType().getKind() != TypeKind.NULL)
-                .filter(el -> el.getSimpleName().toString().startsWith("get"))
+                .filter(el -> el.getSimpleName().toString().startsWith("get") || el.getSimpleName().toString().startsWith("is"))
                 .map(el -> {
                     String type =  el.getReturnType().toString();
                     Element element = processingEnv.getTypeUtils().asElement(el.getReturnType());
                     if(element!=null){
                         type = element.getSimpleName().toString();
                     }
-                    String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), "get"));
+                    String prefix = type.equalsIgnoreCase("boolean")?"is":"get";
+                    String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), prefix));
                     csvMetaModel.registerFieldType(fieldName, type);
                     return el.getSimpleName().toString();
                 })

@@ -43,4 +43,61 @@ public class CsvMarshallerGeneratorAnnotationTest {
         runner.run();
     }
 
+    @Test
+    @SneakyThrows
+    public void booleanCompileTest(){
+
+        Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyBooleanTest",
+                "    package  com.fluxtion.extension.csvcompiler;\n" +
+                "\n" +
+                "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                "\n" +
+                "    @CsvMarshaller\n" +
+                "    public final class MyBooleanTest{\n" +
+                "\n" +
+                "        boolean name;\n" +
+                "\n" +
+                "        public boolean isName(){\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(boolean name){\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "\n" +
+                "    }\n");
+    }
+
+    @Test
+//    @SneakyThrows
+    public void nestedClassCompileTest(){
+
+        Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyBooleanTest",
+                "    package  com.fluxtion.extension.csvcompiler;\n" +
+                "\n" +
+                "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                "\n" +
+                "    @CsvMarshaller\n" +
+                "    public final class MyBooleanTest{\n" +
+                "\n" +
+                "        boolean name;\n" +
+                "\n" +
+                "        public boolean isName(){\n" +
+                "            return name;\n" +
+                "        }\n" +
+                "\n" +
+                "        public void setName(boolean name){\n" +
+                "            this.name = name;\n" +
+                "        }\n" +
+                "@CsvMarshaller\n" +
+                "public static class MyNestedClass{}" +
+                "    }\n");
+
+        MYTestClass.MyNestedClass x = new MYTestClass.MyNestedClass();
+    }
+
+    public static class MYTestClass{
+        public static class MyNestedClass{}
+    }
+
 }

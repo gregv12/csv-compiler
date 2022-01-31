@@ -33,9 +33,9 @@ public class CsvMetaModel implements CodeGeneratorModel {
     private boolean skipEmptyLines;
     private boolean asciiOnlyHeader;
 
-    public CsvMetaModel(String targetClassName, String packageName) {
+    public CsvMetaModel(String targetClassName, String marshallerClassName, String packageName) {
         this.targetClassName = targetClassName;
-        this.marshallerClassName = targetClassName + "CsvMarshaller";
+        this.marshallerClassName = marshallerClassName + "CsvMarshaller";
         this.packageName = packageName;
     }
 
@@ -45,7 +45,8 @@ public class CsvMetaModel implements CodeGeneratorModel {
     }
 
     public void registerGetMethod(String methodName) {
-        String fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, "get"));
+        String prefix = methodName.startsWith("is")?"is":"get";
+        String fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, prefix));
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setGetterMethod(methodName);
     }
 
