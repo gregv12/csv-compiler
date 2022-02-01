@@ -330,7 +330,7 @@ public class CodeGenerator {
             return "";
         }
         String options = "    private void mapHeader(){\n" +
-                         "        String header = new String(chars).trim();\n";
+                         "        String header = new String(chars).trim().substring(0, writeIndex);\n";
         if (codeGeneratorModel.isAsciiOnlyHeader()) {
 //            options += "    header = header.replaceAll(\"\\P{InBasic_Latin}\", \"\");";
         }

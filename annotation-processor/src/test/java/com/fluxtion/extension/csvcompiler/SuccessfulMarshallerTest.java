@@ -2,6 +2,7 @@ package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import com.fluxtion.extension.csvcompiler.beans.Person.MultipleHeaderLines;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -31,6 +32,21 @@ public class SuccessfulMarshallerTest {
     }
 
     @Test
+    public void multipleHeaderLinesTest() {
+        testPerson(
+                MultipleHeaderLines.class,
+                "XXXX\n" +
+                        "name,age\n" +
+                        "YYYYY\n" +
+                        "tim,32\n" +
+                        "\n" +
+                        "lisa,44\n",
+                Person.build(MultipleHeaderLines::new, "tim", 32),
+                Person.build(MultipleHeaderLines::new, "lisa", 44)
+        );
+    }
+
+    @Test
     public void validateCanSkipEmptyLines() {
         testPerson(
                 Person.class,
@@ -38,6 +54,22 @@ public class SuccessfulMarshallerTest {
                 "tim,32\n" +
                 "\n" +
                 "lisa,44\n",
+                Person.build(Person::new, "tim", 32),
+                Person.build(Person::new, "lisa", 44)
+        );
+    }
+
+    @Test
+    public void validateCanSkipCommentLines() {
+        testPerson(
+                Person.class,
+                "name,age\n" +
+                        "#\n" +
+                        "#\n" +
+                        "#\n" +
+                        "tim,32\n" +
+                        "\n" +
+                        "lisa,44\n",
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "lisa", 44)
         );
@@ -57,12 +89,13 @@ public class SuccessfulMarshallerTest {
 
     @Test
     public void noSkipPerson_NoSkipCsvMarshallerEmptyLines() {
-        testPerson(
+        testPersonErrors(
                 Person.NoSkip.class,
                 "name,age\n" +
                 "tim,32\n" +
                 "\n" +
                 "lisa,44\n",
+                List.of(3),
                 Person.build(Person.NoSkip::new, "tim", 32),
                 Person.build(Person.NoSkip::new, "lisa", 44)
         );
@@ -93,11 +126,37 @@ public class SuccessfulMarshallerTest {
 
     @SafeVarargs
     private static <T extends Person> void testPerson(Class<T> personClass, String input, T... people) {
+        testPersonErrors(personClass, input, List.of(), people);
+    }
+
+    @SafeVarargs
+    private static <T extends Person> void testPersonErrors(
+            Class<T> personClass, String input, List<Integer> errorRowsExpected, T... people) {
         List<? super Person> resultList = new ArrayList<>();
-        CsvMarshallerLoader.marshaller(personClass).stream(resultList::add, new StringReader(input));
+        List<Integer> errorRowsActual = new ArrayList<>();
+
+        CsvMarshallerLoader
+                .marshaller(personClass)
+                .setErrorLog(new ValidationLogger() {
+                    @Override
+                    public void logFatal(CsvProcessingException csvProcessingException) {
+                        errorRowsActual.add(csvProcessingException.getLineNumber());
+                    }
+
+                    @Override
+                    public void logException(CsvProcessingException csvProcessingException) {
+                        errorRowsActual.add(csvProcessingException.getLineNumber());
+                    }
+                })
+                .stream(resultList::add, new StringReader(input));
         assertIterableEquals(
                 List.of(people),
                 resultList
+        );
+
+        assertIterableEquals(
+                errorRowsExpected,
+                errorRowsActual
         );
     }
 }

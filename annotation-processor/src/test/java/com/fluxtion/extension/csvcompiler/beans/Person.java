@@ -49,6 +49,9 @@ public class Person {
     public static class NoSkip extends Person {
     }
 
+    @CsvMarshaller(headerLines = 3, mappingRow = 2, formatSource = true)
+    public static class MultipleHeaderLines extends Person {
+    }
 
     @CsvMarshaller(formatSource = true, newBeanPerRecord = false)
     public static class PersonRecycleInstance extends Person{
