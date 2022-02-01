@@ -8,4 +8,13 @@ public class CsvProcessingException extends RuntimeException {
         super(reason, cause);
         this.lineNumber = lineNumber;
     }
+
+    public CsvProcessingException(String reason, int lineNumber) {
+        super(reason);
+        this.lineNumber = lineNumber;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
 }

@@ -30,6 +30,7 @@ public class CodeGenerator {
                                                              "    private final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);\n" +
                                                              "    private int fieldIndex = 0;\n" +
                                                              "    private int writeIndex = 0;\n" +
+                                                             "    private boolean failOnError = %7$s;\n" +
                                                              "\n" +
                                                              "%s\n" +
                                                              "\n" +
@@ -85,7 +86,8 @@ public class CodeGenerator {
                 codeGeneratorModel.getMarshallerClassName(),
                 codeGeneratorModel.getTargetClassName(),
                 buildDeclarations(codeGeneratorModel),
-                buildCharacterProcessing(codeGeneratorModel)
+                buildCharacterProcessing(codeGeneratorModel),
+                codeGeneratorModel.isFailOnFirstError()
         );
         if (codeGeneratorModel.isFormatSource()) {
             sourceString = new Formatter(
@@ -213,32 +215,30 @@ public class CodeGenerator {
                          "        boolean targetChanged = false;\n" +
                          "        rowNumber++;\n";
         if (codeGeneratorModel.isSkipCommentLines()) {
-            options += "    if(chars[0]=='#'){\n" +
-                       "        writeIndex = 0;\n" +
-                       "        fieldIndex = 0;\n" +
-                       "        return targetChanged;\n" +
-                       "    }\n";
+            options += "if(chars[0]=='#'){\n" +
+                       "    writeIndex = 0;\n" +
+                       "    fieldIndex = 0;\n" +
+                       "    return targetChanged;\n" +
+                       "}\n";
         }
-        if (codeGeneratorModel.isHeaderPresent() && codeGeneratorModel.isSkipCommentLines()) {
-            if (codeGeneratorModel.isSkipEmptyLines()) {
-                options += "    if (HEADER_ROWS < rowNumber & writeIndex > 0) {\n";
-            } else {
-                options += "    if (HEADER_ROWS < rowNumber) {\n";
-            }
-            options += "        targetChanged = updateTarget();\n" +
-                       "    }\n";
-        } else if (codeGeneratorModel.isHeaderPresent()) {
+        if (codeGeneratorModel.isSkipEmptyLines()) {
+            options += "if(writeIndex < 1){\n" +
+                    "        writeIndex = 0;\n" +
+                    "        fieldIndex = 0;\n" +
+                    "        return targetChanged;\n" +
+                    "    }\n";
+        }else{
+            options += "if(writeIndex < 1){\n" +
+                    "        logProblem(\"empty lines are not valid input\");\n" +
+                    "        writeIndex = 0;\n" +
+                    "        fieldIndex = 0;\n" +
+                    "        return targetChanged;\n" +
+                    "    }\n";
+        }
+        if (codeGeneratorModel.isHeaderPresent()) {
             options += "    if (HEADER_ROWS < rowNumber) {\n" +
                        "        targetChanged = updateTarget();\n" +
                        "    }\n";
-        } else if (!codeGeneratorModel.isHeaderPresent() && codeGeneratorModel.isSkipCommentLines()) {
-            if (codeGeneratorModel.isSkipEmptyLines()) {
-                options += "    if(writeIndex > 0){\n" +
-                           "        targetChanged = updateTarget();\n" +
-                           "    }\n";
-            } else {
-                options += "        targetChanged = updateTarget();\n";
-            }
         } else {
             options += "    targetChanged = updateTarget();";
         }
@@ -369,18 +369,26 @@ public class CodeGenerator {
                              "                .append(\"'\")\n" +
                              "                ;\n" +
                              "        CsvProcessingException csvProcessingException = new CsvProcessingException(sb.toString(), e, rowNumber);\n" +
-                             "        if (fatal) {\n" +
+                             "        if (fatal || failOnError) {\n" +
                              "            errorLog.logFatal(csvProcessingException);\n" +
                              "            throw csvProcessingException;\n" +
                              "        }\n" +
                              "        errorLog.logException(csvProcessingException);" +
                              "    }\n" +
                              "\n" +
+                             " private void logProblem(String description){\n" +
+                            "       CsvProcessingException csvProcessingException = new CsvProcessingException(description, rowNumber);\n" +
+                            "        if (failOnError) {\n" +
+                            "            errorLog.logFatal(csvProcessingException);\n" +
+                            "            throw csvProcessingException;\n" +
+                            "        }\n" +
+                            "        errorLog.logException(csvProcessingException);\n" +
+                            "    }\n" +
                              "    private void logHeaderProblem(String prefix, boolean fatal, Exception e) {\n" +
                              "        StringBuilder sb = new StringBuilder().append(\"%1$s \").append(prefix).append(rowNumber);\n" +
                              "        CsvProcessingException csvProcessingException =\n" +
                              "                new CsvProcessingException(sb.toString(), e, rowNumber);\n" +
-                             "        if (fatal) {\n" +
+                             "        if (fatal || failOnError) {\n" +
                              "            errorLog.logFatal(csvProcessingException);\n" +
                              "            throw csvProcessingException;\n" +
                              "        }\n" +

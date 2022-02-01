@@ -66,4 +66,6 @@ public interface CodeGeneratorModel {
     boolean isAcceptPartials();
 
     boolean isTrim();
+
+    boolean isFailOnFirstError();
 }

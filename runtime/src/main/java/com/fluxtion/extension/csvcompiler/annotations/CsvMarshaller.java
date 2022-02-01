@@ -112,4 +112,12 @@ public @interface CsvMarshaller {
      */
     boolean formatSource() default false;
 
+    /**
+     * Exit the processing on the first error whether fatal or not, missing header is fatal, unexpected empty line is
+     * a warning to the {@link com.fluxtion.extension.csvcompiler.ValidationLogger }and continue.
+     * Set to true and warnings will result in throwing a {@link com.fluxtion.extension.csvcompiler.CsvProcessingException}
+     * @return flag controlling early exit of parsing on warning
+     */
+    boolean failOnFirstError() default false;
+
 }

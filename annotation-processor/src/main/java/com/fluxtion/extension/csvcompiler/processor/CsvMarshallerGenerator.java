@@ -127,6 +127,7 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setIgnoreQuotes(annotation.ignoreQuotes());
         csvMetaModel.setIgnoreCharacter(annotation.ignoredChar());
         csvMetaModel.setFormatSource(annotation.formatSource());
+        csvMetaModel.setFailOnFirstError(annotation.failOnFirstError());
         csvMetaModel.setSkipCommentLines(annotation.skipCommentLines());
         csvMetaModel.setSkipEmptyLines(annotation.skipEmptyLines());
         csvMetaModel.setAsciiOnlyHeader(annotation.asciiOnlyHeader());

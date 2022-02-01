@@ -99,6 +99,5 @@ public class SuccessfulMarshallerTest {
                 List.of(people),
                 resultList
         );
-
     }
 }
