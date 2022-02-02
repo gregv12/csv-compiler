@@ -23,6 +23,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
     private int mappingRow = 1;
     private char ignoreCharacter;
     private char delimiter;
+    private char newLineCharacter;
     private boolean newBeanPerRecord;
     private boolean acceptPartials;
     private boolean trim;

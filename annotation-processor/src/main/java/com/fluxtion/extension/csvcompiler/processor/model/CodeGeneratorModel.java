@@ -62,6 +62,8 @@ public interface CodeGeneratorModel {
 
     char getDelimiter();
 
+    char getNewLineCharacter();
+
     boolean isNewBeanPerRecord();
 
     boolean isAcceptPartials();

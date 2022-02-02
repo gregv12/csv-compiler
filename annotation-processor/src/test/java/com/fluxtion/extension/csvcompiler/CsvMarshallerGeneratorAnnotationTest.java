@@ -24,7 +24,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
                 "\n" +
                 "        @Override\n" +
                 "        public void run() {\n" +
-                "            System.out.println(\"hello world\");\n" +
+                "            //System.out.println(\"hello world\");\n" +
                 "        }\n" +
                 "\n" +
                 "        public String getName(){\n" +

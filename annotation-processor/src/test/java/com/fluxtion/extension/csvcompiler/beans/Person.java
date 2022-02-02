@@ -72,4 +72,12 @@ public class Person {
     @CsvMarshaller(formatSource = true, trim = true)
     public static class Trim extends Person{
     }
+
+    @CsvMarshaller(formatSource = true, failOnFirstError = true)
+    public static class FailFast extends Person{
+    }
+
+    @CsvMarshaller(formatSource = true, ignoredChar = '\0', lineEnding = '\r')
+    public static class UnixLineEnding extends Person{
+    }
 }

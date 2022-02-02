@@ -30,6 +30,18 @@ public class SuccessfulMarshallerTest {
                 Person.build(Person::new, "lisa", 44)
         );
     }
+    @Test
+    public void unixLineEndingTest() {
+        testPerson(
+                Person.UnixLineEnding.class,
+                "name,age\r" +
+                "tim,32\r" +
+                "\r" +
+                "lisa,44\r",
+                Person.build(Person.UnixLineEnding::new, "tim", 32),
+                Person.build(Person.UnixLineEnding::new, "lisa", 44)
+        );
+    }
 
     @Test
     public void multipleHeaderLinesTest() {
@@ -88,20 +100,6 @@ public class SuccessfulMarshallerTest {
     }
 
     @Test
-    public void noSkipPerson_NoSkipCsvMarshallerEmptyLines() {
-        testPersonErrors(
-                Person.NoSkip.class,
-                "name,age\n" +
-                "tim,32\n" +
-                "\n" +
-                "lisa,44\n",
-                List.of(3),
-                Person.build(Person.NoSkip::new, "tim", 32),
-                Person.build(Person.NoSkip::new, "lisa", 44)
-        );
-    }
-
-    @Test
     public void processEscapeSequence(){
         testPerson(
                 Person.Escaped.class,
@@ -154,16 +152,6 @@ public class SuccessfulMarshallerTest {
         );
     }
 
-//    @Test
-//    public void testLocalBean(){
-//        Pattern.quote()
-//        new Person_PipeSeparatorCsvMarshaller().stream(System.out::println, new StringReader(
-//                "name|age\n" +
-//                        "tim|32\n" +
-//                        "lisa|44\n"
-//        ));
-//    }
-
     @Test
     public void allDefaultPropertyTypeMarshaller() {
         String input = "booleanProperty,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
@@ -188,12 +176,12 @@ public class SuccessfulMarshallerTest {
     }
 
     @SafeVarargs
-    private static <T extends Person> void testPerson(Class<T> personClass, String input, T... people) {
+    static <T extends Person> void testPerson(Class<T> personClass, String input, T... people) {
         testPersonErrors(personClass, input, List.of(), people);
     }
 
     @SafeVarargs
-    private static <T extends Person> void testPersonErrors(
+    static <T extends Person> void testPersonErrors(
             Class<T> personClass, String input, List<Integer> errorRowsExpected, T... people) {
         List<? super Person> resultList = new ArrayList<>();
         List<Integer> errorRowsActual = new ArrayList<>();
@@ -212,6 +200,7 @@ public class SuccessfulMarshallerTest {
                     }
                 })
                 .stream(resultList::add, new StringReader(input));
+
         assertIterableEquals(
                 List.of(people),
                 resultList

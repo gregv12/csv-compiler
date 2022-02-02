@@ -132,6 +132,7 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setSkipEmptyLines(annotation.skipEmptyLines());
         csvMetaModel.setAsciiOnlyHeader(annotation.asciiOnlyHeader());
         csvMetaModel.setDelimiter(annotation.fieldSeparator());
+        csvMetaModel.setNewLineCharacter(annotation.lineEnding());
         csvMetaModel.setNewBeanPerRecord(annotation.newBeanPerRecord());
         csvMetaModel.setAcceptPartials(annotation.acceptPartials());
         csvMetaModel.setTrim(annotation.trim());

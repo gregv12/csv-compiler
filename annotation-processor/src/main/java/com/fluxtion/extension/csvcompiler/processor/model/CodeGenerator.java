@@ -174,7 +174,7 @@ public class CodeGenerator {
                                  "        }\n" +
                                  "        chars[writeIndex++] = character;\n" +
                                  "        return false;\n" +
-                                 "    }\n", StringEscapeUtils.escapeJava("\n"), codeGeneratorModel.getDelimiter());
+                                 "    }\n", StringEscapeUtils.escapeJava(codeGeneratorModel.getNewLineCharacter() + "" ), codeGeneratorModel.getDelimiter());
         return options;
     }
 
