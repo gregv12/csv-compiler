@@ -284,7 +284,7 @@ public class CodeGenerator {
                             }
                             String out;
                             if (acceptPartials) {
-                                out = String.format("if (maxFieldIndex > %s {", fieldIdentifier);
+                                out = String.format("if (maxFieldIndex >= %s ){", fieldIdentifier);
                             } else {
                                 out = String.format("fieldIndex = %s;", fieldIdentifier);
                             }
@@ -336,7 +336,7 @@ public class CodeGenerator {
         }
         options += String.format("        header = header.replace(\"\\\"\", \"\");\n" +
                                  "        List<String> headers = new ArrayList();\n" +
-                                 "        for (String colName : header.split(\"%c\")) {\n" +
+                                 "        for (String colName : header.split(Pattern.quote(\"%c\"))) {\n" +
                                  "            headers.add(getIdentifier(colName));\n" +
                                  "        }\n", codeGeneratorModel.getDelimiter());
         options += codeGeneratorModel.fieldInfoList().stream()

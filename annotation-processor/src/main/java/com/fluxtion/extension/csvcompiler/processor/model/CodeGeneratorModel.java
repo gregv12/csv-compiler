@@ -29,6 +29,7 @@ public interface CodeGeneratorModel {
                "import java.util.HashMap;\n" +
                "import java.util.List;\n" +
                "import java.util.function.Consumer;\n" +
+               "import java.util.regex.Pattern;\n" +
                "\n" +
                "import static com.fluxtion.extension.csvcompiler.Conversion.*;\n";
     }

@@ -102,6 +102,69 @@ public class SuccessfulMarshallerTest {
     }
 
     @Test
+    public void processEscapeSequence(){
+        testPerson(
+                Person.Escaped.class,
+                "name,age\n" +
+                        "\"tim, smith\",32\n" +
+                        "\n" +
+                        "\"\"\"lisa\"\"\",44\n"
+                ,
+                Person.build(Person.Escaped::new, "tim, smith", 32),
+                Person.build(Person.Escaped::new, "\"lisa\"", 44)
+        );
+    }
+
+    @Test
+    public void processPipeAsSeparatorSequence(){
+        testPerson(
+                Person.PipeSeparator.class,
+                "name|age\n" +
+                        "tim|32\n" +
+                        "lisa|44\n"
+                ,
+                Person.build(Person.PipeSeparator::new, "tim", 32),
+                Person.build(Person.PipeSeparator::new, "lisa", 44)
+        );
+    }
+
+    @Test
+    public void acceptPartialsTest(){
+        testPerson(
+                Person.AcceptPartials.class,
+                "name,age\n" +
+                        "tim\n" +
+                        "lisa,44\n"
+                ,
+                Person.build(Person.AcceptPartials::new, "tim", 0),
+                Person.build(Person.AcceptPartials::new, "lisa", 44)
+        );
+    }
+
+    @Test
+    public void trimTest(){
+        testPerson(
+                Person.Trim.class,
+                "name,age\n" +
+                        "tim ,  32 \n" +
+                        "  lisa, 44\n"
+                ,
+                Person.build(Person.Trim::new, "tim", 32),
+                Person.build(Person.Trim::new, "lisa", 44)
+        );
+    }
+
+//    @Test
+//    public void testLocalBean(){
+//        Pattern.quote()
+//        new Person_PipeSeparatorCsvMarshaller().stream(System.out::println, new StringReader(
+//                "name|age\n" +
+//                        "tim|32\n" +
+//                        "lisa|44\n"
+//        ));
+//    }
+
+    @Test
     public void allDefaultPropertyTypeMarshaller() {
         String input = "booleanProperty,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
                        "true,8,10.7,1.5,100,2000,4,hello\n";

@@ -56,4 +56,20 @@ public class Person {
     @CsvMarshaller(formatSource = true, newBeanPerRecord = false)
     public static class PersonRecycleInstance extends Person{
     }
+
+    @CsvMarshaller(formatSource = true, processEscapeSequences = true)
+    public static class Escaped extends Person{
+    }
+
+    @CsvMarshaller(formatSource = true, fieldSeparator = '|')
+    public static class PipeSeparator extends Person{
+    }
+
+    @CsvMarshaller(formatSource = true, acceptPartials = true)
+    public static class AcceptPartials extends Person{
+    }
+
+    @CsvMarshaller(formatSource = true, trim = true)
+    public static class Trim extends Person{
+    }
 }
