@@ -1,5 +1,6 @@
 package com.fluxtion.extension.csvcompiler;
 
+import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
@@ -51,10 +52,12 @@ public class CsvMarshallerGeneratorAnnotationTest {
                 "    package  com.fluxtion.extension.csvcompiler;\n" +
                 "\n" +
                 "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                "    import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;\n" +
                 "\n" +
                 "    @CsvMarshaller\n" +
                 "    public final class MyBooleanTest{\n" +
                 "\n" +
+                "        @ColumnMapping(columnName = \"myname\")\n" +
                 "        boolean name;\n" +
                 "\n" +
                 "        public boolean isName(){\n" +
@@ -97,6 +100,9 @@ public class CsvMarshallerGeneratorAnnotationTest {
     }
 
     public static class MYTestClass{
+
+        @ColumnMapping(columnName = "myname")
+        int c;
         public static class MyNestedClass{}
     }
 

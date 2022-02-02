@@ -1,5 +1,6 @@
 package com.fluxtion.extension.csvcompiler.beans;
 
+import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -79,5 +80,19 @@ public class Person {
 
     @CsvMarshaller(formatSource = true, ignoredChar = '\0', lineEnding = '\r')
     public static class UnixLineEnding extends Person{
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class MapColumn extends Person{
+        @ColumnMapping(columnName = "mappedNameColumn")
+        private String mapToJava;
+
+        public String getMapToJava() {
+            return mapToJava;
+        }
+
+        public void setMapToJava(String mapToJava) {
+            this.mapToJava = mapToJava;
+        }
     }
 }

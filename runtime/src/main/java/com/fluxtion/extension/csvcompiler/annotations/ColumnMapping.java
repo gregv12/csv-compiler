@@ -13,7 +13,7 @@ public @interface ColumnMapping {
      * The name of the column used in the input source, by default tries to match an input field name with the name
      * of the target variable.
      *
-     * @return the String that is the default value
+     * @return the name of the column in the csv header
      */
     String columnName() default "";
 
