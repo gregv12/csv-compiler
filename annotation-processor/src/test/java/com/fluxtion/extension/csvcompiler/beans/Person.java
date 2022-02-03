@@ -98,4 +98,16 @@ public class Person {
         @ColumnMapping(defaultValue = "18")
         private int age;
     }
+
+    @CsvMarshaller
+    public static class NoTrimField extends Person{
+        @ColumnMapping(trim = false)
+        private String name;
+    }
+
+//    @CsvMarshaller
+//    public static class OptionalField{
+//        @ColumnMapping(optionalField = true)
+//        private int age;
+//    }
 }

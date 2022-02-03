@@ -92,6 +92,12 @@ public class CsvMarshallerGenerator implements Processor {
                 if(!columnMapping.defaultValue().isBlank()){
                     csvMetaModel.setDefaultFieldValue(variableName.toString(), columnMapping.defaultValue());
                 }
+                if(columnMapping.optionalField()){
+                    csvMetaModel.setOptionalField(variableName.toString(),true);
+                }
+                if(columnMapping.trim()){
+                    csvMetaModel.setTrimField(variableName.toString(),true);
+                }
             }
         });
 
