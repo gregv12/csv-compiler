@@ -60,6 +60,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setColumnName(columnName);
     }
 
+    public void setDefaultFieldValue(String fieldName, String columnName){
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setDefaultFieldName(columnName);
+    }
+
     public void buildModel(){
         pruneInvalidFields();
         fieldMap.values().forEach(FieldModel::buildFieldModel);
@@ -103,6 +107,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setColumnName(String columnName){
             csvToFieldInfo.setSourceFieldName(columnName);
+        }
+
+        public void setDefaultFieldName(String defaultValue){
+            csvToFieldInfo.setDefaultValue(defaultValue);
         }
 
     }

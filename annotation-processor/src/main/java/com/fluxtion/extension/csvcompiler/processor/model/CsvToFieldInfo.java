@@ -96,10 +96,8 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         this.converterMethod = converterInstanceId + "." + converterMethod;
     }
 
-    public void setDefaultValue(String instanceId, String defaultMethod, Object converterInstance) {
-        this.defaultInstanceId = instanceId;
-        this.defaultInstance = converterInstance;
-        this.defaultMethod = defaultInstanceId + "." + defaultMethod;
+    public void setDefaultValue(String defaultValue) {
+        this.defaultMethod = targetCalcMethodName+ ".isEmpty()?\"" + defaultValue + "\":";
     }
 
     public boolean getMandatoryField() {
@@ -107,8 +105,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     }
 
     public boolean isDefaultOptionalField() {
-        final boolean test = defaultMethod != null && !mandatory;
-        return test;
+        return defaultMethod != null && !mandatory;
     }
 
     public String getValidate() {
@@ -176,10 +173,9 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
             }
         }
 
-        String a = targetInstanceId + "." + targetCalcMethodName + "("
+        return targetInstanceId + "." + targetCalcMethodName + "("
                 + conversion
                 + ");";
-        return a;
     }
 
     public boolean isNamedField() {

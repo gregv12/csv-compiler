@@ -57,7 +57,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
                 "    @CsvMarshaller\n" +
                 "    public final class MyBooleanTest{\n" +
                 "\n" +
-                "        @ColumnMapping(columnName = \"myname\")\n" +
+                "        @ColumnMapping(defaultValue = \"DEFAULT VALUE\")\n" +
                 "        boolean name;\n" +
                 "\n" +
                 "        public boolean isName(){\n" +
@@ -101,7 +101,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
 
     public static class MYTestClass{
 
-        @ColumnMapping(columnName = "myname")
+        @ColumnMapping(columnName = "myname", defaultValue = "WHO ARE YOU")
         int c;
         public static class MyNestedClass{}
     }

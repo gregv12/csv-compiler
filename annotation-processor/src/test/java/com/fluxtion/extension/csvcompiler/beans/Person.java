@@ -84,15 +84,18 @@ public class Person {
 
     @CsvMarshaller(formatSource = true)
     public static class MapColumn extends Person{
-        @ColumnMapping(columnName = "mappedNameColumn")
-        private String mapToJava;
 
-        public String getMapToJava() {
-            return mapToJava;
-        }
+        @ColumnMapping(columnName = "overrideNameMapping")
+        private String name;
+    }
 
-        public void setMapToJava(String mapToJava) {
-            this.mapToJava = mapToJava;
-        }
+    @CsvMarshaller(formatSource = true)
+    public static class DefaultColumnValue extends Person{
+
+        @ColumnMapping(defaultValue = "NO NAME")
+        private String name;
+
+        @ColumnMapping(defaultValue = "18")
+        private int age;
     }
 }

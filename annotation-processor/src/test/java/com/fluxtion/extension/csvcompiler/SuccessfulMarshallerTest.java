@@ -30,6 +30,7 @@ public class SuccessfulMarshallerTest {
                 Person.build(Person::new, "lisa", 44)
         );
     }
+
     @Test
     public void unixLineEndingTest() {
         testPerson(
@@ -173,6 +174,10 @@ public class SuccessfulMarshallerTest {
                 List.of(bean),
                 resultList
         );
+    }
+
+    public static void parserOutput(CsvMarshallerLoader loader, String input){
+        loader.stream(System.out::println, new StringReader(input));
     }
 
     @SafeVarargs

@@ -80,19 +80,21 @@ public class CsvMarshallerGenerator implements Processor {
         registerGetters(csvMetaModel, typeElement);
         registerSetters(csvMetaModel, typeElement);
         setMarshallerOptions(csvMetaModel, typeElement);
-
+        csvMetaModel.buildModel();
+        //apply field customisations
         processingEnv.getElementUtils().getAllMembers(typeElement).stream().forEach(e -> {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             if(columnMapping!=null){
                 Name variableName = e.getSimpleName();
-                System.out.println("mapping:" + columnMapping + " variable:" + variableName);
-                if(columnMapping.columnName().isBlank()){
+                if(!columnMapping.columnName().isBlank()){
                     csvMetaModel.setColumnName(variableName.toString(), columnMapping.columnName());
+                }
+                if(!columnMapping.defaultValue().isBlank()){
+                    csvMetaModel.setDefaultFieldValue(variableName.toString(), columnMapping.defaultValue());
                 }
             }
         });
 
-        csvMetaModel.buildModel();
         return csvMetaModel;
     }
 

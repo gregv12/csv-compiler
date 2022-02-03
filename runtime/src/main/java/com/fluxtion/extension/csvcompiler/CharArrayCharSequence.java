@@ -88,6 +88,10 @@ public class CharArrayCharSequence implements CharSequence {
             return end - start;
         }
 
+        public boolean isEmpty() {
+            return this.length() == 0;
+        }
+
         public CharSequenceView subSequenceNoOffset(int start, int end) {
             updated = true;
             this.start = start;
