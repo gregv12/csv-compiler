@@ -9,7 +9,6 @@ import com.google.auto.service.AutoService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
-
 import javax.annotation.processing.Completion;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
@@ -75,7 +74,7 @@ public class CsvMarshallerGenerator implements Processor {
         PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(typeElement);
         final String packageName = packageOf.getQualifiedName().toString();
         final String targetType = StringUtils.remove(typeElement.getQualifiedName().toString(), packageName + ".");
-        final String className =  targetType.replace(".", "_");//typeElement.getSimpleName().toString();
+        final String className = targetType.replace(".", "_");//typeElement.getSimpleName().toString();
         CsvMetaModel csvMetaModel = new CsvMetaModel(targetType, className, packageName);
         registerGetters(csvMetaModel, typeElement);
         registerSetters(csvMetaModel, typeElement);
@@ -84,20 +83,18 @@ public class CsvMarshallerGenerator implements Processor {
         //apply field customisations
         processingEnv.getElementUtils().getAllMembers(typeElement).stream().forEach(e -> {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
-            if(columnMapping!=null){
+            if (columnMapping != null) {
                 Name variableName = e.getSimpleName();
-                if(!columnMapping.columnName().isBlank()){
+                if (!columnMapping.columnName().isBlank()) {
                     csvMetaModel.setColumnName(variableName.toString(), columnMapping.columnName());
                 }
-                if(!columnMapping.defaultValue().isBlank()){
+                if (!columnMapping.defaultValue().isBlank()) {
                     csvMetaModel.setDefaultFieldValue(variableName.toString(), columnMapping.defaultValue());
                 }
-                if(columnMapping.optionalField()){
-                    csvMetaModel.setOptionalField(variableName.toString(),true);
+                if (columnMapping.optionalField()) {
+                    csvMetaModel.setOptionalField(variableName.toString(), true);
                 }
-                if(columnMapping.trim()){
-                    csvMetaModel.setTrimField(variableName.toString(),true);
-                }
+                csvMetaModel.setTrimField(variableName.toString(), columnMapping.trim());
             }
         });
 
@@ -114,18 +111,17 @@ public class CsvMarshallerGenerator implements Processor {
                 .filter(el -> el.getReturnType().getKind() != TypeKind.NULL)
                 .filter(el -> el.getSimpleName().toString().startsWith("get") || el.getSimpleName().toString().startsWith("is"))
                 .map(el -> {
-                    String type =  el.getReturnType().toString();
+                    String type = el.getReturnType().toString();
                     Element element = processingEnv.getTypeUtils().asElement(el.getReturnType());
-                    if(element!=null){
+                    if (element != null) {
                         type = element.getSimpleName().toString();
                     }
-                    String prefix = type.equalsIgnoreCase("boolean")?"is":"get";
+                    String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
                     String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), prefix));
                     csvMetaModel.registerFieldType(fieldName, type);
                     return el.getSimpleName().toString();
                 })
                 .forEach(csvMetaModel::registerGetMethod);
-
 
 
     }
@@ -141,7 +137,7 @@ public class CsvMarshallerGenerator implements Processor {
                 .forEach(csvMetaModel::registerSetMethod);
     }
 
-    private void setMarshallerOptions(CsvMetaModel csvMetaModel, TypeElement typeElement){
+    private void setMarshallerOptions(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
         csvMetaModel.setHeaderLines(annotation.headerLines());
         csvMetaModel.setMappingRow(annotation.mappingRow());

@@ -99,15 +99,15 @@ public class Person {
         private int age;
     }
 
-    @CsvMarshaller
+    @CsvMarshaller(formatSource = true)
     public static class NoTrimField extends Person{
-        @ColumnMapping(trim = false)
-        private String name;
+        @ColumnMapping(trim = true)
+        private int age;
     }
 
-//    @CsvMarshaller
-//    public static class OptionalField{
-//        @ColumnMapping(optionalField = true)
-//        private int age;
-//    }
+    @CsvMarshaller
+    public static class OptionalField extends Person{
+        @ColumnMapping(optionalField = true)
+        private int age;
+    }
 }

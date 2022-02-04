@@ -275,7 +275,8 @@ public class CodeGenerator {
                             String readField = s.getTargetCalcMethodName() + ".subSequenceNoOffset(delimiterIndex["
                                                + s.getFieldIdentifier() + "], delimiterIndex[" + fieldIdentifier + " + 1] - 1)";
                             String readOptionalFiled = s.getTargetCalcMethodName() + ".subSequenceNoOffset(0,0)";
-                            if (trim) {
+                            boolean fieldTrim = s.isTrim();
+                            if (fieldTrim || (trim)) {
                                 readField += ".trim();\n";
                                 readOptionalFiled += ".trim();\n";
                             } else {

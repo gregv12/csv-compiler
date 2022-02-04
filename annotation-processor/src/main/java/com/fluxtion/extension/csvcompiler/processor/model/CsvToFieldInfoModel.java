@@ -13,5 +13,7 @@ public interface CsvToFieldInfoModel {
 
     boolean isDefaultOptionalField();
 
+    boolean isTrim();
+
     String getUpdateTarget();
 }
