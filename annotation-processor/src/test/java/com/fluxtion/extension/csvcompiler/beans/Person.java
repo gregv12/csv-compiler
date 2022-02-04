@@ -105,9 +105,15 @@ public class Person {
         private int age;
     }
 
-    @CsvMarshaller
+    @CsvMarshaller(formatSource = true)
     public static class OptionalField extends Person{
         @ColumnMapping(optionalField = true)
+        private int age;
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class OptionalFieldWithDefaultValue extends Person{
+        @ColumnMapping(optionalField = true, defaultValue = "18")
         private int age;
     }
 }
