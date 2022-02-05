@@ -21,6 +21,7 @@ package com.fluxtion.extension.csvcompiler.processor;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGenerator;
 import com.fluxtion.extension.csvcompiler.processor.model.CsvMetaModel;
 import com.google.auto.common.MoreElements;
@@ -97,6 +98,7 @@ public class CsvMarshallerGenerator implements Processor {
         CsvMetaModel csvMetaModel = new CsvMetaModel(targetType, className, packageName);
         registerGetters(csvMetaModel, typeElement);
         registerSetters(csvMetaModel, typeElement);
+        potProcessMethod(csvMetaModel, typeElement);
         setMarshallerOptions(csvMetaModel, typeElement);
         csvMetaModel.buildModel();
         //apply field customisations
@@ -120,6 +122,14 @@ public class CsvMarshallerGenerator implements Processor {
         return csvMetaModel;
     }
 
+    private void potProcessMethod(CsvMetaModel csvMetaModel, TypeElement typeElement){
+        MoreElements.getLocalAndInheritedMethods(
+                        typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
+                .stream()
+                .filter(el -> el.getParameters().size() == 0)
+                .filter(el -> MoreElements.isAnnotationPresent(el, PostProcessMethod.class))
+                .forEach(el -> csvMetaModel.setPostProcessMethod(el.getSimpleName().toString()));
+    }
 
     private void registerGetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         MoreElements.getLocalAndInheritedMethods(
@@ -141,8 +151,6 @@ public class CsvMarshallerGenerator implements Processor {
                     return el.getSimpleName().toString();
                 })
                 .forEach(csvMetaModel::registerGetMethod);
-
-
     }
 
     private void registerSetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {

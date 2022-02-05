@@ -21,6 +21,7 @@ package com.fluxtion.extension.csvcompiler.beans;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -134,5 +135,14 @@ public class Person {
     public static class OptionalFieldWithDefaultValue extends Person{
         @ColumnMapping(optionalField = true, defaultValue = "18")
         private int age;
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class PostProcess extends Person{
+
+        @PostProcessMethod
+        public void myPostProcessMethod(){
+            setName(getName().toUpperCase());
+        }
     }
 }

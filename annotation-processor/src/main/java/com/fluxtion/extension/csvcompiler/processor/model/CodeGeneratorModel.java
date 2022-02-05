@@ -20,6 +20,7 @@
 package com.fluxtion.extension.csvcompiler.processor.model;
 
 import java.util.List;
+import java.util.Objects;
 
 public interface CodeGeneratorModel {
 
@@ -64,6 +65,12 @@ public interface CodeGeneratorModel {
     String getPackageName();
 
     String getTargetClassName();
+
+    String getPostProcessMethod();
+
+    default boolean isPostProcessMethodSet(){
+        return Objects.nonNull(getPostProcessMethod()) && !getPostProcessMethod().isBlank();
+    }
 
     boolean isProcessEscapeSequence();
 

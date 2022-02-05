@@ -173,6 +173,18 @@ public class SuccessfulMarshallerTest {
     }
 
     @Test
+    public void postProcessMethodTest() {
+        testPerson(
+                Person.PostProcess.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,44\n",
+                Person.build(Person.PostProcess::new, "TIM", 32),
+                Person.build(Person.PostProcess::new, "LISA", 44)
+        );
+    }
+
+    @Test
     public void allDefaultPropertyTypeMarshaller() {
         String input = "booleanProperty,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
                        "true,8,10.7,1.5,100,2000,4,hello\n";
