@@ -35,7 +35,8 @@ public interface CodeGeneratorModel {
     }
 
     default String getImports() {
-        return "import com.fluxtion.extension.csvcompiler.CharArrayCharSequence;\n" +
+        return "import com.fluxtion.extension.csvcompiler.BaseMarshaller;\n" +
+               "import com.fluxtion.extension.csvcompiler.CharArrayCharSequence;\n" +
                "import com.fluxtion.extension.csvcompiler.CharArrayCharSequence.CharSequenceView;\n" +
                "import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;\n" +
                "import com.fluxtion.extension.csvcompiler.ValidationLogger;\n" +

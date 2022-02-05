@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 
 @EqualsAndHashCode
 @ToString
+//@CsvMarshaller
 @CsvMarshaller(formatSource = true)
 public class Person {
 

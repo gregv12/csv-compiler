@@ -23,6 +23,7 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+//@CsvMarshaller
 @CsvMarshaller(formatSource = true)
 @EqualsAndHashCode
 @ToString

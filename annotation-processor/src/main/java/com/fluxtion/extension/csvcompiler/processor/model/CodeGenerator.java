@@ -31,63 +31,25 @@ import java.util.stream.Collectors;
 
 public class CodeGenerator {
 
-    private static final String CODE_TEMPLATE_DECLARATIONS = "package %s;\n" +
+    private static final String CODE_TEMPLATE_DECLARATIONS = "package %1$s;\n" +
             "\n" +
-            "%s\n" +
+            "%2$s\n" +
             "\n" +
             "@AutoService(CsvMarshallerLoader.class)\n" +
-            "public class %s implements CsvMarshallerLoader<%4$s>{\n" +
+            "public class %3$s extends BaseMarshaller<%4$s>{\n" +
             "\n" +
-            "    private %s target;\n" +
-            "    private int rowNumber;\n" +
-            "    private final HashMap fieldMap = new HashMap<>();\n" +
-            "    private boolean passedValidation;\n" +
-            "    private ValidationLogger errorLog = ValidationLogger.CONSOLE;\n" +
-            "    private final char[] chars = new char[4096];\n" +
-            "    private final int[] delimiterIndex = new int[1024];\n" +
-            "    private StringBuilder messageSink = new StringBuilder(256);\n" +
-            "    private final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);\n" +
-            "    private int fieldIndex = 0;\n" +
-            "    private int writeIndex = 0;\n" +
-            "    private boolean failOnError = %7$s;\n" +
+            "%5$s\n" +
             "\n" +
-            "%s\n" +
+            "    public %3$s() {\n" +
+            "        super(%7$s);\n" +
+            "    }\n" +
             "\n" +
             "    public Class<%4$s> targetClass(){\n" +
             "        return %4$s.class;\n" +
             "    }\n" +
             "\n" +
-            "%s\n" +
+            "%6$s\n" +
             "\n" +
-            "    public boolean passedValidation() {\n" +
-            "        return passedValidation;\n" +
-            "    }\n" +
-            "\n" +
-            "    public int getRowNumber() {\n" +
-            "        return rowNumber;\n" +
-            "    }\n" +
-            "\n" +
-            "    @Override\n" +
-            "    public CsvMarshallerLoader<%4$s> setErrorLog(ValidationLogger errorLog) {\n" +
-            "        this.errorLog = errorLog;\n" +
-            "        return this;\n" +
-            "    }\n" +
-            "\n" +
-            "    @Override\n" +
-            "    public void stream(Consumer<%4$s> consumer, Reader in) {\n" +
-            "        init();\n" +
-            "        int c;\n" +
-            "        try {\n" +
-            "            while ((c = in.read()) != -1) {\n" +
-            "                if (charEvent((char) c)) {\n" +
-            "                    consumer.accept(target);\n" +
-            "                }\n" +
-            "            }\n" +
-            "            eof();\n" +
-            "        }catch (IOException e){\n" +
-            "            throw new RuntimeException(e);\n" +
-            "        }\n" +
-            "    }\n" +
             "}\n";
     private final Writer writer;
     private final CodeGeneratorModel codeGeneratorModel;
@@ -143,13 +105,10 @@ public class CodeGenerator {
     private static String buildCharacterProcessing(CodeGeneratorModel codeGeneratorModel) {
         String options = initMethod(codeGeneratorModel);
         options += charEventMethod(codeGeneratorModel);
-        options += eofMethod();
         options += processEscapeSequenceMethod(codeGeneratorModel);
         options += processRowMethod(codeGeneratorModel);
         options += updateTargetMethod(codeGeneratorModel);
         options += mapHeaderMethod(codeGeneratorModel);
-        options += updateFieldIndexMethod();
-        options += logErrorMethods(codeGeneratorModel);
         return options;
     }
 
@@ -221,16 +180,9 @@ public class CodeGenerator {
         return options;
     }
 
-    private static String eofMethod() {
-        return "\n" +
-                "    public boolean eof(){\n" +
-                "        return writeIndex==0?false:processRow();\n" +
-                "    }\n";
-    }
-
     private static String processRowMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = "\n" +
-                "    private boolean processRow() {\n" +
+                "    protected boolean processRow() {\n" +
                 "        boolean targetChanged = false;\n" +
                 "        rowNumber++;\n";
         if (codeGeneratorModel.isSkipCommentLines()) {
@@ -377,54 +329,5 @@ public class CodeGenerator {
                 .collect(Collectors.joining("", "", "}"));
         return options;
     }
-
-    public static String logErrorMethods(CodeGeneratorModel codeGeneratorModel) {
-        return String.format("    private void logException(String prefix, boolean fatal, Exception e) {\n" +
-                "         StringBuilder sb = new StringBuilder()\n" +
-                "                .append(\"%1$s \")\n" +
-                "                .append(prefix)\n" +
-                "                .append(\" fieldIndex:'\")\n" +
-                "                .append(fieldIndex)\n" +
-                "                .append(\"' targetMethod:'%1$s#\")\n" +
-                "                .append(fieldMap.get(fieldIndex))\n" +
-                "                .append(\"' error:'\")\n" +
-                "                .append(e.toString())\n" +
-                "                .append(\"'\")\n" +
-                "                ;\n" +
-                "        CsvProcessingException csvProcessingException = new CsvProcessingException(sb.toString(), e, rowNumber);\n" +
-                "        if (fatal || failOnError) {\n" +
-                "            errorLog.logFatal(csvProcessingException);\n" +
-                "            throw csvProcessingException;\n" +
-                "        }\n" +
-                "        errorLog.logException(csvProcessingException);" +
-                "    }\n" +
-                "\n" +
-                " private void logProblem(String description){\n" +
-                "       CsvProcessingException csvProcessingException = new CsvProcessingException(description, rowNumber);\n" +
-                "        if (failOnError) {\n" +
-                "            errorLog.logFatal(csvProcessingException);\n" +
-                "            throw csvProcessingException;\n" +
-                "        }\n" +
-                "        errorLog.logException(csvProcessingException);\n" +
-                "    }\n" +
-                "    private void logHeaderProblem(String prefix, boolean fatal, Exception e) {\n" +
-                "        StringBuilder sb = new StringBuilder().append(\"%1$s \").append(prefix).append(rowNumber);\n" +
-                "        CsvProcessingException csvProcessingException =\n" +
-                "                new CsvProcessingException(sb.toString(), e, rowNumber);\n" +
-                "        if (fatal || failOnError) {\n" +
-                "            errorLog.logFatal(csvProcessingException);\n" +
-                "            throw csvProcessingException;\n" +
-                "        }\n" +
-                "        errorLog.logException(csvProcessingException);\n" +
-                "    }\n", codeGeneratorModel.getTargetClassName());
-    }
-
-    private static String updateFieldIndexMethod() {
-        return "    private void updateFieldIndex() {\n" +
-                "        fieldIndex++;\n" +
-                "        delimiterIndex[fieldIndex] = writeIndex + 1;\n" +
-                "    }\n";
-    }
-
 
 }
