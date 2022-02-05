@@ -34,5 +34,7 @@ public interface CsvToFieldInfoModel {
 
     boolean isTrim();
 
+    boolean isIndexField();
+
     String getUpdateTarget();
 }

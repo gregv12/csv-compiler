@@ -315,6 +315,7 @@ public class CodeGenerator {
                 "            headers.add(getIdentifier(colName));\n" +
                 "        }\n", codeGeneratorModel.getDelimiter());
         options += codeGeneratorModel.fieldInfoList().stream()
+                .filter(f -> !f.isIndexField())
                 .map(s -> {
                             String out = String.format("%1$s = headers.indexOf(\"%2$s\");\n" +
                                     "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());

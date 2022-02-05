@@ -187,7 +187,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public String getFieldIdentifier() {
         if (indexField) {
-            fieldIdentifier = "fieldIndex_" + getFieldIndex();
+            fieldIdentifier = "fieldIndex_" + getFieldName();
         } else if (fixedWidth) {
             fieldIdentifier = "fixedStart_" + getFieldIndex();
         } else {

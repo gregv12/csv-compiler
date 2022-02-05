@@ -146,4 +146,14 @@ public class Person {
             setName(getName().toUpperCase());
         }
     }
+
+    @CsvMarshaller(formatSource = true, headerLines = -1, mappingRow = 0)
+    public static class IndexFields extends Person{
+
+        @ColumnMapping(columnIndex = 0)
+        private String name;
+
+        @ColumnMapping(columnIndex = 1)
+        private int age;
+    }
 }

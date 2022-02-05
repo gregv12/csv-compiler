@@ -37,6 +37,13 @@ public @interface ColumnMapping {
     String columnName() default "";
 
     /**
+     * Use the index of the column in place of a header value as the input column for the bean field
+     *
+     * @return the index of the column for this field, zero index convention
+     */
+    int columnIndex() default -1;
+
+    /**
      * A default value for a field, the empty string denotes no optional value is used. This value is used if no value
      * is found in the source row
      *

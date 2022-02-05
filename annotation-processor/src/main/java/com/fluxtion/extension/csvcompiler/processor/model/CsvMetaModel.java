@@ -88,8 +88,12 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setOptionalField(optionalField);
     }
 
-    public void setTrimField(String fieldName, boolean trimlField){
-        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setTrimField(trimlField);
+    public void setTrimField(String fieldName, boolean trimField){
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setTrimField(trimField);
+    }
+
+    public void setColumnIndex(String fieldName, int columnIndex){
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setColumnIndex(columnIndex);
     }
 
     public void buildModel(){
@@ -147,6 +151,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setTrimField(boolean trimField){
             csvToFieldInfo.setTrim(trimField);
+        }
+
+        public void setColumnIndex(int columnIndex){
+            csvToFieldInfo.setSourceColIndex(columnIndex);
         }
 
     }

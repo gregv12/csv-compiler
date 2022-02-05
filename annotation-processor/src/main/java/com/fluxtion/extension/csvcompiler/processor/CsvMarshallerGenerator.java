@@ -115,6 +115,9 @@ public class CsvMarshallerGenerator implements Processor {
                 if (columnMapping.optionalField()) {
                     csvMetaModel.setOptionalField(variableName.toString(), true);
                 }
+                if(columnMapping.columnIndex() > -1){
+                    csvMetaModel.setColumnIndex(variableName.toString(), columnMapping.columnIndex());
+                }
                 csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
             }
         });

@@ -101,4 +101,15 @@ public class FieldMappingTest {
         );
     }
 
+    @Test
+    public void indexColumnsNoHeader() {
+        testPerson(
+                Person.IndexFields.class,
+                        "tim,32\n" +
+                        "lisa,44\n",
+                Person.build(Person.IndexFields::new, "tim", 32),
+                Person.build(Person.IndexFields::new, "lisa", 44)
+        );
+    }
+
 }
