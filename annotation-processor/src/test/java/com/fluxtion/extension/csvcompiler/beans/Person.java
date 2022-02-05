@@ -120,8 +120,8 @@ public class Person {
 
     @CsvMarshaller(formatSource = true)
     public static class NoTrimField extends Person{
-        @ColumnMapping(trim = true)
-        private int age;
+        @ColumnMapping(trimOverride = true)
+        private String name;
     }
 
     @CsvMarshaller(formatSource = true)

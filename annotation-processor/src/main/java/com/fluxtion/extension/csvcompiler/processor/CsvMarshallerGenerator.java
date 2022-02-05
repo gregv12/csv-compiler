@@ -113,7 +113,7 @@ public class CsvMarshallerGenerator implements Processor {
                 if (columnMapping.optionalField()) {
                     csvMetaModel.setOptionalField(variableName.toString(), true);
                 }
-                csvMetaModel.setTrimField(variableName.toString(), columnMapping.trim());
+                csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
             }
         });
 

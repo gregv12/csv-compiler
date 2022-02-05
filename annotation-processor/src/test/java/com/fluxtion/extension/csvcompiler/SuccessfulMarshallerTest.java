@@ -195,7 +195,7 @@ public class SuccessfulMarshallerTest {
         );
     }
 
-    public static void parserOutput(CsvMarshallerLoader loader, String input){
+    public static void parserOutput(CsvMarshallerLoader<?> loader, String input){
         loader.stream(System.out::println, new StringReader(input));
     }
 

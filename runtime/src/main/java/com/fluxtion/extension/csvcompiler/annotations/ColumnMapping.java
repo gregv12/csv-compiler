@@ -54,9 +54,10 @@ public @interface ColumnMapping {
 
 
     /**
-     * Flag controlling field trimming, removes whitespace at the front and the end of the input field
+     * Flag controlling field trimming, removes whitespace at the front and the end of the input field. Setting this
+     * flag overrides the default trimming behaviour for the class and inverts it
      *
-     * @return flag controlling field trimming.
+     * @return flag controlling field trimming override.
      */
-    boolean trim() default true;
+    boolean trimOverride() default false;
 }
