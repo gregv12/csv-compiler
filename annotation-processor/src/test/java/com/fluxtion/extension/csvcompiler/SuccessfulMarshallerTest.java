@@ -19,6 +19,7 @@
 
 package com.fluxtion.extension.csvcompiler;
 
+import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
 import com.fluxtion.extension.csvcompiler.beans.Person.MultipleHeaderLines;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
@@ -219,6 +221,12 @@ public class SuccessfulMarshallerTest {
     @SafeVarargs
     static <T extends Person> void testPersonErrors(
             Class<T> personClass, String input, List<Integer> errorRowsExpected, T... people) {
+        testPersonErrors(personClass, input, null, errorRowsExpected, people);
+    }
+
+    @SafeVarargs
+    static <T extends Person> void testPersonErrors(
+            Class<T> personClass, String input, BiConsumer<T, ValidationResultStore> validator, List<Integer> errorRowsExpected, T... people) {
         List<? super Person> resultList = new ArrayList<>();
         List<Integer> errorRowsActual = new ArrayList<>();
 
@@ -235,6 +243,7 @@ public class SuccessfulMarshallerTest {
                         errorRowsActual.add(csvProcessingException.getLineNumber());
                     }
                 })
+                .setValidator(validator)
                 .stream(resultList::add, new StringReader(input));
 
         assertIterableEquals(

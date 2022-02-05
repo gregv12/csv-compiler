@@ -19,9 +19,12 @@
 
 package com.fluxtion.extension.csvcompiler;
 
+import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public abstract class BaseMarshaller<T> implements CsvMarshallerLoader<T> {
@@ -38,6 +41,8 @@ public abstract class BaseMarshaller<T> implements CsvMarshallerLoader<T> {
     protected final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);
     protected int fieldIndex = 0;
     protected int writeIndex = 0;
+    protected BiConsumer<T, ValidationResultStore> validator;
+    protected boolean failedValidation;
 
     protected BaseMarshaller(boolean failOnError) {
         this.failOnError = failOnError;
@@ -54,14 +59,44 @@ public abstract class BaseMarshaller<T> implements CsvMarshallerLoader<T> {
         init();
         int c;
         try {
-            while ((c = in.read()) != -1) {
-                if (charEvent((char) c)) {
-                    consumer.accept(target);
+            if(validator == null){
+                while ((c = in.read()) != -1) {
+                    if (charEvent((char) c)) {
+                        consumer.accept(target);
+                    }
+                }
+            }else{
+                failedValidation = false;
+                while ((c = in.read()) != -1) {
+                    if (charEvent((char) c)) {
+                        validator.accept(target, this::logValidationProblem);
+                        if(!failedValidation){
+                            consumer.accept(target);
+                        }
+                    }
                 }
             }
             eof();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public CsvMarshallerLoader<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
+        this.validator = validator;
+        return this;
+    }
+
+    protected void logValidationProblem(String errorMessage){
+        failedValidation = true;
+        String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
+        CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
+        if(failOnError){
+            errorLog.logFatal(exception);
+            throw exception;
+        }else{
+            errorLog.logException(exception);
         }
     }
 

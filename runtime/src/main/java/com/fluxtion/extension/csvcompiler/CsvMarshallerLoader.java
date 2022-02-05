@@ -19,7 +19,10 @@
 
 package com.fluxtion.extension.csvcompiler;
 
+import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
+
 import java.io.Reader;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.util.ServiceLoader.Provider;
@@ -41,5 +44,7 @@ public interface CsvMarshallerLoader<T> {
                 .findAny()
                 .get();
     }
+
+    CsvMarshallerLoader<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
 
 }
