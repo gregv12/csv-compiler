@@ -36,6 +36,8 @@ public interface CsvMarshallerLoader<T> {
 
     void stream(Consumer<T> consumer, Reader in);
 
+    CsvMarshallerLoader<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
+
     static <T> CsvMarshallerLoader<T> marshaller(Class<T> clazz) {
         return load(CsvMarshallerLoader.class).stream()
                 .map(Provider::get)
@@ -44,7 +46,5 @@ public interface CsvMarshallerLoader<T> {
                 .findAny()
                 .get();
     }
-
-    CsvMarshallerLoader<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
 
 }

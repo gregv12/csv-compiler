@@ -37,4 +37,19 @@ public interface CsvToFieldInfoModel {
     boolean isIndexField();
 
     String getUpdateTarget();
+
+    //converter
+    String getConverterMethod();
+
+    String getConverterInstanceId();
+
+    String getConverterClassName();
+
+    String getConvertConfiguration();
+
+    default boolean isConverterApplied() {
+        return getConverterClassName() != null && !getConverterClassName().isBlank();
+    }
+
+
 }

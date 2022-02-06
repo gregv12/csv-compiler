@@ -99,6 +99,11 @@ public class CodeGenerator {
                 codeGeneratorModel.fieldInfoList().stream()
                         .map(s -> "private int " + s.getFieldIdentifier() + " = " + s.getFieldIndex() + ";")
                         .collect(Collectors.joining("\n"));
+        options +=
+                codeGeneratorModel.fieldInfoList().stream()
+                        .filter(CsvToFieldInfoModel::isConverterApplied)
+                        .map(s -> "private final " + s.getConverterClassName() + " " + s.getConverterInstanceId() + " = new " + s.getConverterClassName() + "();")
+                        .collect(Collectors.joining("\n"));
         return options;
     }
 
@@ -119,7 +124,12 @@ public class CodeGenerator {
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .map(s -> "fieldMap.put(" + s.getFieldIdentifier() + ", \"" + s.getTargetCalcMethodName() + "\");")
-                        .collect(Collectors.joining("\n", "", "}"));
+                        .collect(Collectors.joining("\n", "", "\n"));
+        options +=
+                codeGeneratorModel.fieldInfoList().stream()
+                        .filter(CsvToFieldInfoModel::isConverterApplied)
+                        .map(s -> s.getConverterInstanceId() + ".setConversionConfiguration(\"" + s.getConvertConfiguration() + "\");")
+                        .collect(Collectors.joining("\n", "", "\n}"));
         return options;
     }
 

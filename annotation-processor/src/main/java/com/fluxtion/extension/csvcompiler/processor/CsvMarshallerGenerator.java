@@ -19,8 +19,11 @@
 
 package com.fluxtion.extension.csvcompiler.processor;
 
+import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;
+import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGenerator;
 import com.fluxtion.extension.csvcompiler.processor.model.CsvMetaModel;
@@ -39,7 +42,11 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.ServiceLoader.load;
 
 @AutoService(Processor.class)
 public class CsvMarshallerGenerator implements Processor {
@@ -104,8 +111,8 @@ public class CsvMarshallerGenerator implements Processor {
         //apply field customisations
         processingEnv.getElementUtils().getAllMembers(typeElement).stream().forEach(e -> {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
+            Name variableName = e.getSimpleName();
             if (columnMapping != null) {
-                Name variableName = e.getSimpleName();
                 if (!columnMapping.columnName().isBlank()) {
                     csvMetaModel.setColumnName(variableName.toString(), columnMapping.columnName());
                 }
@@ -119,6 +126,13 @@ public class CsvMarshallerGenerator implements Processor {
                     csvMetaModel.setColumnIndex(variableName.toString(), columnMapping.columnIndex());
                 }
                 csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
+            }
+
+            DataMapping dataMapping = e.getAnnotation(DataMapping.class);
+            if(dataMapping!=null){
+                String converterClass = findConverterClass(dataMapping.converterName());
+                String format = dataMapping.converterConfiguration();
+                csvMetaModel.setFieldConverter(variableName.toString(), converterClass, format);
             }
         });
 
@@ -184,6 +198,20 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setNewBeanPerRecord(annotation.newBeanPerRecord());
         csvMetaModel.setAcceptPartials(annotation.acceptPartials());
         csvMetaModel.setTrim(annotation.trim());
+    }
+
+
+    static String findConverterClass(String converterId){
+        System.out.println("looking for:" + converterId);
+        return load(FieldConverter.class, FieldConverter.class.getClassLoader()).stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(f -> f.getName().equals(converterId))
+                .map(FieldConverter::getClass)
+                .map(Class::getCanonicalName)
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("No converter registered with " +
+                        "ServiceLoader under the name:" + converterId));
+
     }
 
 }

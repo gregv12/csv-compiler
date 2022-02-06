@@ -51,6 +51,8 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     //converter
     private String converterMethod;
     private String converterInstanceId;
+    private String converterClassName;
+    private String convertConfiguration;
     //default value
     private String defaultMethod;
     private String defaultInstanceId;
@@ -94,9 +96,11 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         this.targetGetMethod = targetGetMethod;
     }
 
-    public void setConverter(String instanceId, String converterMethod) {
-        this.converterInstanceId = instanceId;
-        this.converterMethod = converterInstanceId + "." + converterMethod;
+    public void setConverter(String converterClass, String convertConfiguration) {
+        this.converterInstanceId = getFieldIdentifier() + "Converter";
+        this.converterMethod = converterInstanceId + ".fromCharSequence";
+        this.converterClassName = converterClass;
+        this.convertConfiguration = convertConfiguration==null?"":convertConfiguration;
     }
 
     public void setDefaultValue(String defaultValue) {

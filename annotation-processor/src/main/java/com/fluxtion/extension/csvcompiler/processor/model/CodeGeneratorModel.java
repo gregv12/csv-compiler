@@ -52,7 +52,7 @@ public interface CodeGeneratorModel {
                "import java.util.function.Consumer;\n" +
                "import java.util.regex.Pattern;\n" +
                "\n" +
-               "import static com.fluxtion.extension.csvcompiler.Conversion.*;\n";
+               "import static com.fluxtion.extension.csvcompiler.converters.Conversion.*;\n";
     }
 
     int getMappingRow();

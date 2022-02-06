@@ -17,7 +17,7 @@
  *
  */
 
-package com.fluxtion.extension.csvcompiler;
+package com.fluxtion.extension.csvcompiler.converters;
 
 import static java.beans.Introspector.decapitalize;
 

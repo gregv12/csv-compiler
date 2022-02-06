@@ -21,10 +21,13 @@ package com.fluxtion.extension.csvcompiler.beans;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
+import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.time.LocalTime;
 import java.util.function.Supplier;
 
 @EqualsAndHashCode
@@ -76,42 +79,42 @@ public class Person {
     }
 
     @CsvMarshaller(formatSource = true, newBeanPerRecord = false)
-    public static class PersonRecycleInstance extends Person{
+    public static class PersonRecycleInstance extends Person {
     }
 
     @CsvMarshaller(formatSource = true, processEscapeSequences = true)
-    public static class Escaped extends Person{
+    public static class Escaped extends Person {
     }
 
     @CsvMarshaller(formatSource = true, fieldSeparator = '|')
-    public static class PipeSeparator extends Person{
+    public static class PipeSeparator extends Person {
     }
 
     @CsvMarshaller(formatSource = true, acceptPartials = true)
-    public static class AcceptPartials extends Person{
+    public static class AcceptPartials extends Person {
     }
 
     @CsvMarshaller(formatSource = true, trim = true)
-    public static class Trim extends Person{
+    public static class Trim extends Person {
     }
 
     @CsvMarshaller(formatSource = true, failOnFirstError = true)
-    public static class FailFast extends Person{
+    public static class FailFast extends Person {
     }
 
     @CsvMarshaller(formatSource = true, ignoredChar = '\0', lineEnding = '\r')
-    public static class UnixLineEnding extends Person{
+    public static class UnixLineEnding extends Person {
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class MapColumn extends Person{
+    public static class MapColumn extends Person {
 
         @ColumnMapping(columnName = "overrideNameMapping")
         private String name;
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class DefaultColumnValue extends Person{
+    public static class DefaultColumnValue extends Person {
 
         @ColumnMapping(defaultValue = "NO NAME")
         private String name;
@@ -121,39 +124,54 @@ public class Person {
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class NoTrimField extends Person{
+    public static class NoTrimField extends Person {
         @ColumnMapping(trimOverride = true)
         private String name;
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class OptionalField extends Person{
+    public static class OptionalField extends Person {
         @ColumnMapping(optionalField = true)
         private int age;
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class OptionalFieldWithDefaultValue extends Person{
+    public static class OptionalFieldWithDefaultValue extends Person {
         @ColumnMapping(optionalField = true, defaultValue = "18")
         private int age;
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class PostProcess extends Person{
+    public static class PostProcess extends Person {
 
         @PostProcessMethod
-        public void myPostProcessMethod(){
+        public void myPostProcessMethod() {
             setName(getName().toUpperCase());
         }
     }
 
     @CsvMarshaller(formatSource = true, headerLines = -1, mappingRow = 0)
-    public static class IndexFields extends Person{
+    public static class IndexFields extends Person {
 
         @ColumnMapping(columnIndex = 0)
         private String name;
 
         @ColumnMapping(columnIndex = 1)
         private int age;
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class ConverterFiled extends Person {
+
+        @DataMapping(converterName = LocalTimeConverter.ID)
+        private LocalTime birthTime;
+
+        public LocalTime getBirthTime() {
+            return birthTime;
+        }
+
+        public void setBirthTime(LocalTime birthTime) {
+            this.birthTime = birthTime;
+        }
     }
 }
