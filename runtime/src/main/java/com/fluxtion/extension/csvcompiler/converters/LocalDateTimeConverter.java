@@ -22,18 +22,18 @@ package com.fluxtion.extension.csvcompiler.converters;
 import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.google.auto.service.AutoService;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @AutoService(FieldConverter.class)
-public class LocalTimeConverter implements FieldConverter<LocalTime> {
+public class LocalDateTimeConverter implements FieldConverter<LocalDateTime> {
 
-    public static final String ID = "localTimeConverter";
-    private DateTimeFormatter timeFormatter  = DateTimeFormatter.ISO_LOCAL_TIME;
+    public static final String ID = "localDateTimeConverter";
+    private DateTimeFormatter timeFormatter  = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
-    public LocalTime fromCharSequence(CharSequence charSequence) {
-        return  LocalTime.parse(charSequence, timeFormatter);
+    public LocalDateTime fromCharSequence(CharSequence charSequence) {
+        return  LocalDateTime.parse(charSequence, timeFormatter);
     }
 
     @Override
@@ -45,5 +45,4 @@ public class LocalTimeConverter implements FieldConverter<LocalTime> {
     public void setConversionConfiguration(String conversionConfiguration) {
         timeFormatter = DateTimeFormatter.ofPattern(conversionConfiguration);
     }
-
 }

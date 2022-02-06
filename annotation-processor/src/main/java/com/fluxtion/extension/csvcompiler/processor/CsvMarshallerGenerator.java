@@ -19,7 +19,6 @@
 
 package com.fluxtion.extension.csvcompiler.processor;
 
-import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;
 import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
@@ -44,7 +43,6 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.ServiceLoader.load;
 
@@ -122,16 +120,16 @@ public class CsvMarshallerGenerator implements Processor {
                 if (columnMapping.optionalField()) {
                     csvMetaModel.setOptionalField(variableName.toString(), true);
                 }
-                if(columnMapping.columnIndex() > -1){
+                if (columnMapping.columnIndex() > -1) {
                     csvMetaModel.setColumnIndex(variableName.toString(), columnMapping.columnIndex());
                 }
                 csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
             }
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
-            if(dataMapping!=null){
+            if (dataMapping != null) {
                 String converterClass = findConverterClass(dataMapping.converterName());
-                String format = dataMapping.converterConfiguration();
+                String format = dataMapping.configuration();
                 csvMetaModel.setFieldConverter(variableName.toString(), converterClass, format);
             }
         });
@@ -139,7 +137,7 @@ public class CsvMarshallerGenerator implements Processor {
         return csvMetaModel;
     }
 
-    private void potProcessMethod(CsvMetaModel csvMetaModel, TypeElement typeElement){
+    private void potProcessMethod(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         MoreElements.getLocalAndInheritedMethods(
                         typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
                 .stream()
@@ -201,17 +199,21 @@ public class CsvMarshallerGenerator implements Processor {
     }
 
 
-    static String findConverterClass(String converterId){
-        System.out.println("looking for:" + converterId);
-        return load(FieldConverter.class, FieldConverter.class.getClassLoader()).stream()
+    static String findConverterClass(String converterId) {
+        return load(FieldConverter.class).stream()
                 .map(ServiceLoader.Provider::get)
                 .filter(f -> f.getName().equals(converterId))
                 .map(FieldConverter::getClass)
                 .map(Class::getCanonicalName)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("No converter registered with " +
-                        "ServiceLoader under the name:" + converterId));
-
+                .findAny().orElseGet(() ->
+                        load(FieldConverter.class, FieldConverter.class.getClassLoader()).stream()
+                                .map(ServiceLoader.Provider::get)
+                                .filter(f -> f.getName().equals(converterId))
+                                .map(FieldConverter::getClass)
+                                .map(Class::getCanonicalName)
+                                .findAny()
+                                .orElseThrow(() -> new IllegalArgumentException("No converter registered with " +
+                                                                                "ServiceLoader under the name:" + converterId)));
     }
 
 }

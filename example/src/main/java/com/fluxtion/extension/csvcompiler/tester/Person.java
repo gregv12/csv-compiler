@@ -3,14 +3,16 @@ package com.fluxtion.extension.csvcompiler.tester;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
+import com.fluxtion.extension.csvcompiler.converters.ConstantStringConverter;
 import lombok.ToString;
 
 import java.time.LocalTime;
 
 @ToString
-@CsvMarshaller//(formatSource = true)
+@CsvMarshaller(formatSource = true)
 public class Person {
 
+    @DataMapping(converterName = ConstantStringConverter.ID, configuration = "ALWAYS ME")
     private String name;
     private int age;
 

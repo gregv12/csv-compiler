@@ -22,6 +22,8 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.beans.Person;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalTime;
+
 import static com.fluxtion.extension.csvcompiler.SuccessfulMarshallerTest.testPerson;
 
 public class FieldMappingTest {
@@ -90,7 +92,7 @@ public class FieldMappingTest {
     }
 
     @Test
-    public void optionalFieldColumnMissinfDefaultValue() {
+    public void optionalFieldColumnMissingDefaultValue() {
         testPerson(
                 Person.OptionalFieldWithDefaultValue.class,
                 "name\n" +
@@ -110,6 +112,21 @@ public class FieldMappingTest {
                 Person.build(Person.IndexFields::new, "tim", 32),
                 Person.build(Person.IndexFields::new, "lisa", 44)
         );
+    }
+
+    @Test
+    public void converterFields(){
+        Person.ConverterFiled converted = new Person.ConverterFiled();
+        converted.setAge(44);
+        converted.setName("ALWAYS_LINDA");
+        converted.setBirthTime(LocalTime.of(12,34));
+        testPerson(
+                Person.ConverterFiled.class,
+                "name,age,birthTime\n" +
+                "lisa,44,12:34\n",
+                converted
+        );
+
     }
 
 }

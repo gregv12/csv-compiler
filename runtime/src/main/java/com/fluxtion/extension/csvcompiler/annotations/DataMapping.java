@@ -23,7 +23,7 @@ public @interface DataMapping {
 
     String converterName() default "";
 
-    String converterConfiguration() default "";
+    String configuration() default "";
 
     String lookupName() default "";
 }

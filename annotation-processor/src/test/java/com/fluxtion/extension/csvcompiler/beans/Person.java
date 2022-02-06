@@ -24,6 +24,7 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
 import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
+import com.fluxtion.extension.csvcompiler.converters.ConstantStringConverter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -161,10 +162,15 @@ public class Person {
     }
 
     @CsvMarshaller(formatSource = true)
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
     public static class ConverterFiled extends Person {
 
-        @DataMapping(converterName = LocalTimeConverter.ID)
+        @DataMapping(converterName = LocalTimeConverter.ID, configuration = "HH:mm")
         private LocalTime birthTime;
+
+        @DataMapping(converterName = ConstantStringConverter.ID, configuration = "ALWAYS_LINDA")
+        private String name;
 
         public LocalTime getBirthTime() {
             return birthTime;
