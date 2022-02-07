@@ -20,12 +20,10 @@
 package com.fluxtion.extension.csvcompiler.converters;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
-import com.google.auto.service.AutoService;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-@AutoService(FieldConverter.class)
 public class LocalTimeConverter implements FieldConverter<LocalTime> {
 
     public static final String ID = "localTimeConverter";

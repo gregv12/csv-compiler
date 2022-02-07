@@ -12,11 +12,11 @@ import java.time.LocalTime;
 @CsvMarshaller(formatSource = true)
 public class Person {
 
-    @DataMapping(converterName = ConstantStringConverter.ID, configuration = "ALWAYS ME")
+    @DataMapping(converter = ConstantStringConverter.class, configuration = "ALWAYS ME")
     private String name;
     private int age;
 
-    @DataMapping(converterName = LocalTimeConverter.ID)
+    @DataMapping(converter = LocalTimeConverter.class)
     private LocalTime birthDate;
 
     public String getName() {

@@ -166,10 +166,10 @@ public class Person {
     @ToString(callSuper = true)
     public static class ConverterFiled extends Person {
 
-        @DataMapping(converterName = LocalTimeConverter.ID, configuration = "HH:mm")
+        @DataMapping(converter = LocalTimeConverter.class, configuration = "HH:mm")
         private LocalTime birthTime;
 
-        @DataMapping(converterName = ConstantStringConverter.ID, configuration = "ALWAYS_LINDA")
+        @DataMapping(converter = ConstantStringConverter.class, configuration = "ALWAYS_LINDA")
         private String name;
 
         public LocalTime getBirthTime() {

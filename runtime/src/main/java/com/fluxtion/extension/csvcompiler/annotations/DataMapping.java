@@ -19,9 +19,11 @@
 
 package com.fluxtion.extension.csvcompiler.annotations;
 
+import com.fluxtion.extension.csvcompiler.FieldConverter;
+
 public @interface DataMapping {
 
-    String converterName() default "";
+    Class<? extends FieldConverter> converter() default FieldConverter.NULL.class;
 
     String configuration() default "";
 

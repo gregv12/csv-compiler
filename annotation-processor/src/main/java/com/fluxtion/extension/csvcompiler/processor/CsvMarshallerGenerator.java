@@ -19,7 +19,6 @@
 
 package com.fluxtion.extension.csvcompiler.processor;
 
-import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
@@ -37,14 +36,16 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.ServiceLoader;
+import java.util.List;
 import java.util.Set;
-
-import static java.util.ServiceLoader.load;
 
 @AutoService(Processor.class)
 public class CsvMarshallerGenerator implements Processor {
@@ -127,14 +128,35 @@ public class CsvMarshallerGenerator implements Processor {
             }
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
-            if (dataMapping != null) {
-                String converterClass = findConverterClass(dataMapping.converterName());
+            if (dataMapping != null){// && dataMapping.converter()!=FieldConverter.NULL.class) {
+                List<? extends TypeMirror> types = getTypeMirrorFromAnnotationValue(() -> dataMapping.converter());
+                TypeMirror typeMirror = types.get(0);
+                Types TypeUtils = this.processingEnv.getTypeUtils();
+                TypeElement typeElement1 = (TypeElement) TypeUtils.asElement(typeMirror);
+                PackageElement packageOfConverter = processingEnv.getElementUtils().getPackageOf(typeElement1);
+                String fqnConverter = packageOfConverter.getQualifiedName() + "." + typeElement1.getSimpleName();
                 String format = dataMapping.configuration();
-                csvMetaModel.setFieldConverter(variableName.toString(), converterClass, format);
+                csvMetaModel.setFieldConverter(variableName.toString(), fqnConverter, format);
             }
         });
 
         return csvMetaModel;
+    }
+
+
+    @FunctionalInterface
+    public interface GetClassValue {
+        void execute() throws MirroredTypeException, MirroredTypesException;
+    }
+
+    public static List<? extends TypeMirror> getTypeMirrorFromAnnotationValue(GetClassValue c) {
+        try {
+            c.execute();
+        }
+        catch(MirroredTypesException ex) {
+            return ex.getTypeMirrors();
+        }
+        return null;
     }
 
     private void potProcessMethod(CsvMetaModel csvMetaModel, TypeElement typeElement) {
@@ -196,24 +218,6 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setNewBeanPerRecord(annotation.newBeanPerRecord());
         csvMetaModel.setAcceptPartials(annotation.acceptPartials());
         csvMetaModel.setTrim(annotation.trim());
-    }
-
-
-    static String findConverterClass(String converterId) {
-        return load(FieldConverter.class).stream()
-                .map(ServiceLoader.Provider::get)
-                .filter(f -> f.getName().equals(converterId))
-                .map(FieldConverter::getClass)
-                .map(Class::getCanonicalName)
-                .findAny().orElseGet(() ->
-                        load(FieldConverter.class, FieldConverter.class.getClassLoader()).stream()
-                                .map(ServiceLoader.Provider::get)
-                                .filter(f -> f.getName().equals(converterId))
-                                .map(FieldConverter::getClass)
-                                .map(Class::getCanonicalName)
-                                .findAny()
-                                .orElseThrow(() -> new IllegalArgumentException("No converter registered with " +
-                                                                                "ServiceLoader under the name:" + converterId)));
     }
 
 }

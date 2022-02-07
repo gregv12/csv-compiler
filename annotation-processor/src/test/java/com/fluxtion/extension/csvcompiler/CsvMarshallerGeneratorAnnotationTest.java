@@ -104,10 +104,12 @@ public class CsvMarshallerGeneratorAnnotationTest {
                 "    package  com.fluxtion.extension.csvcompiler;\n" +
                         "\n" +
                         "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                        "    import com.fluxtion.extension.csvcompiler.annotations.*;\n" +
                         "\n" +
                         "    @CsvMarshaller\n" +
                         "    public final class MyBooleanTest{\n" +
                         "\n" +
+                        "       @DataMapping(converter = ConstantStringConverter.class, configuration = \"ALWAYS_LINDA\")\n" +
                         "        boolean name;\n" +
                         "\n" +
                         "        public boolean isName(){\n" +

@@ -20,9 +20,7 @@
 package com.fluxtion.extension.csvcompiler.converters;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
-import com.google.auto.service.AutoService;
 
-@AutoService(FieldConverter.class)
 public class ConstantStringConverter implements FieldConverter<String> {
 
     public static final String ID = "ConstantStringConverter";
