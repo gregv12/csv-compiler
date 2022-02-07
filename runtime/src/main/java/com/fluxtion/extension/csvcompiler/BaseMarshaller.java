@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public abstract class BaseMarshaller<T> implements CsvMarshallerLoader<T> {
+public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
     protected int rowNumber;
     protected T target;
@@ -49,7 +49,7 @@ public abstract class BaseMarshaller<T> implements CsvMarshallerLoader<T> {
     }
 
     @Override
-    public final CsvMarshallerLoader<T> setErrorLog(ValidationLogger errorLog) {
+    public final RowMarshaller<T> setErrorLog(ValidationLogger errorLog) {
         this.errorLog = errorLog;
         return this;
     }
@@ -83,7 +83,7 @@ public abstract class BaseMarshaller<T> implements CsvMarshallerLoader<T> {
     }
 
     @Override
-    public CsvMarshallerLoader<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
+    public RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
         this.validator = validator;
         return this;
     }

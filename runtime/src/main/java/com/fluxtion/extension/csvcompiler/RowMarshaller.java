@@ -22,26 +22,26 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
 
 import java.io.Reader;
+import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.util.ServiceLoader.Provider;
-import static java.util.ServiceLoader.load;
 
-public interface CsvMarshallerLoader<T> {
+public interface RowMarshaller<T> {
 
     Class<T> targetClass();
 
-    CsvMarshallerLoader<T> setErrorLog(ValidationLogger errorLog);
+    RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
 
     void stream(Consumer<T> consumer, Reader in);
 
-    CsvMarshallerLoader<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
+    RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
 
-    static <T> CsvMarshallerLoader<T> marshaller(Class<T> clazz) {
-        return load(CsvMarshallerLoader.class).stream()
+    static <T> RowMarshaller<T> load(Class<T> clazz) {
+        return ServiceLoader.load(RowMarshaller.class).stream()
                 .map(Provider::get)
-                .map(obj -> (CsvMarshallerLoader<T>) obj)
+                .map(obj -> (RowMarshaller<T>) obj)
                 .filter(svc -> svc.targetClass().equals(clazz))
                 .findAny()
                 .get();

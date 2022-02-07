@@ -36,7 +36,7 @@ public class SuccessfulMarshallerTest {
 
     @Test
     public void loadPersonMarshallerTest() {
-        CsvMarshallerLoader.marshaller(Person.class);
+        RowMarshaller.load(Person.class);
     }
 
     @Test
@@ -191,7 +191,7 @@ public class SuccessfulMarshallerTest {
         String input = "booleanProperty,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
                        "true,8,10.7,1.5,100,2000,4,hello\n";
         List<AllNativeMarshallerTypes> resultList = new ArrayList<>();
-        CsvMarshallerLoader.marshaller(AllNativeMarshallerTypes.class).stream(resultList::add, new StringReader(input));
+        RowMarshaller.load(AllNativeMarshallerTypes.class).stream(resultList::add, new StringReader(input));
 
         AllNativeMarshallerTypes bean = new AllNativeMarshallerTypes();
         bean.setBooleanProperty(true);
@@ -209,7 +209,7 @@ public class SuccessfulMarshallerTest {
         );
     }
 
-    public static void parserOutput(CsvMarshallerLoader<?> loader, String input){
+    public static void parserOutput(RowMarshaller<?> loader, String input){
         loader.stream(System.out::println, new StringReader(input));
     }
 
@@ -230,8 +230,8 @@ public class SuccessfulMarshallerTest {
         List<? super Person> resultList = new ArrayList<>();
         List<Integer> errorRowsActual = new ArrayList<>();
 
-        CsvMarshallerLoader
-                .marshaller(personClass)
+        RowMarshaller
+                .load(personClass)
                 .setErrorLog(new ValidationLogger() {
                     @Override
                     public void logFatal(CsvProcessingException csvProcessingException) {

@@ -1,9 +1,8 @@
 package com.fluxtion.extension.csvcompiler.tester;
 
-import com.fluxtion.extension.csvcompiler.CsvMarshallerLoader;
+import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.ValidationLogger;
-import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
 
 import java.io.StringReader;
 import java.util.ServiceLoader;
@@ -13,7 +12,7 @@ import static java.util.ServiceLoader.load;
 public class Main {
 
     public static void main(String[] args) {
-        CsvMarshallerLoader.marshaller(Person.class)
+        RowMarshaller.load(Person.class)
                 .setErrorLog(ValidationLogger.CONSOLE)
                 .stream(System.out::println, new StringReader("name,age\n" +
                                                               "Linda Smith,43\n" +

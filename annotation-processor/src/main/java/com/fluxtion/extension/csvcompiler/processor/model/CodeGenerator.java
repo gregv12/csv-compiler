@@ -35,7 +35,7 @@ public class CodeGenerator {
             "\n" +
             "%2$s\n" +
             "\n" +
-            "@AutoService(CsvMarshallerLoader.class)\n" +
+            "@AutoService(RowMarshaller.class)\n" +
             "public class %3$s extends BaseMarshaller<%4$s>{\n" +
             "\n" +
             "%5$s\n" +
