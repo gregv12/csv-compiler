@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.util.ServiceLoader.Provider;
 
@@ -35,6 +36,8 @@ public interface RowMarshaller<T> {
     RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
 
     void stream(Consumer<T> consumer, Reader in);
+
+    RowMarshaller<T> setHeaderTransformer(Function<String, String>headerTransformer);
 
     RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
 

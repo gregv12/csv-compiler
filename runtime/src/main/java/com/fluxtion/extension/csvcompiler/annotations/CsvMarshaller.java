@@ -107,16 +107,6 @@ public @interface CsvMarshaller {
     boolean trim() default false;
 
     /**
-     * Only allow basic latin characters in the header using:<p>
-     * <code>
-     *     header = header.replaceAll("\\P{InBasic_Latin}", "");
-     * </code>
-     *
-     * @return only accept ascii in header
-     */
-    boolean asciiOnlyHeader() default true;
-
-    /**
      * Re-use the same bean instance for each record or create a new instance on
      * every record. Default is to re-use the same instance
      *

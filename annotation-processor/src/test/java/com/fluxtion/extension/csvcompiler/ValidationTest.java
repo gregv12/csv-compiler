@@ -40,6 +40,24 @@ public class ValidationTest {
                         validationResultStore.vaildationFailure("TOO OLD");
                 },List.of(3),Person.build(Person::new, "tim", 32)
         );
-
     }
+
+    @Test
+    public void interleavedInvalidRecordsValidationTest() {
+        testPersonErrors(
+                Person.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,44\n" +
+                        "siobhan,18\n"
+                ,
+                (person, validationResultStore) -> {
+                    if (person.getAge() > 40)
+                        validationResultStore.vaildationFailure("TOO OLD");
+                },List.of(3),
+                Person.build(Person::new, "tim", 32),
+                Person.build(Person::new, "siobhan", 18)
+        );
+    }
+
 }

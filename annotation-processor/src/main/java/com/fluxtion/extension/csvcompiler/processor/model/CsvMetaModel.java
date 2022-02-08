@@ -51,7 +51,6 @@ public class CsvMetaModel implements CodeGeneratorModel {
     private boolean formatSource;
     private boolean skipCommentLines;
     private boolean skipEmptyLines;
-    private boolean asciiOnlyHeader;
     private boolean failOnFirstError;
     private String postProcessMethod;
 

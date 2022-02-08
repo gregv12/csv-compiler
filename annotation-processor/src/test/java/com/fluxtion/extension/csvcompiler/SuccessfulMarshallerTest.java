@@ -53,6 +53,18 @@ public class SuccessfulMarshallerTest {
     }
 
     @Test
+    public void noLineEndingLastRowTest() {
+        testPerson(
+                Person.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,44",
+                Person.build(Person::new, "tim", 32),
+                Person.build(Person::new, "lisa", 44)
+        );
+    }
+
+    @Test
     public void unixLineEndingTest() {
         testPerson(
                 Person.UnixLineEnding.class,
@@ -209,6 +221,31 @@ public class SuccessfulMarshallerTest {
         );
     }
 
+    @Test
+    public void mapHeaderTest(){
+        String input = "booleanPROP,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
+                "true,8,10.7,1.5,100,2000,4,hello\n";
+        List<AllNativeMarshallerTypes> resultList = new ArrayList<>();
+        RowMarshaller.load(AllNativeMarshallerTypes.class)
+                .setHeaderTransformer(s -> s.replace("PROP", "Property"))
+                .stream(resultList::add, new StringReader(input));
+
+        AllNativeMarshallerTypes bean = new AllNativeMarshallerTypes();
+        bean.setBooleanProperty(true);
+        bean.setByteProperty((byte) 8);
+        bean.setDoubleProperty(10.7);
+        bean.setFloatProperty(1.5f);
+        bean.setIntProperty(100);
+        bean.setLongProperty(2000);
+        bean.setShortProperty((short) 4);
+        bean.setStringProperty("hello");
+
+        assertIterableEquals(
+                List.of(bean),
+                resultList
+        );
+    }
+
     public static void parserOutput(RowMarshaller<?> loader, String input){
         loader.stream(System.out::println, new StringReader(input));
     }
@@ -247,13 +284,16 @@ public class SuccessfulMarshallerTest {
                 .stream(resultList::add, new StringReader(input));
 
         assertIterableEquals(
-                List.of(people),
-                resultList
+                errorRowsExpected,
+                errorRowsActual,
+                "indexes of invalid rows does not match"
         );
 
         assertIterableEquals(
-                errorRowsExpected,
-                errorRowsActual
+                List.of(people),
+                resultList,
+                "number of valid rows is different"
         );
+
     }
 }

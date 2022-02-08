@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
@@ -43,6 +44,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected int writeIndex = 0;
     protected BiConsumer<T, ValidationResultStore> validator;
     protected boolean failedValidation;
+    protected Function<String, String> headerTransformer = Function.identity();
 
     protected BaseMarshaller(boolean failOnError) {
         this.failOnError = failOnError;
@@ -65,30 +67,43 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                         consumer.accept(target);
                     }
                 }
+                if(eof())
+                    consumer.accept(target);
             }else{
-                failedValidation = false;
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
+                        failedValidation = false;
                         validator.accept(target, this::logValidationProblem);
                         if(!failedValidation){
                             consumer.accept(target);
                         }
                     }
                 }
+                if(eof()){
+                    validator.accept(target, this::logValidationProblem);
+                    if(!failedValidation){
+                        consumer.accept(target);
+                    }
+                }
             }
-            eof();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
+    public final RowMarshaller<T> setHeaderTransformer(Function<String, String> headerTransformer) {
+        this.headerTransformer = headerTransformer;
+        return this;
+    }
+
+    @Override
+    public final RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
         this.validator = validator;
         return this;
     }
 
-    protected void logValidationProblem(String errorMessage){
+    protected final void logValidationProblem(String errorMessage){
         failedValidation = true;
         String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
@@ -114,8 +129,9 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         return rowNumber;
     }
 
-    protected final void eof() {
-        if (writeIndex != 0) processRow();
+    protected final boolean eof() {
+        if (writeIndex != 0) return processRow();
+        return false;
     }
 
     protected final void updateFieldIndex() {

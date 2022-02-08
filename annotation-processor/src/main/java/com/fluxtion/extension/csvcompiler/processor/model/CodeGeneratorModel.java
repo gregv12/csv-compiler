@@ -85,8 +85,6 @@ public interface CodeGeneratorModel {
 
     boolean isSkipEmptyLines();
 
-    boolean isAsciiOnlyHeader();
-
     char getDelimiter();
 
     char getNewLineCharacter();
