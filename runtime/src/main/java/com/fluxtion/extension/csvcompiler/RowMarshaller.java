@@ -27,6 +27,7 @@ import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.util.ServiceLoader.Provider;
 
@@ -35,6 +36,8 @@ public interface RowMarshaller<T> {
     Class<T> targetClass();
 
     RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
+
+    Stream<T> stream(Reader in);
 
     void forEach(Consumer<T> consumer, Reader in);
 

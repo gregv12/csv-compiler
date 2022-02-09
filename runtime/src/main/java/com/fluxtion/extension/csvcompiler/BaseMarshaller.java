@@ -25,9 +25,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
@@ -63,6 +66,13 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         init();
         foundRecord = false;
         return new MyIterator(in);
+    }
+
+    @Override
+    public Stream<T> stream(Reader in){
+        Iterable<T> iterable = () -> iterator(in);
+        Spliterator<T> spliterator = iterable.spliterator();
+        return StreamSupport.stream(spliterator, false);
     }
 
     private T next(Reader in){
