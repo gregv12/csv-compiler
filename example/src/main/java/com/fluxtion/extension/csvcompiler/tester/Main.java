@@ -14,14 +14,11 @@ public class Main {
     public static void main(String[] args) {
         RowMarshaller.load(Person.class)
                 .setErrorLog(ValidationLogger.CONSOLE)
-                .stream(System.out::println, new StringReader("name,age\n" +
+                .forEach(System.out::println, new StringReader("name,age\n" +
                                                               "Linda Smith,43\n" +
                                                               "Soren Miller,33\n" +
                                                               "fred,not a number\n"
                 ));
-
-//        String converterClass = findConverterClass(LocalTimeConverter.ID);
-//        System.out.println(converterClass);
     }
 
 
