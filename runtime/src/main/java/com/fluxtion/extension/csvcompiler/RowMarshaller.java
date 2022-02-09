@@ -22,6 +22,7 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
 
 import java.io.Reader;
+import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -35,7 +36,9 @@ public interface RowMarshaller<T> {
 
     RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
 
-    void stream(Consumer<T> consumer, Reader in);
+    void forEach(Consumer<T> consumer, Reader in);
+
+    Iterator<T> iterator(Reader in);
 
     RowMarshaller<T> setHeaderTransformer(Function<String, String>headerTransformer);
 

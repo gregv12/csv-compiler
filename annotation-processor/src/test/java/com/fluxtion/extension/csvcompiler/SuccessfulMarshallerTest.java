@@ -203,7 +203,7 @@ public class SuccessfulMarshallerTest {
         String input = "booleanProperty,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
                        "true,8,10.7,1.5,100,2000,4,hello\n";
         List<AllNativeMarshallerTypes> resultList = new ArrayList<>();
-        RowMarshaller.load(AllNativeMarshallerTypes.class).stream(resultList::add, new StringReader(input));
+        RowMarshaller.load(AllNativeMarshallerTypes.class).forEach(resultList::add, new StringReader(input));
 
         AllNativeMarshallerTypes bean = new AllNativeMarshallerTypes();
         bean.setBooleanProperty(true);
@@ -228,7 +228,7 @@ public class SuccessfulMarshallerTest {
         List<AllNativeMarshallerTypes> resultList = new ArrayList<>();
         RowMarshaller.load(AllNativeMarshallerTypes.class)
                 .setHeaderTransformer(s -> s.replace("PROP", "Property"))
-                .stream(resultList::add, new StringReader(input));
+                .forEach(resultList::add, new StringReader(input));
 
         AllNativeMarshallerTypes bean = new AllNativeMarshallerTypes();
         bean.setBooleanProperty(true);
@@ -247,7 +247,7 @@ public class SuccessfulMarshallerTest {
     }
 
     public static void parserOutput(RowMarshaller<?> loader, String input){
-        loader.stream(System.out::println, new StringReader(input));
+        loader.forEach(System.out::println, new StringReader(input));
     }
 
     @SafeVarargs
@@ -281,7 +281,7 @@ public class SuccessfulMarshallerTest {
                     }
                 })
                 .setValidator(validator)
-                .stream(resultList::add, new StringReader(input));
+                .forEach(resultList::add, new StringReader(input));
 
         assertIterableEquals(
                 errorRowsExpected,

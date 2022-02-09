@@ -24,6 +24,7 @@ import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -45,6 +46,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected BiConsumer<T, ValidationResultStore> validator;
     protected boolean failedValidation;
     protected Function<String, String> headerTransformer = Function.identity();
+    private boolean foundRecord;
 
     protected BaseMarshaller(boolean failOnError) {
         this.failOnError = failOnError;
@@ -57,7 +59,47 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     @Override
-    public final void stream(Consumer<T> consumer, Reader in) {
+    public Iterator<T> iterator(Reader in){
+        init();
+        foundRecord = false;
+        return new MyIterator(in);
+    }
+
+    private T next(Reader in){
+        int c;
+        foundRecord = false;
+        try {
+            if(validator == null){
+                while ((c = in.read()) != -1) {
+                    if (charEvent((char) c)) {
+                        foundRecord = true;
+                        break;
+                    }
+                }
+            }else{
+                while ((c = in.read()) != -1) {
+                    if (charEvent((char) c)) {
+                        failedValidation = false;
+                        validator.accept(target, this::logValidationProblem);
+                        foundRecord = true;
+                        if(!failedValidation){
+                            break;
+                        }
+                    }
+                }
+                if(eof()){
+                    validator.accept(target, this::logValidationProblem);
+                    foundRecord = true;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return target;
+    }
+
+    @Override
+    public final void forEach(Consumer<T> consumer, Reader in) {
         init();
         int c;
         try {
@@ -86,6 +128,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                     }
                 }
             }
+            target = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -178,5 +221,29 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             throw csvProcessingException;
         }
         errorLog.logException(csvProcessingException);
+    }
+
+    class MyIterator implements Iterator<T>{
+
+        private final Reader in;
+
+        public MyIterator(Reader in) {
+            this.in = in;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if(!foundRecord){
+                BaseMarshaller.this.next(in);
+            }
+            return foundRecord;
+        }
+
+        @Override
+        public T next() {
+            hasNext();
+            foundRecord = false;
+            return target;
+        }
     }
 }
