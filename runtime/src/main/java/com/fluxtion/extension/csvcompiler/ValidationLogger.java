@@ -30,13 +30,11 @@ public interface ValidationLogger {
 
     ValidationLogger CONSOLE = new ValidationLogger() {
         public void logFatal(CsvProcessingException csvProcessingException) {
-            System.out.print(csvProcessingException.getMessage()
-                    + " line:" + csvProcessingException.getLineNumber());
+            System.out.println(csvProcessingException.getMessage());
         }
 
         public void logException(CsvProcessingException csvProcessingException) {
-            System.out.print(csvProcessingException.getMessage()
-                    + " line:" + csvProcessingException.getLineNumber());
+            System.out.println(csvProcessingException.getMessage());
         }
     };
 

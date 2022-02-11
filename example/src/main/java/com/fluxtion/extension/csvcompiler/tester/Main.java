@@ -1,39 +1,48 @@
 package com.fluxtion.extension.csvcompiler.tester;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
-import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.ValidationLogger;
+import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import lombok.ToString;
 
 import java.io.StringReader;
-import java.util.ServiceLoader;
-
-import static java.util.ServiceLoader.load;
 
 public class Main {
 
     public static void main(String[] args) {
         RowMarshaller.load(Person.class)
                 .setErrorLog(ValidationLogger.CONSOLE)
-                .forEach(System.out::println, new StringReader("name,age\n" +
-                                                              "Linda Smith,43\n" +
-                                                              "Soren Miller,33\n" +
-                                                              "fred,not a number\n"
-                ));
+                .stream("name,age\n" +
+                        "Linda Smith,43\n" +
+                        "Soren Miller,33\n" +
+                        "fred,not a number\n")
+                .peek(System.out::println)
+                .mapToInt(Person::getAge)
+                .max()
+                .ifPresent(i -> System.out.println("Max age:" + i));
     }
 
+    @ToString
+    @CsvMarshaller(formatSource = true)
+    public static class Person {
 
-    static String findConverterClass(String converterId){
-        System.out.println("looking for:" + converterId);
-        return load(FieldConverter.class).stream()
-                .peek(System.out::println)
-                .map(ServiceLoader.Provider::get)
-                .filter(f -> f.getName().equals(converterId))
-                .peek(System.out::println)
-                .map(FieldConverter::getClass)
-                .map(Class::getCanonicalName)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("No converter registered with " +
-                        "ServiceLoader under the name:" + converterId));
+        private String name;
+        private int age;
 
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
     }
 }

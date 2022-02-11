@@ -22,6 +22,7 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
@@ -38,6 +39,10 @@ public interface RowMarshaller<T> {
     RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
 
     Stream<T> stream(Reader in);
+
+    default Stream<T> stream(String in){
+        return stream(new StringReader(in));
+    }
 
     void forEach(Consumer<T> consumer, Reader in);
 

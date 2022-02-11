@@ -75,25 +75,26 @@ public class Person {
 Load CSV marshaller for the bean, set error listener, stream from a reader and push records to a consumer.
 ```java
 public class Main {
-    
+
     public static void main(String[] args) {
-        CsvMarshallerLoader.marshaller(Person.class)
+        RowMarshaller.load(Person.class)
                 .setErrorLog(ValidationLogger.CONSOLE)
-                .stream(System.out::println, new StringReader("""
-                        name,age
-                        Linda Smith,33
-                        Soren Miller,33
-                        fred,not a number
-                        """
-                ));
+                .stream("name,age\n" +
+                        "Linda Smith,43\n" +
+                        "Soren Miller,33\n" +
+                        "fred,not a number\n")
+                .peek(System.out::println)
+                .mapToInt(Person::getAge)
+                .max()
+                .ifPresent(i -> System.out.println("Max age:" + i));
     }
 }
 ```
 Running the application outputs:
 ```text
-
-Person(name=Linda Smith, age=33)
-Person(name=Soren Miller, age=33)
-validation exception:Person problem pushing 'not a number' from row:'4' fieldIndex:'1' targetMethod:'Person#setAge' error:'java.lang.NumberFormatException: For input string: "not a number"'
+Main.Person(name=Linda Smith, age=43)
+Main.Person(name=Soren Miller, age=33)
+Person problem pushing 'not a number' from row:'4' fieldIndex:'1' targetMethod:'Person#setAge' error:'java.lang.NumberFormatException: For input string: "not a number"'
+Max age:43
 ```
 
