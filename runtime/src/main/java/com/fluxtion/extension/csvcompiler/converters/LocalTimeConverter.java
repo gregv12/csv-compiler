@@ -26,17 +26,11 @@ import java.time.format.DateTimeFormatter;
 
 public class LocalTimeConverter implements FieldConverter<LocalTime> {
 
-    public static final String ID = "localTimeConverter";
     private DateTimeFormatter timeFormatter  = DateTimeFormatter.ISO_LOCAL_TIME;
 
     @Override
     public LocalTime fromCharSequence(CharSequence charSequence) {
         return  LocalTime.parse(charSequence, timeFormatter);
-    }
-
-    @Override
-    public String getName() {
-        return ID;
     }
 
     @Override
