@@ -16,16 +16,7 @@ even greater as byte code generation optimisation that many dynamic parsers empl
 
 If reducing costs and emissions are important to you please consider using or help improve CVS compiler.
 
-## Example
-A marshaller example is available [here](), steps to process a CSV source:
-1. Add CVS compiler dependencies to you project. 
-2. Create a java bean with getters and setter for persistent properties 
-3. Add a ```@CSVMarshaller``` annotation to the java bean source file
-4. Load marshaller using ```CsvMarshallerLoader.marshaller([Bean.class])```
-5. Optionally supply an error listener to handle any marshalling errors. ```.setErrorLog(ValidationLogger.CONSOLE)```
-6. Stream from a reader to the marshaller add a consumer that will process marshalled instances ```.stream(Consumer<[Bean.class]>, [Reader])```
-
-### Dependencies
+## Dependencies
 - The annotation processor: used during compile time to generate the custom marshaller, not required in runtime operation. 
 Use provided scope
 - CSV compiler runtime: small library that provides efficient marshalling and interface definitions
@@ -43,6 +34,8 @@ Use provided scope
     <scope>provided</scope>
 </dependency>
 ```
+## Example
+This example converts csv -> bean -> process each bean record in a java stream. The example is available [here]()
 
 ### Code
 Mark a java bean with annotation ```@CSVMarshaller```
@@ -72,7 +65,7 @@ public class Person {
 }
 ```
 
-Load CSV marshaller for the bean, set error listener, stream from a reader and push records to a consumer.
+Load CSV marshaller for the bean, set error listener, stream from a reader or String and push records to a consumer.
 ```java
 public class Main {
 
@@ -90,11 +83,21 @@ public class Main {
     }
 }
 ```
-Running the application outputs:
+
+Application execution output:
 ```text
 Main.Person(name=Linda Smith, age=43)
 Main.Person(name=Soren Miller, age=33)
 Person problem pushing 'not a number' from row:'4' fieldIndex:'1' targetMethod:'Person#setAge' error:'java.lang.NumberFormatException: For input string: "not a number"'
 Max age:43
 ```
+
+steps to process a CSV source:
+1. Add CVS compiler dependencies to you project.
+2. Create a java bean with getters and setter for persistent properties
+3. Add a ```@CSVMarshaller``` annotation to the java bean source file
+4. Load marshaller using ```CsvMarshallerLoader.marshaller([Bean.class])```
+5. Optionally supply an error listener to handle any marshalling errors. ```.setErrorLog(ValidationLogger.CONSOLE)```
+6. Stream from a reader to the marshaller add a consumer that will process marshalled instances ```.stream(Consumer<[Bean.class]>, [Reader])```
+
 
