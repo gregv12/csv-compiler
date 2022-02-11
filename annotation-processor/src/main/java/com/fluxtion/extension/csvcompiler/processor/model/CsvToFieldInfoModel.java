@@ -48,8 +48,15 @@ public interface CsvToFieldInfoModel {
     String getConvertConfiguration();
 
     default boolean isConverterApplied() {
-        return getConverterClassName() != null && !getConverterClassName().isBlank();
+        return getConverterClassName() != null && !getConverterClassName().isBlank() && getConverterClassName().length()>0;
     }
 
+    String getLookupField();
+
+    String getLookupKey();
+
+    default boolean isLookupApplied() {
+        return getLookupKey() != null && !getLookupKey().isBlank();
+    }
 
 }

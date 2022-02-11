@@ -59,6 +59,8 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     private Object defaultInstance;
     //validator
     private String validatorMethod;
+    //lookup
+    private String lookupKey;
 
     public void setSourceColIndex(int colIndex) {
         this.fieldIndex = colIndex;
@@ -97,10 +99,17 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     }
 
     public void setConverter(String converterClass, String convertConfiguration) {
-        this.converterInstanceId = getFieldIdentifier() + "Converter";
-        this.converterMethod = converterInstanceId + ".fromCharSequence";
-        this.converterClassName = converterClass;
-        this.convertConfiguration = convertConfiguration==null?"":convertConfiguration;
+        if(converterClass==null || converterClass.isBlank()){
+        }else{
+            this.converterInstanceId = getFieldIdentifier() + "Converter";
+            this.converterMethod = converterInstanceId + ".fromCharSequence";
+            this.converterClassName = converterClass;
+            this.convertConfiguration = convertConfiguration==null?"":convertConfiguration;
+        }
+    }
+
+    public String getLookupField(){
+        return "lookup_" + getFieldName();
     }
 
     public void setDefaultValue(String defaultValue) {
@@ -130,7 +139,9 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         }
         String conversion = defaultMethodCalc;
         boolean addConversion = true;
-
+        if(isLookupApplied()){
+            defaultMethodCalc = getLookupField() + ".apply(" + defaultMethodCalc + ")";
+        }
         if (converterMethod != null) {
             addConversion = false;
             conversion = converterMethod + "(" + defaultMethodCalc + ")";

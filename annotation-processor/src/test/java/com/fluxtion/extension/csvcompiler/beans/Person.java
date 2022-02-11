@@ -164,7 +164,7 @@ public class Person {
     @CsvMarshaller(formatSource = true)
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    public static class ConverterFiled extends Person {
+    public static class ConverterFlled extends Person {
 
         @DataMapping(converter = LocalTimeConverter.class, configuration = "HH:mm")
         private LocalTime birthTime;
@@ -179,5 +179,14 @@ public class Person {
         public void setBirthTime(LocalTime birthTime) {
             this.birthTime = birthTime;
         }
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class Lookup extends Person {
+
+        public static final String AGE_LOOKUP = "age";
+
+        @DataMapping(lookupName = AGE_LOOKUP)
+        private int age;
     }
 }

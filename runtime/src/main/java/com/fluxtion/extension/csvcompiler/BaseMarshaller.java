@@ -233,6 +233,12 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         errorLog.logException(csvProcessingException);
     }
 
+    private static <T> T requireNonNull(T obj, String message) {
+        if (obj == null)
+            throw new NullPointerException(message);
+        return obj;
+    }
+
     class MyIterator implements Iterator<T>{
 
         private final Reader in;

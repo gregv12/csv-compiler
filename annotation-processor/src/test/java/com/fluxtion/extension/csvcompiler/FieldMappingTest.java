@@ -116,12 +116,12 @@ public class FieldMappingTest {
 
     @Test
     public void converterFields(){
-        Person.ConverterFiled converted = new Person.ConverterFiled();
+        Person.ConverterFlled converted = new Person.ConverterFlled();
         converted.setAge(44);
         converted.setName("ALWAYS_LINDA");
         converted.setBirthTime(LocalTime.of(12,34));
         testPerson(
-                Person.ConverterFiled.class,
+                Person.ConverterFlled.class,
                 "name,age,birthTime\n" +
                 "lisa,44,12:34\n",
                 converted

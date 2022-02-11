@@ -23,6 +23,7 @@ import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
 import com.fluxtion.extension.csvcompiler.beans.Person.MultipleHeaderLines;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -196,6 +197,19 @@ public class SuccessfulMarshallerTest {
                 Person.build(Person.PostProcess::new, "TIM", 32),
                 Person.build(Person.PostProcess::new, "LISA", 44)
         );
+    }
+
+    @Test
+    public void lookupFieldTest() {
+        String input = "name,age\n" +
+                "tim,32\n" +
+                "lisa,44\n";
+        int sum = RowMarshaller.load(Person.Lookup.class)
+                .addLookup(Person.Lookup.AGE_LOOKUP, s -> "40")
+                .stream(new StringReader(input))
+                .mapToInt(Person::getAge)
+                .sum();
+        Assertions.assertEquals(80, sum);
     }
 
     @Test

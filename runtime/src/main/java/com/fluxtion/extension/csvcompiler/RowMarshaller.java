@@ -47,6 +47,10 @@ public interface RowMarshaller<T> {
 
     RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
 
+    default RowMarshaller<T> addLookup(String lookupName, Function<CharSequence, CharSequence> lookup) {
+        throw new IllegalArgumentException("cannot find lookup with name:" + lookup);
+    }
+
     static <T> RowMarshaller<T> load(Class<T> clazz) {
         return ServiceLoader.load(RowMarshaller.class).stream()
                 .map(Provider::get)

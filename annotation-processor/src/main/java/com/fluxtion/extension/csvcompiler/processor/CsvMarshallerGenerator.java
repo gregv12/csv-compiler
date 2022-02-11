@@ -19,6 +19,7 @@
 
 package com.fluxtion.extension.csvcompiler.processor;
 
+import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
@@ -108,7 +109,7 @@ public class CsvMarshallerGenerator implements Processor {
         setMarshallerOptions(csvMetaModel, typeElement);
         csvMetaModel.buildModel();
         //apply field customisations
-        processingEnv.getElementUtils().getAllMembers(typeElement).stream().forEach(e -> {
+        processingEnv.getElementUtils().getAllMembers(typeElement).forEach(e -> {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             Name variableName = e.getSimpleName();
             if (columnMapping != null) {
@@ -128,15 +129,19 @@ public class CsvMarshallerGenerator implements Processor {
             }
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
-            if (dataMapping != null){// && dataMapping.converter()!=FieldConverter.NULL.class) {
-                List<? extends TypeMirror> types = getTypeMirrorFromAnnotationValue(() -> dataMapping.converter());
-                TypeMirror typeMirror = types.get(0);
-                Types TypeUtils = this.processingEnv.getTypeUtils();
-                TypeElement typeElement1 = (TypeElement) TypeUtils.asElement(typeMirror);
-                PackageElement packageOfConverter = processingEnv.getElementUtils().getPackageOf(typeElement1);
-                String fqnConverter = packageOfConverter.getQualifiedName() + "." + typeElement1.getSimpleName();
-                String format = dataMapping.configuration();
-                csvMetaModel.setFieldConverter(variableName.toString(), fqnConverter, format);
+            if (dataMapping != null){
+                    List<? extends TypeMirror> types = getTypeMirrorFromAnnotationValue(dataMapping::converter);
+                    TypeMirror typeMirror = types.get(0);
+                    Types TypeUtils = this.processingEnv.getTypeUtils();
+                    TypeElement typeElement1 = (TypeElement) TypeUtils.asElement(typeMirror);
+                    String fqnConverter = typeElement1.getQualifiedName().toString();
+                    if(!fqnConverter.equalsIgnoreCase(FieldConverter.NULL.class.getCanonicalName())){
+                        String format = dataMapping.configuration();
+                        csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), format);
+                    }
+                    if(!dataMapping.lookupName().isBlank()){
+                        csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
+                    }
             }
         });
 

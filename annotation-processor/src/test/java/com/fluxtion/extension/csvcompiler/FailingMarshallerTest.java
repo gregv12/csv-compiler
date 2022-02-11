@@ -23,6 +23,7 @@ import com.fluxtion.extension.csvcompiler.beans.Person;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
 import java.util.List;
 
 import static com.fluxtion.extension.csvcompiler.SuccessfulMarshallerTest.testPersonErrors;
@@ -37,7 +38,7 @@ public class FailingMarshallerTest {
                         "tim,sfgdg\n" +
                         "lisa,44\n" +
                         "lisa,fddg\n",
-                List.of(2,4),
+                List.of(2, 4),
                 Person.build(Person::new, "lisa", 44)
         );
     }
@@ -66,5 +67,18 @@ public class FailingMarshallerTest {
                         "lisa\n",
                 List.of(2)
         ));
+    }
+
+    @Test
+    public void missingLookupTest() {
+        String input = "name,age\n" +
+                "tim,32\n" +
+                "lisa,44\n";
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+                RowMarshaller.load(Person.Lookup.class)
+                        .addLookup("missing lookup key", s -> "40")
+                        .stream(new StringReader(input))
+                        .mapToInt(Person::getAge)
+                        .sum());
     }
 }

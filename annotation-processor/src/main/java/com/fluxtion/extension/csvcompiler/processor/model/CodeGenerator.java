@@ -103,7 +103,32 @@ public class CodeGenerator {
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(CsvToFieldInfoModel::isConverterApplied)
                         .map(s -> "private final " + s.getConverterClassName() + " " + s.getConverterInstanceId() + " = new " + s.getConverterClassName() + "();")
-                        .collect(Collectors.joining("\n"));
+                        .collect(Collectors.joining("\n","", ""));
+        options +=
+                codeGeneratorModel.fieldInfoList().stream()
+                        .filter(CsvToFieldInfoModel::isLookupApplied)
+                        .map(s -> "private Function<CharSequence, CharSequence> " + s.getLookupField() + " = Function.identity();")
+                        .collect(Collectors.joining("\n","", "\n"));
+        return options;
+    }
+
+    private static String buildLookup(CodeGeneratorModel codeGeneratorModel){
+        String options = "";
+        if(codeGeneratorModel.fieldInfoList().stream().anyMatch(CsvToFieldInfoModel::isLookupApplied)){
+            options = "public " + codeGeneratorModel.getMarshallerClassName() + " addLookup(String lookupName, Function<CharSequence, CharSequence> lookup){\n" +
+                    "        switch(lookupName){\n";
+            options +=
+                    codeGeneratorModel.fieldInfoList().stream()
+                            .filter(CsvToFieldInfoModel::isLookupApplied)
+                            .map(s -> "    case  \"" +  s.getLookupKey() + "\":\n\t" + s.getLookupField() + " = lookup;\nbreak;")
+                            .collect(Collectors.joining("\n","", "\n"));
+
+            options += "         default:\n" +
+                    "                throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+                    "        }\n" +
+                    "        return this;" +
+                    "    }";
+        }
         return options;
     }
 
@@ -113,6 +138,7 @@ public class CodeGenerator {
         options += processEscapeSequenceMethod(codeGeneratorModel);
         options += processRowMethod(codeGeneratorModel);
         options += updateTargetMethod(codeGeneratorModel);
+        options += buildLookup(codeGeneratorModel);
         options += mapHeaderMethod(codeGeneratorModel);
         return options;
     }
