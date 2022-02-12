@@ -46,14 +46,14 @@ public class FailingMarshallerTest {
     @Test
     public void noSkipCsvMarshallerEmptyLines() {
         testPersonErrors(
-                Person.NoSkip.class,
+                Person.class,
                 "name,age\n" +
                         "tim,32\n" +
                         "\n" +
                         "lisa,44\n",
                 List.of(3),
-                Person.build(Person.NoSkip::new, "tim", 32),
-                Person.build(Person.NoSkip::new, "lisa", 44)
+                Person.build(Person::new, "tim", 32),
+                Person.build(Person::new, "lisa", 44)
         );
     }
 

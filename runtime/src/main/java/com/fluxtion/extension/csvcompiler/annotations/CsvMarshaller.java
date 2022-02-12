@@ -62,7 +62,7 @@ public @interface CsvMarshaller {
      *
      * @return ignore empty lines
      */
-    boolean skipEmptyLines() default true;
+    boolean skipEmptyLines() default false;
 
     /**
      * The line ending character for the input file. default is '\n'

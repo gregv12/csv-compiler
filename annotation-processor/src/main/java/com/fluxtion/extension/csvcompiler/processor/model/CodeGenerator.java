@@ -111,25 +111,25 @@ public class CodeGenerator {
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(CsvToFieldInfoModel::isConverterApplied)
                         .map(s -> "private final " + s.getConverterClassName() + " " + s.getConverterInstanceId() + " = new " + s.getConverterClassName() + "();")
-                        .collect(Collectors.joining("\n","", ""));
+                        .collect(Collectors.joining("\n", "", ""));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(CsvToFieldInfoModel::isLookupApplied)
                         .map(s -> "private Function<CharSequence, CharSequence> " + s.getLookupField() + " = Function.identity();")
-                        .collect(Collectors.joining("\n","", "\n"));
+                        .collect(Collectors.joining("\n", "", "\n"));
         return options;
     }
 
-    private static String buildLookup(CodeGeneratorModel codeGeneratorModel){
+    private static String buildLookup(CodeGeneratorModel codeGeneratorModel) {
         String options = "";
-        if(codeGeneratorModel.fieldInfoList().stream().anyMatch(CsvToFieldInfoModel::isLookupApplied)){
+        if (codeGeneratorModel.fieldInfoList().stream().anyMatch(CsvToFieldInfoModel::isLookupApplied)) {
             options = "public " + codeGeneratorModel.getMarshallerClassName() + " addLookup(String lookupName, Function<CharSequence, CharSequence> lookup){\n" +
                     "        switch(lookupName){\n";
             options +=
                     codeGeneratorModel.fieldInfoList().stream()
                             .filter(CsvToFieldInfoModel::isLookupApplied)
-                            .map(s -> "    case  \"" +  s.getLookupKey() + "\":\n\t" + s.getLookupField() + " = lookup;\nbreak;")
-                            .collect(Collectors.joining("\n","", "\n"));
+                            .map(s -> "    case  \"" + s.getLookupKey() + "\":\n\t" + s.getLookupField() + " = lookup;\nbreak;")
+                            .collect(Collectors.joining("\n", "", "\n"));
 
             options += "         default:\n" +
                     "                throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
@@ -169,11 +169,8 @@ public class CodeGenerator {
 
     @NotNull
     private static String charEventMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = String.format("    public boolean charEvent(char character) {\n" +
-                "        passedValidation = true;\n" +
-                "        if(character == '%s'){\n" +
-                "            return false;\n" +
-                "        }\n", StringEscapeUtils.escapeJava(codeGeneratorModel.getIgnoreCharacter() + ""));
+        String options = "    public boolean charEvent(char character) {\n" +
+                "        passedValidation = true;\n";
         if (codeGeneratorModel.isIgnoreQuotes()) {
             options += "    if(character == '\\\"'){\n" +
                     "        return false;\n" +
@@ -188,15 +185,26 @@ public class CodeGenerator {
                     "        return false;\n" +
                     "    }\n";
         }
-        options += String.format("        if (character == '%s') {\n" +
-                "            return processRow();\n" +
-                "        }\n" +
-                "        if (character == '%c') {\n" +
-                "            updateFieldIndex();\n" +
-                "        }\n" +
-                "        chars[writeIndex++] = character;\n" +
-                "        return false;\n" +
-                "    }\n", StringEscapeUtils.escapeJava(codeGeneratorModel.getNewLineCharacter() + ""), codeGeneratorModel.getDelimiter());
+        options += String.format(
+                "        if(character == '\\r'){\n" +
+                        "            previousChar = character;\n" +
+                        "            return processRow();\n" +
+                        "        }\n" +
+                        "        if (character == '\\n' & previousChar != '\\r') {\n" +
+                        "            previousChar = character;\n" +
+                        "            return processRow();\n" +
+                        "        }\n" +
+                        "        if(character == '\\n'){\n" +
+                        "            previousChar = character;\n" +
+                        "            return false;\n" +
+                        "        }\n" +
+                        "        previousChar = character;\n" +
+                        "        if (character == '%c') {\n" +
+                        "            updateFieldIndex();\n" +
+                        "        }\n" +
+                        "        chars[writeIndex++] = character;\n" +
+                        "        return false;\n" +
+                        "    }\n", codeGeneratorModel.getDelimiter());
         return options;
     }
 
@@ -247,7 +255,7 @@ public class CodeGenerator {
                     "        logProblem(\"empty lines are not valid input\");\n" +
                     "        writeIndex = 0;\n" +
                     "        fieldIndex = 0;\n" +
-                    "        return targetChanged;\n" +
+                    (codeGeneratorModel.isAcceptPartials() ? "" : "        return targetChanged;\n") +
                     "    }\n";
         }
         if (codeGeneratorModel.isHeaderPresent()) {

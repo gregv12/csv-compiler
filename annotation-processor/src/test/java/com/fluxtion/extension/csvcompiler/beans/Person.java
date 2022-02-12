@@ -71,8 +71,8 @@ public class Person {
         this.age = age;
     }
 
-    @CsvMarshaller(skipEmptyLines = false, formatSource = true)
-    public static class NoSkip extends Person {
+    @CsvMarshaller(skipEmptyLines = true, formatSource = true)
+    public static class SkipEmptyLines extends Person {
     }
 
     @CsvMarshaller(headerLines = 3, mappingRow = 2, formatSource = true)

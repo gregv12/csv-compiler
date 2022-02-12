@@ -24,24 +24,24 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-//@CsvMarshaller(
-//        formatSource = true,
-//        mappingRow = 0,
-//        headerLines = 0,
-//        acceptPartials = true,
-//        processEscapeSequences = true,
-//        ignoredChar = '\0'
-//)
+@CsvMarshaller(
+        formatSource = true,
+        mappingRow = 0,
+        headerLines = 0,
+        acceptPartials = true,
+        processEscapeSequences = true,
+        ignoredChar = '\0'
+)
 @EqualsAndHashCode
 @ToString
 public class StringsOnly {
 
 
-//    @ColumnMapping(columnIndex = 0)
+    @ColumnMapping(columnIndex = 0)
     private String field1;
-//    @ColumnMapping(columnIndex = 1)
+    @ColumnMapping(columnIndex = 1)
     private String field2;
-//    @ColumnMapping(columnIndex = 2)
+    @ColumnMapping(columnIndex = 2)
     private String field3;
 
     public StringsOnly() {
@@ -84,5 +84,68 @@ public class StringsOnly {
 
     public void setField3(String field3) {
         this.field3 = field3;
+    }
+
+    @CsvMarshaller(
+            formatSource = true,
+            mappingRow = 0,
+            headerLines = 0,
+            acceptPartials = true,
+            processEscapeSequences = true,
+            ignoredChar = '\0',
+            skipEmptyLines = true
+    )
+    @EqualsAndHashCode
+    @ToString
+    public static class SkipEmptyLines {
+
+        @ColumnMapping(columnIndex = 0)
+        private String field1;
+        @ColumnMapping(columnIndex = 1)
+        private String field2;
+        @ColumnMapping(columnIndex = 2)
+        private String field3;
+
+        public SkipEmptyLines() {
+        }
+
+        public SkipEmptyLines(String field1) {
+            this.field1 = field1;
+        }
+
+        public SkipEmptyLines(String field1, String field2) {
+            this.field1 = field1;
+            this.field2 = field2;
+        }
+
+        public SkipEmptyLines(String field1, String field2, String field3) {
+            this.field1 = field1;
+            this.field2 = field2;
+            this.field3 = field3;
+        }
+
+        public String getField1() {
+            return field1;
+        }
+
+        public void setField1(String field1) {
+            this.field1 = field1;
+        }
+
+        public String getField2() {
+            return field2;
+        }
+
+        public void setField2(String field2) {
+            this.field2 = field2;
+        }
+
+        public String getField3() {
+            return field3;
+        }
+
+        public void setField3(String field3) {
+            this.field3 = field3;
+        }
     }
 }

@@ -93,11 +93,139 @@ public class PartialsTest {
      */
     @Test
     public void newLineFeed(){
+        assertGoodParse("A\nB", new StringsOnly("A"), new StringsOnly("B"));
+        assertGoodParse("D\n", new StringsOnly("D"));
+        assertGoodParse("\nD", new StringsOnly(""), new StringsOnly("D"));
+        assertGoodParseSkip("\nD", new StringsOnly.SkipEmptyLines("D"));
+    }
 
+
+    /**
+     * Newlines with Carriage-Return (Legacy Mac)
+     * A␍B                     A⏎B
+     * D␍                      D
+     * ␍D                      ◯⏎D
+     * ␍D                      D           [skipEmptyLines]
+     */
+    @Test
+    public void LegacyMacLfTest(){
+        assertGoodParse("A\rB", new StringsOnly("A"), new StringsOnly("B"));
+        assertGoodParse("D\r", new StringsOnly("D"));
+        assertGoodParse("\rD", new StringsOnly(""), new StringsOnly("D"));
+        assertGoodParseSkip("\rD", new StringsOnly.SkipEmptyLines("D"));
+    }
+    /**
+     * Newlines with Linefeed and Carriage-Return (Windows)
+     * A␍␊B                    A⏎B
+     * D␍␊                     D
+     * ␍␊D                     ◯⏎D
+     * ␍␊D                     D           [skipEmptyLines]
+     */
+    @Test
+    public void windowsCrLfTest(){
+        assertGoodParse("A\r\nB", new StringsOnly("A"), new StringsOnly("B"));
+        assertGoodParse("D\r\n", new StringsOnly("D"));
+        assertGoodParse("\r\nD", new StringsOnly(""), new StringsOnly("D"));
+        assertGoodParseSkip("\r\nD", new StringsOnly.SkipEmptyLines("D"));
+    }
+
+    /**
+     * Quotation
+     * "␣D␣"                   ␣D␣
+     * "D"                     D
+     * "D",D                   D↷D
+     * D,"D"                   D↷D
+     */
+    @Test
+    public void quotationTest(){
+        assertGoodParse("\" D \"", new StringsOnly(" D "));
+        assertGoodParse("\"D\"", new StringsOnly("D"));
+        assertGoodParse("\"D\",D", new StringsOnly("D", "D"));
+        assertGoodParse("D,\"D\"", new StringsOnly("D", "D"));
+    }
+
+    /**
+     * Open Quotation
+     * A,"B                    A↷B
+     * A,B"                    A↷B"
+     * "A,B                    A,B
+     */
+    @Test
+    public void openQuotationTest(){
+        assertGoodParse("A,\"B", new StringsOnly("A", "B"));
+        assertGoodParse("A,B\"", new StringsOnly("A", "B"));//TODO change this test
+        assertGoodParse("\"A,B", new StringsOnly("A,B"));
+    }
+
+    /**
+     * # Escape Quotation
+     * """D"                   "D
+     * "D"""                   D"
+     * "A""B"                  A"B
+     */
+    @Test
+    public void escapedQuotationTest(){
+        assertGoodParse("\"\"\"D\"", new StringsOnly("\"D"));
+        assertGoodParse("\"D\"\"\"", new StringsOnly("D\""));
+        assertGoodParse("\"A\"\"B\"", new StringsOnly("A\"B"));
+    }
+
+    /**
+     * # Multiline
+     * "A␊B"                   A␊B
+     * "A␍B"                   A␍B
+     * "A␍␊B"                  A␍␊B
+     */
+    @Test
+    public void multilineQuotationTest(){
+        assertGoodParse("\"A\nB\"", new StringsOnly("A\nB"));
+        assertGoodParse("\"A\rB\"", new StringsOnly("A\rB"));
+        assertGoodParse("\"A\r\nB\"", new StringsOnly("A\r\nB"));
+    }
+
+    /**
+     * # Different column count
+     * A␊B,C                   A⏎B↷C
+     * A,B␊C                   A↷B⏎C
+     */
+    @Test
+    public void differentColumnCountTest(){
+        assertGoodParse("A\nB,C", new StringsOnly("A"), new StringsOnly("B","C"));
+        assertGoodParse("A,B\nC", new StringsOnly("A", "B"), new StringsOnly("C"));
+    }
+
+    /**
+     * ### NON RFC CONFORMING DATA ###
+     *
+     * "D"␣                    D␣
+     * "A,B"␣                  A,B␣
+     * ␣"D"                    ␣"D"
+     * ␣"D"␣                   ␣"D"␣
+     * "D"z                    Dz
+     * "A,B"z                  A,Bz
+     * z"D"                    z"D"
+     * z"A,B"                  z"A↷B"
+     * z"D"z                   z"D"z
+     */
+
+    @Test
+    public void nonRfcConformingDataTest(){
+        assertGoodParse("\"D\" ", new StringsOnly("D "));
+        assertGoodParse("\"A,B\" ", new StringsOnly("A,B "));
+        //assertGoodParse(" \"D\"", new StringsOnly(" \"D\"")); TODO decide whether to support
+        //assertGoodParse(" \"D\" ", new StringsOnly(" \"D\" ")); TODO decide whether to support
+        assertGoodParse("\"D\"z", new StringsOnly("Dz"));
+        assertGoodParse("\"A,B\"z", new StringsOnly("A,Bz"));
+        //check  last three tests
     }
 
     static void assertGoodParse(String input, StringsOnly... expected){
         List<StringsOnly> results = RowMarshaller.load(StringsOnly.class).stream(input).collect(Collectors.toList());
         Assertions.assertIterableEquals( Arrays.asList(expected), results, "contents differ for input:" + input);
+    }
+
+    static void assertGoodParseSkip(String input, StringsOnly.SkipEmptyLines... expected){
+        List<StringsOnly.SkipEmptyLines> results = RowMarshaller.load(StringsOnly.SkipEmptyLines.class).stream(input).collect(Collectors.toList());
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "contents differ for input:'" + input + "'");
     }
 }

@@ -49,6 +49,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected BiConsumer<T, ValidationResultStore> validator;
     protected boolean failedValidation;
     protected Function<String, String> headerTransformer = Function.identity();
+    protected char previousChar = '\0';
     private boolean foundRecord;
 
     protected BaseMarshaller(boolean failOnError) {

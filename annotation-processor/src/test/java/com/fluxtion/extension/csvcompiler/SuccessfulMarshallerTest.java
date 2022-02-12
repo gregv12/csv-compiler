@@ -46,7 +46,6 @@ public class SuccessfulMarshallerTest {
                 Person.class,
                 "name,age\n" +
                 "tim,32\n" +
-                "\n" +
                 "lisa,44\n",
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "lisa", 44)
@@ -66,12 +65,11 @@ public class SuccessfulMarshallerTest {
     }
 
     @Test
-    public void unixLineEndingTest() {
+    public void oldMacLineEndingTest() {
         testPerson(
                 Person.UnixLineEnding.class,
                 "name,age\r" +
                 "tim,32\r" +
-                "\r" +
                 "lisa,44\r",
                 Person.build(Person.UnixLineEnding::new, "tim", 32),
                 Person.build(Person.UnixLineEnding::new, "lisa", 44)
@@ -86,7 +84,6 @@ public class SuccessfulMarshallerTest {
                         "name,age\n" +
                         "YYYYY\n" +
                         "tim,32\n" +
-                        "\n" +
                         "lisa,44\n",
                 Person.build(MultipleHeaderLines::new, "tim", 32),
                 Person.build(MultipleHeaderLines::new, "lisa", 44)
@@ -96,13 +93,13 @@ public class SuccessfulMarshallerTest {
     @Test
     public void validateCanSkipEmptyLines() {
         testPerson(
-                Person.class,
+                Person.SkipEmptyLines.class,
                 "name,age\n" +
                 "tim,32\n" +
                 "\n" +
                 "lisa,44\n",
-                Person.build(Person::new, "tim", 32),
-                Person.build(Person::new, "lisa", 44)
+                Person.build(Person.SkipEmptyLines::new, "tim", 32),
+                Person.build(Person.SkipEmptyLines::new, "lisa", 44)
         );
     }
 
@@ -115,7 +112,6 @@ public class SuccessfulMarshallerTest {
                         "#\n" +
                         "#\n" +
                         "tim,32\n" +
-                        "\n" +
                         "lisa,44\n",
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "lisa", 44)
@@ -140,7 +136,6 @@ public class SuccessfulMarshallerTest {
                 Person.Escaped.class,
                 "name,age\n" +
                         "\"tim, smith\",32\n" +
-                        "\n" +
                         "\"\"\"lisa\"\"\",44\n"
                 ,
                 Person.build(Person.Escaped::new, "tim, smith", 32),
