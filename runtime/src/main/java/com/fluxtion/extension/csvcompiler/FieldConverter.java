@@ -21,7 +21,7 @@ package com.fluxtion.extension.csvcompiler;
 
 public interface FieldConverter<T> {
 
-    static interface NULL extends FieldConverter{}
+    interface NULL<T> extends FieldConverter<T>{}
 
     T fromCharSequence(CharSequence charSequence);
 
