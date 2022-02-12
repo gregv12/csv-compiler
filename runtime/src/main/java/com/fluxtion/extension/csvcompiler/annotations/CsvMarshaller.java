@@ -65,26 +65,11 @@ public @interface CsvMarshaller {
     boolean skipEmptyLines() default false;
 
     /**
-     * The line ending character for the input file. default is '\n'
-     *
-     * @return line ending char
-     */
-    char lineEnding() default '\n';
-
-    /**
      * The field separator character, default is ','
      *
      * @return field separator
      */
     char fieldSeparator() default ',';
-
-    /**
-     * Ignore character, useful for processing windows style line endings
-     * default is '\r'
-     *
-     * @return ignore character
-     */
-    char ignoredChar() default '\r';
 
     /**
      * Ignore quotes

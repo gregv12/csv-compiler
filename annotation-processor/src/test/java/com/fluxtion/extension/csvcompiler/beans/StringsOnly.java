@@ -29,8 +29,7 @@ import lombok.ToString;
         mappingRow = 0,
         headerLines = 0,
         acceptPartials = true,
-        processEscapeSequences = true,
-        ignoredChar = '\0'
+        processEscapeSequences = true
 )
 @EqualsAndHashCode
 @ToString
@@ -92,7 +91,6 @@ public class StringsOnly {
             headerLines = 0,
             acceptPartials = true,
             processEscapeSequences = true,
-            ignoredChar = '\0',
             skipEmptyLines = true
     )
     @EqualsAndHashCode

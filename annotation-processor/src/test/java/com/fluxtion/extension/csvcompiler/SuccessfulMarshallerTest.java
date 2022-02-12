@@ -67,12 +67,12 @@ public class SuccessfulMarshallerTest {
     @Test
     public void oldMacLineEndingTest() {
         testPerson(
-                Person.UnixLineEnding.class,
+                Person.LegacyMacLineEnding.class,
                 "name,age\r" +
                 "tim,32\r" +
                 "lisa,44\r",
-                Person.build(Person.UnixLineEnding::new, "tim", 32),
-                Person.build(Person.UnixLineEnding::new, "lisa", 44)
+                Person.build(Person.LegacyMacLineEnding::new, "tim", 32),
+                Person.build(Person.LegacyMacLineEnding::new, "lisa", 44)
         );
     }
 

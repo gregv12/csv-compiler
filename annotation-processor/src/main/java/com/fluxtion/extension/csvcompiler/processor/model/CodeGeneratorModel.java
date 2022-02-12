@@ -76,8 +76,6 @@ public interface CodeGeneratorModel {
 
     boolean isProcessEscapeSequence();
 
-    char getIgnoreCharacter();
-
     boolean isIgnoreQuotes();
 
     boolean isFormatSource();
@@ -87,8 +85,6 @@ public interface CodeGeneratorModel {
     boolean isSkipEmptyLines();
 
     char getDelimiter();
-
-    char getNewLineCharacter();
 
     boolean isNewBeanPerRecord();
 

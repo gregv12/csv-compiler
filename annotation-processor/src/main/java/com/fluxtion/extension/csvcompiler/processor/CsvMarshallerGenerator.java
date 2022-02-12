@@ -212,13 +212,11 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setMappingRow(annotation.mappingRow());
         csvMetaModel.setProcessEscapeSequence(annotation.processEscapeSequences());
         csvMetaModel.setIgnoreQuotes(annotation.ignoreQuotes());
-        csvMetaModel.setIgnoreCharacter(annotation.ignoredChar());
         csvMetaModel.setFormatSource(annotation.formatSource());
         csvMetaModel.setFailOnFirstError(annotation.failOnFirstError());
         csvMetaModel.setSkipCommentLines(annotation.skipCommentLines());
         csvMetaModel.setSkipEmptyLines(annotation.skipEmptyLines());
         csvMetaModel.setDelimiter(annotation.fieldSeparator());
-        csvMetaModel.setNewLineCharacter(annotation.lineEnding());
         csvMetaModel.setNewBeanPerRecord(annotation.newBeanPerRecord());
         csvMetaModel.setAcceptPartials(annotation.acceptPartials());
         csvMetaModel.setTrim(annotation.trim());

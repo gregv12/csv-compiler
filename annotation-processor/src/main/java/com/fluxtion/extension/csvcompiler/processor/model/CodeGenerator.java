@@ -255,7 +255,7 @@ public class CodeGenerator {
                        "    }\n";
         } else {
             options += "if(writeIndex < 1){\n" +
-                       "        logProblem(\"empty lines are not valid input\");\n" +
+                       (codeGeneratorModel.isAcceptPartials() ? "" :"        logProblem(\"empty lines are not valid input\");\n") +
                        "        writeIndex = 0;\n" +
                        "        fieldIndex = 0;\n" +
                        (codeGeneratorModel.isAcceptPartials() ? "" : "        return targetChanged;\n") +

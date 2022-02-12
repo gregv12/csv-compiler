@@ -103,8 +103,8 @@ public class Person {
     public static class FailFast extends Person {
     }
 
-    @CsvMarshaller(formatSource = true, ignoredChar = '\0', lineEnding = '\r')
-    public static class UnixLineEnding extends Person {
+    @CsvMarshaller(formatSource = true)
+    public static class LegacyMacLineEnding extends Person {
     }
 
     @CsvMarshaller(formatSource = true)
