@@ -26,6 +26,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -97,7 +98,14 @@ public class CodeGenerator {
                         .collect(Collectors.joining("\n"));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
+                        .filter(Predicate.not(CsvToFieldInfoModel::isIndexField))
                         .map(s -> "private int " + s.getFieldIdentifier() + " = " + s.getFieldIndex() + ";")
+                        .collect(Collectors.joining("\n"));
+
+        options +=
+                codeGeneratorModel.fieldInfoList().stream()
+                        .filter(CsvToFieldInfoModel::isIndexField)
+                        .map(s -> "private final int " + s.getFieldIdentifier() + " = " + s.getFieldIndex() + ";")
                         .collect(Collectors.joining("\n"));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
@@ -344,7 +352,7 @@ public class CodeGenerator {
                 "        String header = new String(chars).trim().substring(0, writeIndex);\n" +
                 "        header = headerTransformer.apply(header);\n";
         options += String.format("        header = header.replace(\"\\\"\", \"\");\n" +
-                "        List<String> headers = new ArrayList();\n" +
+                "        List<String> headers = new ArrayList<>();\n" +
                 "        for (String colName : header.split(Pattern.quote(\"%c\"))) {\n" +
                 "            headers.add(getIdentifier(colName));\n" +
                 "        }\n", codeGeneratorModel.getDelimiter());

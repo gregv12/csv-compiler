@@ -86,6 +86,9 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                         break;
                     }
                 }
+                if(eof()){
+                    foundRecord = true;
+                }
             }else{
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
