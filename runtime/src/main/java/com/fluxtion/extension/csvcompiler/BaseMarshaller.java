@@ -50,6 +50,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected boolean failedValidation;
     protected Function<String, String> headerTransformer = Function.identity();
     protected char previousChar = '\0';
+    protected boolean firstCharOfField = true;
     private boolean foundRecord;
 
     protected BaseMarshaller(boolean failOnError) {
@@ -192,6 +193,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final void updateFieldIndex() {
+        firstCharOfField = true;
         fieldIndex++;
         delimiterIndex[fieldIndex] = writeIndex + 1;
     }

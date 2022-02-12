@@ -153,7 +153,7 @@ public class PartialsTest {
     @Test
     public void openQuotationTest(){
         assertGoodParse("A,\"B", new StringsOnly("A", "B"));
-        assertGoodParse("A,B\"", new StringsOnly("A", "B"));//TODO change this test
+        assertGoodParse("A,B\"", new StringsOnly("A", "B\""));
         assertGoodParse("\"A,B", new StringsOnly("A,B"));
     }
 
@@ -212,11 +212,14 @@ public class PartialsTest {
     public void nonRfcConformingDataTest(){
         assertGoodParse("\"D\" ", new StringsOnly("D "));
         assertGoodParse("\"A,B\" ", new StringsOnly("A,B "));
-        //assertGoodParse(" \"D\"", new StringsOnly(" \"D\"")); TODO decide whether to support
-        //assertGoodParse(" \"D\" ", new StringsOnly(" \"D\" ")); TODO decide whether to support
+        assertGoodParse(" \"D\"", new StringsOnly(" \"D\""));
+        assertGoodParse(" \"D\" ", new StringsOnly(" \"D\" "));
         assertGoodParse("\"D\"z", new StringsOnly("Dz"));
         assertGoodParse("\"A,B\"z", new StringsOnly("A,Bz"));
-        //check  last three tests
+        assertGoodParse("z\"D\"", new StringsOnly("z\"D\""));
+        assertGoodParse("z\"A,B\"", new StringsOnly("z\"A","B\""));
+        assertGoodParse("z\"D\"z", new StringsOnly("z\"D\"z"));
+
     }
 
     static void assertGoodParse(String input, StringsOnly... expected){

@@ -135,10 +135,10 @@ public class SuccessfulMarshallerTest {
         testPerson(
                 Person.Escaped.class,
                 "name,age\n" +
-                        "\"tim, smith\",32\n" +
+                        "\"t, s\",32\n" +
                         "\"\"\"lisa\"\"\",44\n"
                 ,
-                Person.build(Person.Escaped::new, "tim, smith", 32),
+                Person.build(Person.Escaped::new, "t, s", 32),
                 Person.build(Person.Escaped::new, "\"lisa\"", 44)
         );
     }
