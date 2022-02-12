@@ -27,7 +27,5 @@ public interface FieldConverter<T> {
 
     default void toCharSequence(T field, Appendable target){}
 
-    String getName();
-
     default void setConversionConfiguration(String conversionConfiguration){}
 }

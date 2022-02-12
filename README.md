@@ -96,8 +96,9 @@ steps to process a CSV source:
 1. Add CVS compiler dependencies to you project.
 2. Create a java bean with getters and setter for persistent properties
 3. Add a ```@CSVMarshaller``` annotation to the java bean source file
-4. Load marshaller using ```CsvMarshallerLoader.marshaller([Bean.class])```
+4. Load marshaller using ```RowMarshaller.load([Bean.class])```
 5. Optionally supply an error listener to handle any marshalling errors. ```.setErrorLog(ValidationLogger.CONSOLE)```
-6. Stream from a reader to the marshaller add a consumer that will process marshalled instances ```.stream(Consumer<[Bean.class]>, [Reader])```
+6. Stream from a reader or a String  to the marshaller add a consumer that will process marshalled instances 
+```.stream(Consumer<[Bean.class]>, [Reader])```
 
 

@@ -23,8 +23,6 @@ import com.fluxtion.extension.csvcompiler.FieldConverter;
 
 public class ConstantStringConverter implements FieldConverter<String> {
 
-    public static final String ID = "ConstantStringConverter";
-
     private String constantString;
 
     @Override
@@ -37,8 +35,4 @@ public class ConstantStringConverter implements FieldConverter<String> {
         return constantString;
     }
 
-    @Override
-    public String getName() {
-        return ID;
-    }
 }
