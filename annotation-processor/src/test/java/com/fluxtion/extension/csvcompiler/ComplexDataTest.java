@@ -39,12 +39,9 @@ public class ComplexDataTest {
 
     @Test
     public void loadComplexData() {
-        long now = System.nanoTime();
         List<SampleData> data = RowMarshaller.load(SampleData.class).stream(data1)
 //                .peek(System.out::println)
                 .collect(Collectors.toList());
-        now = System.nanoTime() - now;
-        System.out.println("processing time:" + now/1_000_000 + "millis");
         Assertions.assertEquals(24, data.size(), "mismatch on row count");
 
         Assertions.assertEquals(
