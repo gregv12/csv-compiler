@@ -50,8 +50,9 @@ public @interface CsvMarshaller {
     boolean skipCommentLines() default true;
 
     /**
-     * process escape sequences, slows the parser down
+     * process escape sequences, slows the parser down. Makes the parser RFC4180 compliant
      *
+     * @see <a href="https://tools.ietf.org/html/rfc4180">RC4180</a>
      * @return process escape sequence flag
      */
     boolean processEscapeSequences() default false;
@@ -78,7 +79,8 @@ public @interface CsvMarshaller {
     boolean ignoreQuotes() default false;
 
     /**
-     * Process and validate records that are missing fields, default is false
+     * Process and validate records that are missing fields default is false. A missing field is a field that has no
+     * matching value for a column header or index. Only applies to the last fields in a row.
      *
      * @return validate a record with missing field
      */
