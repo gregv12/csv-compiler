@@ -19,10 +19,7 @@
 
 package com.fluxtion.extension.csvcompiler.beans;
 
-import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
-import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
-import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
+import com.fluxtion.extension.csvcompiler.annotations.*;
 import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
 import com.fluxtion.extension.csvcompiler.converters.ConstantStringConverter;
 import lombok.EqualsAndHashCode;
@@ -188,5 +185,13 @@ public class Person {
 
         @DataMapping(lookupName = AGE_LOOKUP)
         private int age;
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class Validation extends Person{
+
+        @Validator(value = "(int age) -> age > 0", errorMessage = "age must be greater 0", exitOnFailure = false)
+        private int age;
+
     }
 }

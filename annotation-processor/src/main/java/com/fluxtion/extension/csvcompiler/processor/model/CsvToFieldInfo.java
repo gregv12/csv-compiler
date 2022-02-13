@@ -39,10 +39,9 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     //Target
     private boolean targetIsEnum;
     private String targetArgType;
-    private String targetClassName;
-    private String targetCalcMethodName;
+    private String targetSetMethodName;
     private String targetInstanceId;
-    private String targetGetMethod;
+    private String targetGetMethodName;
     //mapping info
     private boolean trim = false;
     //imports
@@ -58,7 +57,11 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     private String defaultInstanceId;
     private Object defaultInstance;
     //validator
-    private String validatorMethod;
+    private ValidatorConfig validatorConfig;
+    private String validatorId;
+    private String validatorLambda;
+    private String validatorDeclaration;
+    private String validatorInvocation;
     //lookup
     private String lookupKey;
 
@@ -81,9 +84,10 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         fixedWidth = true;
     }
 
-    public void setTarget(String targetFieldMethodName, boolean targetIsEnum, String targetArgType, String id) {
+    public void setTarget(String getterMethodName, String setterMethodName, boolean targetIsEnum, String targetArgType, String id) {
         targetInstanceId = id;
-        this.targetCalcMethodName = targetFieldMethodName;
+        this.targetSetMethodName = setterMethodName;
+        this.targetGetMethodName = getterMethodName;
         this.targetIsEnum = targetIsEnum;
         this.targetArgType = targetArgType;
         getUpdateTarget();
@@ -93,27 +97,55 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         this.converterMethod = converterMethod;
     }
 
-    public void setValidator(String validatorId, String targetGetMethod) {
-        validatorMethod = validatorId;
-        this.targetGetMethod = targetGetMethod;
+    public void setValidatorConfig(ValidatorConfig validatorConfig) {
+        this.validatorId = getFieldIdentifier() + "Validator";
+        validatorLambda = validatorConfig.getLambda();
+
+        String predicate = "private java.util.function.";
+        switch (targetArgType) {
+            case "int":
+            case "short":
+            case "byte":
+                predicate += "IntPredicate ";
+                break;
+            case "float":
+            case "double":
+                predicate += "DoublePredicate ";
+                break;
+            case "long":
+                predicate += "LongPredicate ";
+            default:
+                predicate += "Predicate<" + targetArgType + "> ";
+        }
+        validatorDeclaration = predicate + validatorId + " = " + validatorLambda + ";";
+        //invocation
+        validatorInvocation =  "validate(target." + targetGetMethodName + "()" +
+                "," + getValidatorId()  +
+                ", \"" + validatorConfig.getErrorMessage() + "\"" +
+                ", " + validatorConfig.isExitOnFailure() +
+                ");\n";
+    }
+
+    public boolean isValidated() {
+        return validatorId != null;
     }
 
     public void setConverter(String converterClass, String convertConfiguration) {
-        if(converterClass==null || converterClass.isBlank()){
-        }else{
+        if (converterClass == null || converterClass.isBlank()) {
+        } else {
             this.converterInstanceId = getFieldIdentifier() + "Converter";
             this.converterMethod = converterInstanceId + ".fromCharSequence";
             this.converterClassName = converterClass;
-            this.convertConfiguration = convertConfiguration==null?"":convertConfiguration;
+            this.convertConfiguration = convertConfiguration == null ? "" : convertConfiguration;
         }
     }
 
-    public String getLookupField(){
+    public String getLookupField() {
         return "lookup_" + getFieldName();
     }
 
     public void setDefaultValue(String defaultValue) {
-        this.defaultMethod = targetCalcMethodName+ ".isEmpty()?\"" + defaultValue + "\":";
+        this.defaultMethod = targetSetMethodName + ".isEmpty()?\"" + defaultValue + "\":";
     }
 
     public boolean getMandatoryField() {
@@ -124,22 +156,14 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         return defaultMethod != null && !mandatory;
     }
 
-    public String getValidate() {
-        return validatorMethod + ".validate(" + targetInstanceId + "." + targetGetMethod + "(), validationBuffer)";
-    }
-
-    public boolean isValidated() {
-        return validatorMethod != null;
-    }
-
     public String getUpdateTarget() {
-        String defaultMethodCalc = targetCalcMethodName;
+        String defaultMethodCalc = targetSetMethodName;
         if (defaultMethod != null) {
-            defaultMethodCalc = defaultMethod + "(" + targetCalcMethodName + ")";
+            defaultMethodCalc = defaultMethod + "(" + targetSetMethodName + ")";
         }
         String conversion = defaultMethodCalc;
         boolean addConversion = true;
-        if(isLookupApplied()){
+        if (isLookupApplied()) {
             defaultMethodCalc = getLookupField() + ".apply(" + defaultMethodCalc + ")";
         }
         if (converterMethod != null) {
@@ -191,7 +215,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
             }
         }
 
-        return targetInstanceId + "." + targetCalcMethodName + "("
+        return targetInstanceId + "." + targetSetMethodName + "("
                 + conversion
                 + ");";
     }

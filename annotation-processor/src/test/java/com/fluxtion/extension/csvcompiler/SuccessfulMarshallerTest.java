@@ -281,11 +281,13 @@ public class SuccessfulMarshallerTest {
                 .setErrorLog(new ValidationLogger() {
                     @Override
                     public void logFatal(CsvProcessingException csvProcessingException) {
+//                        System.out.println(csvProcessingException);
                         errorRowsActual.add(csvProcessingException.getLineNumber());
                     }
 
                     @Override
                     public void logException(CsvProcessingException csvProcessingException) {
+//                        System.out.println(csvProcessingException);
                         errorRowsActual.add(csvProcessingException.getLineNumber());
                     }
                 })

@@ -92,30 +92,35 @@ public class CodeGenerator {
         }
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
-                        .map(CsvToFieldInfoModel::getTargetCalcMethodName)
+                        .map(CsvToFieldInfoModel::getTargetSetMethodName)
                         .map(s -> "    private final CharSequenceView " + s + " = sequence.view();")
-                        .collect(Collectors.joining("\n"));
+                        .collect(Collectors.joining("\n", "\n", ""));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(Predicate.not(CsvToFieldInfoModel::isIndexField))
                         .map(s -> "private int " + s.getFieldIdentifier() + " = " + s.getFieldIndex() + ";")
-                        .collect(Collectors.joining("\n"));
+                        .collect(Collectors.joining("\n", "\n", ""));
 
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(CsvToFieldInfoModel::isIndexField)
                         .map(s -> "private final int " + s.getFieldIdentifier() + " = " + s.getFieldIndex() + ";")
-                        .collect(Collectors.joining("\n"));
+                        .collect(Collectors.joining("\n", "\n", ""));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(CsvToFieldInfoModel::isConverterApplied)
                         .map(s -> "private final " + s.getConverterClassName() + " " + s.getConverterInstanceId() + " = new " + s.getConverterClassName() + "();")
-                        .collect(Collectors.joining("\n", "", ""));
+                        .collect(Collectors.joining("\n", "\n", ""));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .filter(CsvToFieldInfoModel::isLookupApplied)
                         .map(s -> "private Function<CharSequence, CharSequence> " + s.getLookupField() + " = Function.identity();")
-                        .collect(Collectors.joining("\n", "", "\n"));
+                        .collect(Collectors.joining("\n", "\n", ""));
+        options +=
+                codeGeneratorModel.fieldInfoList().stream()
+                        .filter(CsvToFieldInfoModel::isValidated)
+                        .map(CsvToFieldInfoModel::getValidatorDeclaration)
+                        .collect(Collectors.joining("\n", "\n", "\n"));
         return options;
     }
 
@@ -156,7 +161,7 @@ public class CodeGenerator {
                          "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
-                        .map(s -> "fieldMap.put(" + s.getFieldIdentifier() + ", \"" + s.getTargetCalcMethodName() + "\");")
+                        .map(s -> "fieldMap.put(" + s.getFieldIdentifier() + ", \"" + s.getTargetSetMethodName() + "\");")
                         .collect(Collectors.joining("\n", "", "\n"));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
@@ -284,6 +289,7 @@ public class CodeGenerator {
     private static String updateTargetMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = "\n" +
                          "private boolean updateTarget() {\n" +
+                         "    boolean publish = true;\n" +
                          "    int length = 0;\n";
         if (codeGeneratorModel.isNewBeanPerRecord()) {
             options += "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
@@ -298,9 +304,9 @@ public class CodeGenerator {
         options += codeGeneratorModel.fieldInfoList().stream()
                 .map(s -> {
                             String fieldIdentifier = s.getFieldIdentifier();
-                            String readField = s.getTargetCalcMethodName() + ".subSequenceNoOffset(delimiterIndex["
+                            String readField = s.getTargetSetMethodName() + ".subSequenceNoOffset(delimiterIndex["
                                                + s.getFieldIdentifier() + "], delimiterIndex[" + fieldIdentifier + " + 1] - 1)";
-                            String readOptionalFiled = s.getTargetCalcMethodName() + ".subSequenceNoOffset(0,0)";
+                            String readOptionalFiled = s.getTargetSetMethodName() + ".subSequenceNoOffset(0,0)";
                             final boolean fieldTrim = s.isTrim() != trim;
                             if (fieldTrim) {
                                 readField += ".trim();\n";
@@ -330,6 +336,9 @@ public class CodeGenerator {
                                                      "}\n", readField);
                             }
                             out += s.getUpdateTarget();
+                            if(s.isValidated()){
+                                out += "publish = " + s.getValidatorInvocation();
+                            }
                             if (acceptPartials) {
                                 out += "}";
                             }
@@ -350,7 +359,7 @@ public class CodeGenerator {
                    "    } finally {\n" +
                    "        fieldIndex = 0;\n" +
                    "    }\n" +
-                   "    return true;\n" +
+                   "    return publish;\n" +
                    "}\n";
         return options;
     }
@@ -372,7 +381,7 @@ public class CodeGenerator {
                 .filter(f -> !f.isIndexField())
                 .map(s -> {
                             String out = String.format("%1$s = headers.indexOf(\"%2$s\");\n" +
-                                                       "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetCalcMethodName());
+                                                       "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetSetMethodName());
                             if (s.isMandatory()) {
                                 out += String.format("    if (%s < 0) {\n" +
                                                      "        logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +

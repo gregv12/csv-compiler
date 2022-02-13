@@ -21,6 +21,8 @@ package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -64,45 +66,45 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     @Override
-    public Iterator<T> iterator(Reader in){
+    public Iterator<T> iterator(Reader in) {
         init();
         foundRecord = false;
         return new MyIterator(in);
     }
 
     @Override
-    public Stream<T> stream(Reader in){
+    public Stream<T> stream(Reader in) {
         Iterable<T> iterable = () -> iterator(in);
         Spliterator<T> spliterator = iterable.spliterator();
         return StreamSupport.stream(spliterator, false);
     }
 
-    private T next(Reader in){
+    private T next(Reader in) {
         int c;
         foundRecord = false;
         try {
-            if(validator == null){
+            if (validator == null) {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
                         foundRecord = true;
                         break;
                     }
                 }
-                if(eof()){
+                if (eof()) {
                     foundRecord = true;
                 }
-            }else{
+            } else {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
                         failedValidation = false;
                         validator.accept(target, this::logValidationProblem);
                         foundRecord = true;
-                        if(!failedValidation){
+                        if (!failedValidation) {
                             break;
                         }
                     }
                 }
-                if(eof()){
+                if (eof()) {
                     validator.accept(target, this::logValidationProblem);
                     foundRecord = true;
                 }
@@ -118,27 +120,27 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         init();
         int c;
         try {
-            if(validator == null){
+            if (validator == null) {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
                         consumer.accept(target);
                     }
                 }
-                if(eof())
+                if (eof())
                     consumer.accept(target);
-            }else{
+            } else {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
                         failedValidation = false;
                         validator.accept(target, this::logValidationProblem);
-                        if(!failedValidation){
+                        if (!failedValidation) {
                             consumer.accept(target);
                         }
                     }
                 }
-                if(eof()){
+                if (eof()) {
                     validator.accept(target, this::logValidationProblem);
-                    if(!failedValidation){
+                    if (!failedValidation) {
                         consumer.accept(target);
                     }
                 }
@@ -161,14 +163,64 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         return this;
     }
 
-    protected final void logValidationProblem(String errorMessage){
+    protected boolean validate(int value, java.util.function.IntPredicate predicate, String errorMessage, boolean failFast) {
+        if (!predicate.test(value)) {
+            logFieldValidationProblem(errorMessage + " value:'" + value + "'", failFast);
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean validate(double value, java.util.function.DoublePredicate predicate, String errorMessage, boolean failFast) {
+        if (!predicate.test(value)) {
+            logFieldValidationProblem(errorMessage + " value:'" + value + "'", failFast);
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean validate(long value, java.util.function.LongPredicate predicate, String errorMessage, boolean failFast) {
+        if (!predicate.test(value)) {
+            logFieldValidationProblem(errorMessage + " value:'" + value + "'", failFast);
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean validate(T value, java.util.function.Predicate<T> predicate, String errorMessage, boolean failFast) {
+        if (!predicate.test(value)) {
+            logFieldValidationProblem(errorMessage + " value:'" + value + "'", failFast);
+            return false;
+        }
+        return true;
+    }
+
+    protected final void logValidationProblem(String errorMessage) {
         failedValidation = true;
         String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
-        if(failOnError){
+        if (failOnError) {
             errorLog.logFatal(exception);
             throw exception;
-        }else{
+        } else {
+            errorLog.logException(exception);
+        }
+    }
+
+    protected final void logFieldValidationProblem(String errorMessage, boolean failFast) {
+        failedValidation = true;
+        String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
+
+        msg += " fieldIndex:'" +
+                fieldIndex +
+                "' targetMethod:'" + targetClass().getSimpleName() + "#" +
+                fieldMap.get(fieldIndex) + "'";
+
+        CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
+        if (failOnError || failFast) {
+            errorLog.logFatal(exception);
+            throw exception;
+        } else {
             errorLog.logException(exception);
         }
     }
@@ -245,7 +297,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         return obj;
     }
 
-    class MyIterator implements Iterator<T>{
+    class MyIterator implements Iterator<T> {
 
         private final Reader in;
 
@@ -255,7 +307,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
         @Override
         public boolean hasNext() {
-            if(!foundRecord){
+            if (!foundRecord) {
                 BaseMarshaller.this.next(in);
             }
             return foundRecord;

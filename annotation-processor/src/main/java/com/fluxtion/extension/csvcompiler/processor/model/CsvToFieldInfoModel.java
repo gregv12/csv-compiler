@@ -20,7 +20,7 @@
 package com.fluxtion.extension.csvcompiler.processor.model;
 
 public interface CsvToFieldInfoModel {
-    String getTargetCalcMethodName();
+    String getTargetSetMethodName();
 
     String getFieldIdentifier();
 
@@ -39,8 +39,6 @@ public interface CsvToFieldInfoModel {
     String getUpdateTarget();
 
     //converter
-    String getConverterMethod();
-
     String getConverterInstanceId();
 
     String getConverterClassName();
@@ -50,7 +48,13 @@ public interface CsvToFieldInfoModel {
     default boolean isConverterApplied() {
         return getConverterClassName() != null && !getConverterClassName().isBlank() && getConverterClassName().length()>0;
     }
+    //validator
+    boolean isValidated();
 
+    String getValidatorDeclaration();
+    String getValidatorInvocation();
+
+    //lookup
     String getLookupField();
 
     String getLookupKey();

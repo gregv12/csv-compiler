@@ -20,12 +20,10 @@
 package com.fluxtion.extension.csvcompiler.processor;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
-import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
-import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
-import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
+import com.fluxtion.extension.csvcompiler.annotations.*;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGenerator;
 import com.fluxtion.extension.csvcompiler.processor.model.CsvMetaModel;
+import com.fluxtion.extension.csvcompiler.processor.model.ValidatorConfig;
 import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
 import lombok.SneakyThrows;
@@ -143,6 +141,12 @@ public class CsvMarshallerGenerator implements Processor {
                         csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
                     }
             }
+
+            Validator validator = e.getAnnotation((Validator.class));
+            if(validator != null && !validator.value().isBlank()){
+                csvMetaModel.setValidator(variableName.toString(), ValidatorConfig.fromAnnotation(validator));
+            }
+
         });
 
         return csvMetaModel;

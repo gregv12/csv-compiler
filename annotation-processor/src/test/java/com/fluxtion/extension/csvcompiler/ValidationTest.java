@@ -60,4 +60,18 @@ public class ValidationTest {
         );
     }
 
+    @Test
+    public void fieldValidation(){
+        testPersonErrors(
+                Person.Validation.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,-10\n" +
+                        "siobhan,18\n"
+                ,List.of(3),
+                Person.build(Person.Validation::new, "tim", 32),
+                Person.build(Person.Validation::new, "siobhan", 18)
+        );
+    }
+
 }
