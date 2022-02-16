@@ -16,13 +16,10 @@
  * limitations under the License.
  *
  */
-
 package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -40,7 +37,6 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected T target;
     protected final boolean failOnError;
     protected final HashMap<Integer, String> fieldMap = new HashMap<>();
-    protected boolean passedValidation;
     protected ValidationLogger errorLog = ValidationLogger.CONSOLE;
     protected final char[] chars = new char[4096];
     protected final int[] delimiterIndex = new int[1024];
@@ -49,10 +45,10 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected int fieldIndex = 0;
     protected int writeIndex = 0;
     protected BiConsumer<T, ValidationResultStore> validator;
-    protected boolean failedValidation;
     protected Function<String, String> headerTransformer = Function.identity();
     protected char previousChar = '\0';
     protected boolean firstCharOfField = true;
+    protected boolean passedValidation;
     private boolean foundRecord;
 
     protected BaseMarshaller(boolean failOnError) {
@@ -96,10 +92,9 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             } else {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
-                        failedValidation = false;
                         validator.accept(target, this::logValidationProblem);
                         foundRecord = true;
-                        if (!failedValidation) {
+                        if (passedValidation()) {
                             break;
                         }
                     }
@@ -126,30 +121,30 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                         consumer.accept(target);
                     }
                 }
-                if (eof())
+                if (eof()) {
                     consumer.accept(target);
+                }
             } else {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
-                        failedValidation = false;
                         validator.accept(target, this::logValidationProblem);
-                        if (!failedValidation) {
+                        if (passedValidation()) {
                             consumer.accept(target);
                         }
                     }
                 }
                 if (eof()) {
                     validator.accept(target, this::logValidationProblem);
-                    if (!failedValidation) {
+                    if (passedValidation()) {
                         consumer.accept(target);
                     }
                 }
             }
-            target = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public final RowMarshaller<T> setHeaderTransformer(Function<String, String> headerTransformer) {
@@ -196,7 +191,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final void logValidationProblem(String errorMessage) {
-        failedValidation = true;
+        passedValidation = false;
         String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
         if (failOnError) {
@@ -208,13 +203,13 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final void logFieldValidationProblem(String errorMessage, boolean failFast) {
-        failedValidation = true;
+        passedValidation = false;
         String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
 
-        msg += " fieldIndex:'" +
-                fieldIndex +
-                "' targetMethod:'" + targetClass().getSimpleName() + "#" +
-                fieldMap.get(fieldIndex) + "'";
+        msg += " fieldIndex:'"
+                + fieldIndex
+                + "' targetMethod:'" + targetClass().getSimpleName() + "#"
+                + fieldMap.get(fieldIndex) + "'";
 
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
         if (failOnError || failFast) {
@@ -227,7 +222,13 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
     protected abstract boolean charEvent(char c);
 
-    protected abstract void init();
+    protected void init(){
+        fieldIndex = 0;
+        writeIndex = 0;
+        rowNumber = 0;
+        previousChar = '\0';
+        firstCharOfField = true;
+    }
 
     protected abstract boolean processRow();
 
@@ -240,7 +241,9 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final boolean eof() {
-        if (writeIndex != 0) return processRow();
+        if (writeIndex != 0) {
+            return processRow();
+        }
         return false;
     }
 
@@ -251,17 +254,17 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final void logException(String prefix, boolean fatal, Exception e) {
-        String sb = targetClass().getSimpleName() + " " +
-                prefix +
-                " fieldIndex:'" +
-                fieldIndex +
-                "' targetMethod:'" + targetClass().getSimpleName() + "#" +
-                fieldMap.get(fieldIndex) +
-                "' error:'" +
-                e.toString() +
-                "'";
-        CsvProcessingException csvProcessingException =
-                new CsvProcessingException(sb, e, rowNumber);
+        String sb = targetClass().getSimpleName() + " "
+                + prefix
+                + " fieldIndex:'"
+                + fieldIndex
+                + "' targetMethod:'" + targetClass().getSimpleName() + "#"
+                + fieldMap.get(fieldIndex)
+                + "' error:'"
+                + e.toString()
+                + "'";
+        CsvProcessingException csvProcessingException
+                = new CsvProcessingException(sb, e, rowNumber);
         if (fatal || failOnError) {
             errorLog.logFatal(csvProcessingException);
             throw csvProcessingException;
@@ -270,8 +273,8 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final void logProblem(String description) {
-        CsvProcessingException csvProcessingException =
-                new CsvProcessingException(description, rowNumber);
+        CsvProcessingException csvProcessingException
+                = new CsvProcessingException(description, rowNumber);
         if (failOnError) {
             errorLog.logFatal(csvProcessingException);
             throw csvProcessingException;
@@ -280,10 +283,10 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final void logHeaderProblem(String prefix, boolean fatal, Exception e) {
-        String sb = "Header problem for " + targetClass().getSimpleName() +
-                " " + prefix + rowNumber;
-        CsvProcessingException csvProcessingException =
-                new CsvProcessingException(sb, e, rowNumber);
+        String sb = "Header problem for " + targetClass().getSimpleName()
+                + " " + prefix + rowNumber;
+        CsvProcessingException csvProcessingException
+                = new CsvProcessingException(sb, e, rowNumber);
         if (fatal || failOnError) {
             errorLog.logFatal(csvProcessingException);
             throw csvProcessingException;
@@ -292,8 +295,9 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     private static <T> T requireNonNull(T obj, String message) {
-        if (obj == null)
+        if (obj == null) {
             throw new NullPointerException(message);
+        }
         return obj;
     }
 

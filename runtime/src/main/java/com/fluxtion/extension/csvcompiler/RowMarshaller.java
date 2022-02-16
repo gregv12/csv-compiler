@@ -45,7 +45,7 @@ public interface RowMarshaller<T> {
     }
 
     void forEach(Consumer<T> consumer, Reader in);
-
+    
     Iterator<T> iterator(Reader in);
 
     RowMarshaller<T> setHeaderTransformer(Function<String, String>headerTransformer);

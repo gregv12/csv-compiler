@@ -31,8 +31,8 @@ public class SampleDataFlyweight {
     private int rowId;
     @ColumnMapping(columnIndex = 1)
     private CharSequence description;
-    @ColumnMapping(columnIndex = 9)
-    private double percentage;
+//    @ColumnMapping(columnIndex = 9)
+//    private double percentage;
 
     public int getRowId() {
         return rowId;
@@ -50,11 +50,11 @@ public class SampleDataFlyweight {
         this.description = description;
     }
 
-    public double getPercentage() {
-        return percentage;
-    }
-
-    public void setPercentage(double percentage) {
-        this.percentage = percentage;
-    }
+//    public double getPercentage() {
+//        return percentage;
+//    }
+//
+//    public void setPercentage(double percentage) {
+//        this.percentage = percentage;
+//    }
 }

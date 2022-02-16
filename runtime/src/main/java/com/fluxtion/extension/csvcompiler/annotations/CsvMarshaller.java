@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 package com.fluxtion.extension.csvcompiler.annotations;
 
 import java.lang.annotation.ElementType;
@@ -29,7 +28,8 @@ import java.lang.annotation.Target;
 public @interface CsvMarshaller {
 
     /**
-     * The row containing the column identifiers for this bean marshaller. A value of less than indicates no mapping row
+     * The row containing the column identifiers for this bean marshaller. A value of less 1 than indicates
+     * no mapping row
      *
      * @return the column to property mapping row
      */
@@ -40,7 +40,18 @@ public @interface CsvMarshaller {
      *
      * @return number of header lines
      */
-    int headerLines() default 1;
+    int headerLines() default 0;
+
+    /**
+     * Overrides header and mapping rows to:
+     * <ul>
+     * <li> mappingRow = 0
+     * <li> headerLines = 0
+     * </ul>
+     *
+     * @return flag indicating header is present
+     */
+    boolean noHeader() default false;
 
     /**
      * ignore comment lines, comment char = '#'
@@ -74,6 +85,7 @@ public @interface CsvMarshaller {
 
     /**
      * Ignore quotes
+     *
      * @return ignore quotes
      */
     boolean ignoreQuotes() default false;
@@ -111,7 +123,9 @@ public @interface CsvMarshaller {
     /**
      * Exit the processing on the first error whether fatal or not, missing header is fatal, unexpected empty line is
      * a warning to the {@link com.fluxtion.extension.csvcompiler.ValidationLogger }and continue.
-     * Set to true and warnings will result in throwing a {@link com.fluxtion.extension.csvcompiler.CsvProcessingException}
+     * Set to true and warnings will result in throwing a
+     * {@link com.fluxtion.extension.csvcompiler.CsvProcessingException}
+     *
      * @return flag controlling early exit of parsing on warning
      */
     boolean failOnFirstError() default false;

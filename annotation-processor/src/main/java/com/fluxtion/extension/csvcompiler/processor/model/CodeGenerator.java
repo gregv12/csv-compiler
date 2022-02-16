@@ -36,7 +36,7 @@ public class CodeGenerator {
                                                              "%2$s\n" +
                                                              "\n" +
                                                              "@AutoService(RowMarshaller.class)\n" +
-                                                             "public class %3$s extends BaseMarshaller<%4$s>{\n" +
+                                                             "public final class %3$s extends BaseMarshaller<%4$s>{\n" +
                                                              "\n" +
                                                              "%5$s\n" +
                                                              "\n" +
@@ -44,6 +44,7 @@ public class CodeGenerator {
                                                              "        super(%7$s);\n" +
                                                              "    }\n" +
                                                              "\n" +
+                                                             "@Override\n" +
                                                              "    public Class<%4$s> targetClass(){\n" +
                                                              "        return %4$s.class;\n" +
                                                              "    }\n" +
@@ -157,8 +158,16 @@ public class CodeGenerator {
 
     @NotNull
     private static String initMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = "public void init(){\n" +
-                         "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
+        String options = "@Override\n"
+                + "public void init(){\n"
+                + "     super.init();\n" ;
+        if(codeGeneratorModel.isNewBeanPerRecord()){
+            options += "target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
+        }else{
+            options += "if(target==null){\n"
+                    + "     target = new " + codeGeneratorModel.getTargetClassName() + "();\n"
+                    + "}\n";
+        }
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
                         .map(s -> "fieldMap.put(" + s.getFieldIdentifier() + ", \"" + s.getTargetSetMethodName() + "\");")
@@ -173,7 +182,8 @@ public class CodeGenerator {
 
     @NotNull
     private static String charEventMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = "    public boolean charEvent(char character) {\n" +
+        String options = "@Override\n"
+                + "    public boolean charEvent(char character) {\n" +
                          "        passedValidation = true;\n" +
                          "        char charToTest = previousChar;\n" +
                          "        previousChar = character;\n";
@@ -241,7 +251,7 @@ public class CodeGenerator {
     }
 
     private static String processRowMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = "\n" +
+        String options = "@Override\n" +
                          "    protected boolean processRow() {\n" +
                          "        boolean targetChanged = false;\n" +
                          "        rowNumber++;\n";

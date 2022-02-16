@@ -148,7 +148,7 @@ public class Person {
         }
     }
 
-    @CsvMarshaller(formatSource = true, headerLines = -1, mappingRow = 0)
+    @CsvMarshaller(formatSource = true, noHeader = true)
     public static class IndexFields extends Person {
 
         @ColumnMapping(columnIndex = 0)

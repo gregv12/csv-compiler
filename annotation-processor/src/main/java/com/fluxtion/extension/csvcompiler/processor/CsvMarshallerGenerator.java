@@ -212,8 +212,13 @@ public class CsvMarshallerGenerator implements Processor {
 
     private void setMarshallerOptions(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
-        csvMetaModel.setHeaderLines(annotation.headerLines());
-        csvMetaModel.setMappingRow(annotation.mappingRow());
+        if(annotation.noHeader()){
+            csvMetaModel.setMappingRow(0);
+            csvMetaModel.setHeaderLines(0);
+        }else{
+            csvMetaModel.setMappingRow(annotation.mappingRow());
+            csvMetaModel.setHeaderLines(Math.max(annotation.mappingRow(), annotation.headerLines()));
+        }
         csvMetaModel.setProcessEscapeSequence(annotation.processEscapeSequences());
         csvMetaModel.setIgnoreQuotes(annotation.ignoreQuotes());
         csvMetaModel.setFormatSource(annotation.formatSource());
