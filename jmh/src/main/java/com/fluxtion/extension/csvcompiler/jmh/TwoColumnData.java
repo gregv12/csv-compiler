@@ -23,7 +23,7 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
  *
  * @author V12 Technology Ltd.
  */
-@CsvMarshaller(mappingRow = 0, headerLines = 0)
+@CsvMarshaller(noHeader = true, formatSource = true)
 public class TwoColumnData {
     
     @ColumnMapping(columnIndex = 0)

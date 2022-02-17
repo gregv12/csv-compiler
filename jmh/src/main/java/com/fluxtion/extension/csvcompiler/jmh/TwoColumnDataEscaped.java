@@ -23,7 +23,7 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
  *
  * @author V12 Technology Ltd.
  */
-@CsvMarshaller(mappingRow = 0, headerLines = 0, processEscapeSequences = true)
+@CsvMarshaller(noHeader = true, formatSource = true, processEscapeSequences = true)
 public class TwoColumnDataEscaped {
     
     @ColumnMapping(columnIndex = 0)
@@ -46,7 +46,5 @@ public class TwoColumnDataEscaped {
     public void setCol2(String col2) {
         this.col2 = col2;
     }
-    
-    
-    
+
 }

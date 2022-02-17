@@ -81,4 +81,9 @@ public class FailingMarshallerTest {
                         .mapToInt(Person::getAge)
                         .sum());
     }
+
+    @Test
+    public void failFastWithExternalalidator(){
+
+    }
 }

@@ -34,27 +34,51 @@ import static java.util.ServiceLoader.Provider;
 
 public interface RowMarshaller<T> {
 
+    /**
+     * The target type of this RowMarshaller instance
+     *
+     * @return target type
+     */
     Class<T> targetClass();
 
+    /**
+     * Validation logger
+     *
+     * @param errorLog
+     * @return this {@link RowMarshaller} instance
+     */
     RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
 
-    Stream<T> stream(Reader in);
-
-    default Stream<T> stream(String in){
-        return stream(new StringReader(in));
-    }
-
-    void forEach(Consumer<T> consumer, Reader in);
-    
-    Iterator<T> iterator(Reader in);
-
-    RowMarshaller<T> setHeaderTransformer(Function<String, String>headerTransformer);
-
     RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
+
+    RowMarshaller<T> throwExceptionOnValidationFailure(boolean throwException);
+
+    RowMarshaller<T> setHeaderTransformer(Function<String, String> headerTransformer);
+
 
     default RowMarshaller<T> addLookup(String lookupName, Function<CharSequence, CharSequence> lookup) {
         throw new IllegalArgumentException("cannot find lookup with name:" + lookup);
     }
+
+    /**
+     * Creates a stream from a supplied {@link Reader}
+     *
+     * @param in {@link Reader} to marshall from
+     * @return Stream of target instances
+     */
+    Stream<T> stream(Reader in);
+
+    /**
+     * @param in
+     * @return
+     */
+    default Stream<T> stream(String in) {
+        return stream(new StringReader(in));
+    }
+
+    void forEach(Consumer<T> consumer, Reader in);
+
+    Iterator<T> iterator(Reader in);
 
     static <T> RowMarshaller<T> load(Class<T> clazz) {
         return ServiceLoader.load(RowMarshaller.class).stream()

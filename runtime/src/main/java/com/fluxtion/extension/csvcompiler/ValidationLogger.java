@@ -38,12 +38,11 @@ public interface ValidationLogger {
         }
     };
 
-
     void logFatal(CsvProcessingException csvProcessingException);
 
     void logException(CsvProcessingException csvProcessingException);
 
     interface ValidationResultStore{
-        void vaildationFailure(String failureMessage);
+        void validationFailure(String failureMessage);
     }
 }

@@ -40,7 +40,6 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected ValidationLogger errorLog = ValidationLogger.CONSOLE;
     protected final char[] chars = new char[4096];
     protected final int[] delimiterIndex = new int[1024];
-    protected StringBuilder messageSink = new StringBuilder(256);
     protected final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);
     protected int fieldIndex = 0;
     protected int writeIndex = 0;
@@ -155,6 +154,11 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     @Override
     public final RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
         this.validator = validator;
+        return this;
+    }
+
+    @Override
+    public final RowMarshaller<T> throwExceptionOnValidationFailure(boolean throwException){
         return this;
     }
 

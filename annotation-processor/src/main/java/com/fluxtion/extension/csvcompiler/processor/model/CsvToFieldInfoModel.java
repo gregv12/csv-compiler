@@ -46,12 +46,14 @@ public interface CsvToFieldInfoModel {
     String getConvertConfiguration();
 
     default boolean isConverterApplied() {
-        return getConverterClassName() != null && !getConverterClassName().isBlank() && getConverterClassName().length()>0;
+        return getConverterClassName() != null && !getConverterClassName().isBlank() && getConverterClassName().length() > 0;
     }
+
     //validator
     boolean isValidated();
 
     String getValidatorDeclaration();
+
     String getValidatorInvocation();
 
     //lookup

@@ -37,7 +37,7 @@ public class ValidationTest {
                         "lisa,44\n",
                 (person, validationResultStore) -> {
                     if (person.getAge() > 40)
-                        validationResultStore.vaildationFailure("TOO OLD");
+                        validationResultStore.validationFailure("TOO OLD");
                 },List.of(3),Person.build(Person::new, "tim", 32)
         );
     }
@@ -53,7 +53,7 @@ public class ValidationTest {
                 ,
                 (person, validationResultStore) -> {
                     if (person.getAge() > 40)
-                        validationResultStore.vaildationFailure("TOO OLD");
+                        validationResultStore.validationFailure("TOO OLD");
                 },List.of(3),
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "siobhan", 18)
@@ -71,6 +71,19 @@ public class ValidationTest {
                 ,List.of(3),
                 Person.build(Person.Validation::new, "tim", 32),
                 Person.build(Person.Validation::new, "siobhan", 18)
+        );
+    }
+
+//    @Test
+    public void failFastAnnotation(){
+        testPersonErrors(
+                Person.FailFast.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,assdsdfefe\n" +
+                        "siobhan,18\n"
+                ,List.of(3),
+                Person.build(Person.FailFast::new, "tim", 32)
         );
     }
 
