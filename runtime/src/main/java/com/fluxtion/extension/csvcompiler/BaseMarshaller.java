@@ -18,7 +18,7 @@
  */
 package com.fluxtion.extension.csvcompiler;
 
-import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
+import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationProcessor;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -43,11 +43,12 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);
     protected int fieldIndex = 0;
     protected int writeIndex = 0;
-    protected BiConsumer<T, ValidationResultStore> validator;
+    protected BiConsumer<T, FailedRowValidationProcessor> validator;
     protected Function<String, String> headerTransformer = Function.identity();
     protected char previousChar = '\0';
     protected boolean firstCharOfField = true;
     protected boolean passedValidation;
+    protected Consumer<CsvProcessingException> fatalExceptionHandler;
     private boolean foundRecord;
 
     protected BaseMarshaller(boolean failOnError) {
@@ -55,8 +56,13 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     @Override
-    public final RowMarshaller<T> setErrorLog(ValidationLogger errorLog) {
+    public final RowMarshaller<T> setValidationLogger(ValidationLogger errorLog) {
         this.errorLog = errorLog;
+        return this;
+    }
+
+    public final RowMarshaller<T> setFatalExceptionHandler(Consumer<CsvProcessingException> fatalExceptionHandler) {
+        this.fatalExceptionHandler = fatalExceptionHandler;
         return this;
     }
 
@@ -91,7 +97,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             } else {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
-                        validator.accept(target, this::logValidationProblem);
+                        validator.accept(target, this::logRowValidationProblem);
                         foundRecord = true;
                         if (passedValidation()) {
                             break;
@@ -99,12 +105,14 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                     }
                 }
                 if (eof()) {
-                    validator.accept(target, this::logValidationProblem);
+                    validator.accept(target, this::logRowValidationProblem);
                     foundRecord = true;
                 }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (CsvProcessingException processingException) {
+            this.handleFatalProcessingError(processingException);
         }
         return target;
     }
@@ -126,14 +134,14 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             } else {
                 while ((c = in.read()) != -1) {
                     if (charEvent((char) c)) {
-                        validator.accept(target, this::logValidationProblem);
+                        validator.accept(target, this::logRowValidationProblem);
                         if (passedValidation()) {
                             consumer.accept(target);
                         }
                     }
                 }
                 if (eof()) {
-                    validator.accept(target, this::logValidationProblem);
+                    validator.accept(target, this::logRowValidationProblem);
                     if (passedValidation()) {
                         consumer.accept(target);
                     }
@@ -141,6 +149,8 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (CsvProcessingException processingException) {
+            this.handleFatalProcessingError(processingException);
         }
     }
 
@@ -152,14 +162,17 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     @Override
-    public final RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator) {
+    public final RowMarshaller<T> setRowValidator(BiConsumer<T, FailedRowValidationProcessor> validator) {
         this.validator = validator;
         return this;
     }
 
-    @Override
-    public final RowMarshaller<T> throwExceptionOnValidationFailure(boolean throwException){
-        return this;
+    protected void handleFatalProcessingError(CsvProcessingException exception) {
+        if (fatalExceptionHandler == null) {
+            throw exception;
+        } else {
+            fatalExceptionHandler.accept(exception);
+        }
     }
 
     protected boolean validate(int value, java.util.function.IntPredicate predicate, String errorMessage, boolean failFast) {
@@ -194,15 +207,15 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         return true;
     }
 
-    protected final void logValidationProblem(String errorMessage) {
+    protected final void logRowValidationProblem(String errorMessage, boolean isFatal) {
         passedValidation = false;
         String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
-        if (failOnError) {
+        if (isFatal) {
             errorLog.logFatal(exception);
             throw exception;
         } else {
-            errorLog.logException(exception);
+            errorLog.logWarning(exception);
         }
     }
 
@@ -220,13 +233,13 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             errorLog.logFatal(exception);
             throw exception;
         } else {
-            errorLog.logException(exception);
+            errorLog.logWarning(exception);
         }
     }
 
     protected abstract boolean charEvent(char c);
 
-    protected void init(){
+    protected void init() {
         fieldIndex = 0;
         writeIndex = 0;
         rowNumber = 0;
@@ -273,7 +286,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             errorLog.logFatal(csvProcessingException);
             throw csvProcessingException;
         }
-        errorLog.logException(csvProcessingException);
+        errorLog.logWarning(csvProcessingException);
     }
 
     protected final void logProblem(String description) {
@@ -283,7 +296,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             errorLog.logFatal(csvProcessingException);
             throw csvProcessingException;
         }
-        errorLog.logException(csvProcessingException);
+        errorLog.logWarning(csvProcessingException);
     }
 
     protected final void logHeaderProblem(String prefix, boolean fatal, Exception e) {
@@ -295,7 +308,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             errorLog.logFatal(csvProcessingException);
             throw csvProcessingException;
         }
-        errorLog.logException(csvProcessingException);
+        errorLog.logWarning(csvProcessingException);
     }
 
     private static <T> T requireNonNull(T obj, String message) {

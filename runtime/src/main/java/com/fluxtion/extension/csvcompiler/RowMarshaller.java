@@ -19,7 +19,7 @@
 
 package com.fluxtion.extension.csvcompiler;
 
-import com.fluxtion.extension.csvcompiler.ValidationLogger.ValidationResultStore;
+import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationProcessor;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -32,6 +32,11 @@ import java.util.stream.Stream;
 
 import static java.util.ServiceLoader.Provider;
 
+/**
+ * A class that provides a marshalling service that converts row style character data into a stream of marshalled instances.
+ *
+ * @param <T>
+ */
 public interface RowMarshaller<T> {
 
     /**
@@ -42,26 +47,53 @@ public interface RowMarshaller<T> {
     Class<T> targetClass();
 
     /**
-     * Validation logger
+     * Set {@link ValidationLogger} for this RowMarshaller
      *
-     * @param errorLog
+     * @param errorLog the error log service
      * @return this {@link RowMarshaller} instance
      */
-    RowMarshaller<T> setErrorLog(ValidationLogger errorLog);
+    RowMarshaller<T> setValidationLogger(ValidationLogger errorLog);
 
-    RowMarshaller<T> setValidator(BiConsumer<T, ValidationResultStore> validator);
+    /**
+     * Set the row validation logic for this RowMarshaller. Receives a callback for each successfully marshalled instance
+     * and {@link FailedRowValidationProcessor} to process any validation failures.
+     *
+     * @param validator The injected row validation logic
+     * @return this {@link RowMarshaller} instance
+     */
+    RowMarshaller<T> setRowValidator(BiConsumer<T, FailedRowValidationProcessor> validator);
 
-    RowMarshaller<T> throwExceptionOnValidationFailure(boolean throwException);
+    /**
+     * Inject a fatal exception handler into the processing loop. If a fatal exception occurs this instance receives the
+     * exception for processing. A default instance is provided that rethrows the {@link CsvProcessingException}
+     *
+     * @param fatalExceptionHandler application provided exception handler
+     * @return this {@link RowMarshaller} instance
+     */
+    RowMarshaller<T> setFatalExceptionHandler(Consumer<CsvProcessingException> fatalExceptionHandler);
 
+    /**
+     * Callback to inject application logic for transforming the raw header before processing by the RowMarshaller
+     *
+     * @param headerTransformer header transformer
+     * @return this {@link RowMarshaller} instance
+     */
     RowMarshaller<T> setHeaderTransformer(Function<String, String> headerTransformer);
 
-
+    /**
+     * Any field annotated with {@link com.fluxtion.extension.csvcompiler.annotations.DataMapping} lookupName set to
+     * a non blank value will the lookup function registered under a matching name to convert the supplied {@link CharSequence}
+     *
+     * @param lookupName The lookup name
+     * @param lookup     The lookup {@link Function}
+     * @return this {@link RowMarshaller} instance
+     */
     default RowMarshaller<T> addLookup(String lookupName, Function<CharSequence, CharSequence> lookup) {
         throw new IllegalArgumentException("cannot find lookup with name:" + lookup);
     }
 
     /**
-     * Creates a stream from a supplied {@link Reader}
+     * Creates a {@link Stream} from a supplied {@link Reader}
      *
      * @param in {@link Reader} to marshall from
      * @return Stream of target instances
@@ -69,17 +101,39 @@ public interface RowMarshaller<T> {
     Stream<T> stream(Reader in);
 
     /**
-     * @param in
-     * @return
+     * Creates a {@link Stream}  from a supplied String
+     *
+     * @param in String to marshall from
+     * @return Stream of target instances
      */
     default Stream<T> stream(String in) {
         return stream(new StringReader(in));
     }
 
+    /**
+     * Apply for each semantics over generated instance from the supplied {@link Reader}
+     *
+     * @param consumer Marshalled instance consumer
+     * @param in       Reader source to process
+     */
     void forEach(Consumer<T> consumer, Reader in);
 
+    /**
+     * Creates an iterator over marshalled instances from the supplied {@link Reader}
+     *
+     * @param in Reader source to process
+     * @return The iterator over marshalled instances
+     */
     Iterator<T> iterator(Reader in);
 
+    /**
+     * Loads a {@link RowMarshaller} for a class type using the {@link ServiceLoader} paradigm
+     *
+     * @param clazz The class of the Marshalled instance
+     * @param <T>   The RowMarshaller output type
+     * @return A Configured {@link RowMarshaller} instance for the output type
+     */
+    @SuppressWarnings("unchecked")
     static <T> RowMarshaller<T> load(Class<T> clazz) {
         return ServiceLoader.load(RowMarshaller.class).stream()
                 .map(Provider::get)
@@ -88,5 +142,4 @@ public interface RowMarshaller<T> {
                 .findAny()
                 .get();
     }
-
 }

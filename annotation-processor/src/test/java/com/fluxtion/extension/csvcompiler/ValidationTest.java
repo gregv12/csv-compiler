@@ -20,8 +20,10 @@
 package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.fluxtion.extension.csvcompiler.SuccessfulMarshallerTest.testPersonErrors;
@@ -37,8 +39,10 @@ public class ValidationTest {
                         "lisa,44\n",
                 (person, validationResultStore) -> {
                     if (person.getAge() > 40)
-                        validationResultStore.validationFailure("TOO OLD");
-                },List.of(3),Person.build(Person::new, "tim", 32)
+                        validationResultStore.validationFailure("TOO OLD", false);
+                },
+                List.of(3),
+                Person.build(Person::new, "tim", 32)
         );
     }
 
@@ -53,38 +57,113 @@ public class ValidationTest {
                 ,
                 (person, validationResultStore) -> {
                     if (person.getAge() > 40)
-                        validationResultStore.validationFailure("TOO OLD");
-                },List.of(3),
+                        validationResultStore.validationFailure("TOO OLD", false);
+                }, List.of(3),
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "siobhan", 18)
         );
     }
 
     @Test
-    public void fieldValidation(){
+    public void interleavedInvalidRecordsValidationFailFastTest() {
+        List<Person> results = new ArrayList<>();
+        RowMarshaller.load(Person.class)
+                .setFatalExceptionHandler(c -> {
+                })
+                .setRowValidator((person, validationResultStore) -> {
+                    if (person.getAge() > 40)
+                        validationResultStore.validationFailure("TOO OLD", true);
+                })
+                .setValidationLogger(ValidationLogger.NULL)
+                .stream("name,age\n" +
+                        "tim,32\n" +
+                        "lisa,44\n" +
+                        "siobhan,18\n")
+                .forEach(results::add);
+
+        Assertions.assertIterableEquals(List.of(Person.build(Person::new, "tim", 32)), results);
+    }
+
+    @Test
+    public void interleavedInvalidRecordsValidationFailFastWIthExceptionTest() {
+        List<Person> results = new ArrayList<>();
+        Assertions.assertThrows(CsvProcessingException.class, () -> RowMarshaller.load(Person.class)
+                .setRowValidator((person, validationResultStore) -> {
+                    if (person.getAge() > 40) {
+                        validationResultStore.validationFailure("TOO OLD", true);
+                    }
+                })
+                .setValidationLogger(ValidationLogger.NULL)
+                .stream("name,age\n" +
+                        "tim,32\n" +
+                        "lisa,44\n" +
+                        "siobhan,18\n")
+                .forEach(results::add)
+        );
+        Assertions.assertIterableEquals(List.of(Person.build(Person::new, "tim", 32)), results);
+    }
+
+    @Test
+    public void fieldValidation() {
         testPersonErrors(
                 Person.Validation.class,
                 "name,age\n" +
                         "tim,32\n" +
                         "lisa,-10\n" +
                         "siobhan,18\n"
-                ,List.of(3),
+                , List.of(3),
                 Person.build(Person.Validation::new, "tim", 32),
                 Person.build(Person.Validation::new, "siobhan", 18)
         );
     }
 
-//    @Test
-    public void failFastAnnotation(){
-        testPersonErrors(
-                Person.FailFast.class,
-                "name,age\n" +
+    @Test
+    public void failFastAnnotation() {
+        List<Person.FailFast> results = new ArrayList<>();
+        RowMarshaller.load(Person.FailFast.class)
+                .setFatalExceptionHandler(c -> {
+                })
+                .setValidationLogger(ValidationLogger.NULL)
+                .stream("name,age\n" +
                         "tim,32\n" +
                         "lisa,assdsdfefe\n" +
-                        "siobhan,18\n"
-                ,List.of(3),
-                Person.build(Person.FailFast::new, "tim", 32)
-        );
+                        "siobhan,18\n")
+                .forEach(results::add);
+
+        Assertions.assertIterableEquals(List.of(Person.build(Person.FailFast::new, "tim", 32)), results);
     }
+
+    @Test
+    public void failFastWithExceptionAnnotation() {
+        List<Person.FailFast> results = new ArrayList<>();
+        Assertions.assertThrows(CsvProcessingException.class, () -> RowMarshaller.load(Person.FailFast.class)
+                .setValidationLogger(ValidationLogger.NULL)
+                .stream("name,age\n" +
+                        "tim,32\n" +
+                        "lisa,assdsdfefe\n" +
+                        "siobhan,18\n")
+                .forEach(results::add)
+        );
+
+        Assertions.assertIterableEquals(List.of(Person.build(Person.FailFast::new, "tim", 32)), results);
+    }
+
+    @Test
+    public void noFailFastAnnotation() {
+        List<Person> results = new ArrayList<>();
+        RowMarshaller.load(Person.class)
+                .setValidationLogger(ValidationLogger.NULL)
+                .stream("name,age\n" +
+                        "tim,32\n" +
+                        "lisa,assdsdfefe\n" +
+                        "siobhan,18\n")
+                .forEach(results::add);
+
+        Assertions.assertIterableEquals(List.of(
+                Person.build(Person::new, "tim", 32),
+                Person.build(Person::new, "siobhan", 18)
+        ), results);
+    }
+
 
 }

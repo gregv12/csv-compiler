@@ -5,13 +5,11 @@ import com.fluxtion.extension.csvcompiler.ValidationLogger;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.ToString;
 
-import java.io.StringReader;
-
 public class Main {
 
     public static void main(String[] args) {
         RowMarshaller.load(Person.class)
-                .setErrorLog(ValidationLogger.CONSOLE)
+                .setValidationLogger(ValidationLogger.CONSOLE)
                 .stream("name,age\n" +
                         "Linda Smith,43\n" +
                         "Soren Miller,33\n" +

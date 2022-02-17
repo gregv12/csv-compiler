@@ -19,12 +19,15 @@
 
 package com.fluxtion.extension.csvcompiler;
 
+/**
+ * Logs validation failure messages from a {@link RowMarshaller} instance
+ */
 public interface ValidationLogger {
     ValidationLogger NULL = new ValidationLogger() {
         public void logFatal(CsvProcessingException csvProcessingException) {
         }
 
-        public void logException(CsvProcessingException csvProcessingException) {
+        public void logWarning(CsvProcessingException csvProcessingException) {
         }
     };
 
@@ -33,16 +36,33 @@ public interface ValidationLogger {
             System.out.println(csvProcessingException.getMessage());
         }
 
-        public void logException(CsvProcessingException csvProcessingException) {
+        public void logWarning(CsvProcessingException csvProcessingException) {
             System.out.println(csvProcessingException.getMessage());
         }
     };
 
+    /**
+     * log a fatal exception, processing will halt after this message
+     *
+     * @param csvProcessingException fatal exception
+     */
     void logFatal(CsvProcessingException csvProcessingException);
 
-    void logException(CsvProcessingException csvProcessingException);
+    /**
+     * log a warning message, processing will continue after this message is received
+     *
+     * @param csvProcessingException warning exception
+     */
+    void logWarning(CsvProcessingException csvProcessingException);
 
-    interface ValidationResultStore{
-        void validationFailure(String failureMessage);
+
+    interface FailedRowValidationProcessor {
+        /**
+         * Notify of a row validation failure, set a flag to induce an immediate halt of stream processing
+         *
+         * @param failureMessage failure message
+         * @param isFatal        flag for immediate halt
+         */
+        void validationFailure(String failureMessage, boolean isFatal);
     }
 }
