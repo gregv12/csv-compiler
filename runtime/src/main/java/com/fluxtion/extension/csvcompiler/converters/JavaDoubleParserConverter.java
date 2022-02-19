@@ -17,17 +17,12 @@
  *
  */
 
-package com.fluxtion.extension.csvcompiler.annotations;
+package com.fluxtion.extension.csvcompiler.converters;
 
-import com.fluxtion.extension.csvcompiler.FieldConverter;
+public class JavaDoubleParserConverter implements com.fluxtion.extension.csvcompiler.FieldConverter<Double>{
+    @Override
+    public Double fromCharSequence(CharSequence charSequence) {
+        return Double.parseDouble(charSequence.toString());
+    }
 
-public @interface DataMapping {
-
-    Class<? extends FieldConverter> converter() default FieldConverter.NULL.class;
-
-    String conversionMethod() default "";
-
-    String configuration() default "";
-
-    String lookupName() default "";
 }

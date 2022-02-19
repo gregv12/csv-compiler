@@ -21,31 +21,21 @@ package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-import lombok.ToString;
+import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
+import com.fluxtion.extension.csvcompiler.converters.JavaDoubleParserConverter;
 
-@CsvMarshaller(processEscapeSequences = true, mappingRow = 0, headerLines = 0, formatSource = true, newBeanPerRecord = false)
-@ToString
-public class SampleDataFlyweight {
+@CsvMarshaller(noHeader = true, newBeanPerRecord = false)
+public class CanadaDataJavaParser {
 
     @ColumnMapping(columnIndex = 0)
-    private int rowId;
-    @ColumnMapping(columnIndex = 1)
-    private CharSequence description;
+    @DataMapping(converter = JavaDoubleParserConverter.class)
+    double doubleValue;
 
-    public int getRowId() {
-        return rowId;
+    public double getDoubleValue() {
+        return doubleValue;
     }
 
-    public void setRowId(int rowId) {
-        this.rowId = rowId;
+    public void setDoubleValue(double doubleValue) {
+        this.doubleValue = doubleValue;
     }
-
-    public CharSequence getDescription() {
-        return description;
-    }
-
-    public void setDescription(CharSequence description) {
-        this.description = description;
-    }
-
 }

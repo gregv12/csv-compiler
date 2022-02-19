@@ -31,7 +31,7 @@ public interface CodeGeneratorModel {
     int getHeaderLines();
 
     default boolean isHeaderPresent(){
-        return getHeaderLines() > -1;
+        return getHeaderLines() > 0;
     }
 
     default String getImports() {

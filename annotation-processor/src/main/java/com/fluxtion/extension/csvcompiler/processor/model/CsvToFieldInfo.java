@@ -130,11 +130,15 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         return validatorId != null;
     }
 
-    public void setConverter(String converterClass, String convertConfiguration) {
+    public void setConverter(String converterClass, String convertConfiguration, String converterMethod) {
         if (converterClass == null || converterClass.isBlank()) {
         } else {
             this.converterInstanceId = getFieldIdentifier() + "Converter";
-            this.converterMethod = converterInstanceId + ".fromCharSequence";
+            if(converterMethod==null || converterMethod.isEmpty()){
+                this.converterMethod = converterInstanceId + ".fromCharSequence";
+            }else{
+                this.converterMethod = converterInstanceId + "." + converterMethod;
+            }
             this.converterClassName = converterClass;
             this.convertConfiguration = convertConfiguration == null ? "" : convertConfiguration;
         }

@@ -20,7 +20,11 @@
 package com.fluxtion.extension.csvcompiler.processor;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
-import com.fluxtion.extension.csvcompiler.annotations.*;
+import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
+import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
+import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
+import com.fluxtion.extension.csvcompiler.annotations.Validator;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGenerator;
 import com.fluxtion.extension.csvcompiler.processor.model.CsvMetaModel;
 import com.fluxtion.extension.csvcompiler.processor.model.ValidatorConfig;
@@ -34,12 +38,19 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.Writer;
 import java.util.Collections;
@@ -122,6 +133,14 @@ public class CsvMarshallerGenerator implements Processor {
                 }
                 if (columnMapping.columnIndex() > -1) {
                     csvMetaModel.setColumnIndex(variableName.toString(), columnMapping.columnIndex());
+                }else{
+                    if(!csvMetaModel.isMappingRowPresent()){
+                        processingEnv.getMessager().printMessage(
+                                Diagnostic.Kind.ERROR,
+                                "index column required if no mapping row is present",
+                                e
+                        );
+                    }
                 }
                 csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
             }
@@ -135,7 +154,8 @@ public class CsvMarshallerGenerator implements Processor {
                     String fqnConverter = typeElement1.getQualifiedName().toString();
                     if(!fqnConverter.equalsIgnoreCase(FieldConverter.NULL.class.getCanonicalName())){
                         String format = dataMapping.configuration();
-                        csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), format);
+                        String converterMethod = dataMapping.conversionMethod();
+                        csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), converterMethod, format);
                     }
                     if(!dataMapping.lookupName().isBlank()){
                         csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());

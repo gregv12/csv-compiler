@@ -65,7 +65,7 @@ public class ComplexDataTest {
         private int rowId;
         @ColumnMapping(columnIndex = 1)
         private String description;
-        @ColumnMapping(columnIndex = 9)
+        @ColumnMapping(columnIndex = 9, defaultValue = "0.0")
         private double percentage;
 
         public int getRowId() {

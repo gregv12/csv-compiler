@@ -19,14 +19,19 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
-import java.io.IOException;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
+import java.io.IOException;
 import java.io.StringReader;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @BenchmarkMode(Mode.All)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
@@ -36,8 +41,8 @@ import java.util.stream.Collectors;
 @Measurement(iterations = 1, time = 5)
 public class FirstBenchmark {
 
-    static final RowMarshaller<SampleData> marsahllerNew = RowMarshaller.load(SampleData.class);
-    static final RowMarshaller<SampleDataFlyweight> marsahllerFlyweight = RowMarshaller.load(SampleDataFlyweight.class);
+    static final RowMarshaller<SampleData> marshallerNew = RowMarshaller.load(SampleData.class);
+    static final RowMarshaller<SampleDataFlyweight> marshallerFlyweight = RowMarshaller.load(SampleDataFlyweight.class);
     static final RowMarshaller<TwoColumnData> twoColData = RowMarshaller.load(TwoColumnData.class);
     static final RowMarshaller<TwoColumnDataEscaped> twoColDataEscaped = RowMarshaller.load(TwoColumnDataEscaped.class);
 
@@ -73,7 +78,7 @@ public class FirstBenchmark {
 
 //    @Benchmark
     public void noReuse(Blackhole blackhole) throws IOException {
-        marsahllerNew.forEach(blackhole::consume, reader);
+        marshallerNew.forEach(blackhole::consume, reader);
         reader.reset();
 
 //        List<SampleData> data = RowMarshaller.load(SampleData.class).stream(data1)
@@ -83,19 +88,19 @@ public class FirstBenchmark {
 
 //    @Benchmark
     public void flyweight(Blackhole blackhole) throws IOException {
-        marsahllerFlyweight.forEach(blackhole::consume, reader);
+        marshallerFlyweight.forEach(blackhole::consume, reader);
         reader.reset();
 //        List<SampleDataFlyweight> data = RowMarshaller.load(SampleDataFlyweight.class).stream(data1)
 //                .collect(Collectors.toList());
 //        blackhole.consume(data);
     }
 
-    @Benchmark
+//    @Benchmark
     public void twoColDataTest(Blackhole blackhole) {
         twoColData.forEach(blackhole::consume, reader2);
     }
 
-    @Benchmark
+//    @Benchmark
     public void twoColDataEscapedTest(Blackhole blackhole) {
         twoColDataEscaped.forEach(blackhole::consume, reader2);
     }

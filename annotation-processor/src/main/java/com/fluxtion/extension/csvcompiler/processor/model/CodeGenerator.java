@@ -338,14 +338,16 @@ public class CodeGenerator {
                                                      "}else{\n" +
                                                      "    %s\n" +
                                                      "}\n", readField, readOptionalFiled);
+                                                    out += s.getUpdateTarget();
                             } else if (s.isMandatory()) {
                                 out += readField;
+                                out += s.getUpdateTarget();
                             } else {
                                 out += String.format("if(fieldIndex > -1){\n" +
                                                      "    %s\n" +
-                                                     "}\n", readField);
+                                                     "    %s\n" +
+                                                     "}\n", readField, s.getUpdateTarget());
                             }
-                            out += s.getUpdateTarget();
                             if(s.isValidated()){
                                 out += "publish = " + s.getValidatorInvocation();
                             }

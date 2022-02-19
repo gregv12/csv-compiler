@@ -38,7 +38,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
                         "    @CsvMarshaller\n" +
                         "    public final class MyBooleanTest{\n" +
                         "\n" +
-                        "        @ColumnMapping(defaultValue = \"DEFAULT VALUE\")\n" +
+                        "        @ColumnMapping(optionalField = true)\n" +
                         "        boolean name;\n" +
                         "\n" +
                         "        public boolean isName(){\n" +

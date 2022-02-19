@@ -93,8 +93,8 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setColumnIndex(columnIndex);
     }
 
-    public void setFieldConverter(String fieldName, String converterClass, String convertConfiguration){
-        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldConverter(converterClass, convertConfiguration);
+    public void setFieldConverter(String fieldName, String converterClass, String converterMethod, String convertConfiguration){
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldConverter(converterClass, convertConfiguration, converterMethod);
     }
 
     public void setLookupName(String fieldName, String lookupName){
@@ -167,8 +167,8 @@ public class CsvMetaModel implements CodeGeneratorModel {
             csvToFieldInfo.setSourceColIndex(columnIndex);
         }
 
-        public void setFieldConverter(String converterClass, String convertConfiguration) {
-            csvToFieldInfo.setConverter(converterClass, convertConfiguration);
+        public void setFieldConverter(String converterClass, String convertConfiguration, String converterMethod) {
+            csvToFieldInfo.setConverter(converterClass, convertConfiguration, converterMethod);
         }
 
         public void setFieldValidator(ValidatorConfig validatorConfig){

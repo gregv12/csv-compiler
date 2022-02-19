@@ -19,9 +19,10 @@ package com.fluxtion.extension.csvcompiler.tester;
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
+import lombok.ToString;
+
 import java.io.IOException;
 import java.io.StringReader;
-import lombok.ToString;
 
 /**
  *
@@ -46,7 +47,6 @@ public class ProfileMain {
     }
 
     public static void consume(Person p) {
-//        System.out.println(p);
         count += p.getAge();
     }
 
@@ -58,10 +58,6 @@ public class ProfileMain {
         private CharSequence name;
         @ColumnMapping(columnIndex = 1)
         private int age;
-
-//        public Person() {
-//            System.out.println("Person::constructor");
-//        }
 
         public CharSequence getName() {
             return name;
