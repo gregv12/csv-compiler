@@ -20,7 +20,6 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -46,7 +45,7 @@ public class CanadaSmallSingleShotBenchmark {
 
     public static final String FILENAME = "src/main/data/canada_10rows.txt";
 
-    @Benchmark
+//    @Benchmark
     public void readDoublesJavaDoubleParser(Blackhole blackhole) throws FileNotFoundException {
         double maxValue = RowMarshaller.load(CanadaDataJavaParser.class)
                 .stream(new BufferedReader(new FileReader(FILENAME)))
@@ -55,7 +54,7 @@ public class CanadaSmallSingleShotBenchmark {
         blackhole.consume(maxValue);
     }
 
-    @Benchmark
+//    @Benchmark
     public void readDoubles(Blackhole blackhole) throws FileNotFoundException {
         double maxValue = RowMarshaller.load(CanadaData.class)
                 .stream(new BufferedReader(new FileReader(FILENAME)))

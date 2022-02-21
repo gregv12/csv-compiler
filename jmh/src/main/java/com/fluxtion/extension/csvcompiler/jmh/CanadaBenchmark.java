@@ -20,6 +20,8 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import com.fluxtion.extension.csvcompiler.converters.Conversion;
+import de.siegmar.fastcsv.reader.CsvReader;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -36,17 +38,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.AverageTime)
+@BenchmarkMode({Mode.AverageTime, Mode.SingleShotTime})
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
-@Fork(value = 2, warmups = 1)
-@Warmup(iterations = 1, time = 3)
-@Measurement(iterations = 1, time = 3)
+@Fork(value = 1, warmups = 1)
+@Warmup(iterations = 1, time = 1)
+@Measurement(iterations = 1, time = 2)
 public class CanadaBenchmark {
 
     public static final String FILENAME = "src/main/data/canada.txt";
 
-    @Benchmark
+//    @BenchmarkMode
     public void readDoublesJavaDoubleParser(Blackhole blackhole) throws FileNotFoundException {
         double maxValue = RowMarshaller.load(CanadaDataJavaParser.class)
                 .stream(new BufferedReader(new FileReader(FILENAME)))
@@ -59,6 +61,58 @@ public class CanadaBenchmark {
     public void readDoubles(Blackhole blackhole) throws FileNotFoundException {
         double maxValue = RowMarshaller.load(CanadaData.class)
                 .stream(new BufferedReader(new FileReader(FILENAME)))
+                .mapToDouble(CanadaData::getDoubleValue)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+
+    @Benchmark
+    public void readDoublesNoReuse(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = RowMarshaller.load(CanadaDataNoReuse.class)
+                .stream(new BufferedReader(new FileReader(FILENAME)))
+                .mapToDouble(CanadaDataNoReuse::getDoubleValue)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+    @Benchmark
+    public void readDoublesForEach(Blackhole blackhole) throws FileNotFoundException {
+
+        class Ans{
+            double maxValue = 0.0;
+        }
+        Ans ans = new Ans();
+        RowMarshaller.load(CanadaData.class)
+                .forEach(c -> ans.maxValue += c.getDoubleValue(), new BufferedReader(new FileReader(FILENAME)));
+        blackhole.consume(ans.maxValue);
+    }
+
+    @Benchmark
+    public void readDoubleFastCsvParser(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = CsvReader.builder().build(new BufferedReader(new FileReader(FILENAME)))
+                .stream().map(r -> r.getField(0))
+                .mapToDouble(Conversion::atod)
+                .mapToObj(s -> {
+                    CanadaData data = new CanadaData();
+                    data.setDoubleValue(s);
+                    return data;
+                })
+                .mapToDouble(CanadaData::getDoubleValue)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+    @Benchmark
+    public void readDoubleFastCsvParserNoHelp(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = CsvReader.builder().build(new BufferedReader(new FileReader(FILENAME)))
+                .stream().map(r -> r.getField(0))
+                .mapToDouble(Double::parseDouble)
+                .mapToObj(s -> {
+                    CanadaData data = new CanadaData();
+                    data.setDoubleValue(s);
+                    return data;
+                })
                 .mapToDouble(CanadaData::getDoubleValue)
                 .sum();
         blackhole.consume(maxValue);

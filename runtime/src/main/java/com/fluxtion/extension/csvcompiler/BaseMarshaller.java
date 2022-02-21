@@ -50,6 +50,10 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected boolean passedValidation;
     protected Consumer<CsvProcessingException> fatalExceptionHandler;
     private boolean foundRecord;
+    private static final int READ_SIZE = 8192;
+    private final char[] buf = new char[READ_SIZE];
+    int readPointer = 0;
+    int writtenLimit = -1;
 
     protected BaseMarshaller(boolean failOnError) {
         this.failOnError = failOnError;
@@ -85,22 +89,55 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         foundRecord = false;
         try {
             if (validator == null) {
-                while ((c = in.read()) != -1) {
-                    if (charEvent((char) c)) {
+                //clear unprocessed
+                for (; readPointer < writtenLimit; readPointer++) {
+                    if (charEvent(buf[readPointer])) {
                         foundRecord = true;
-                        break;
+                        readPointer++;
+                        return target;
+                    }
+                }
+                if(writtenLimit==readPointer){
+                    writtenLimit = -1;
+                    readPointer = 0;
+                }
+                //consume from reader
+                while ((c = in.read(buf, readPointer, buf.length - readPointer)) != -1) {
+                    writtenLimit = readPointer + c;
+                    for (; readPointer < c; readPointer++) {
+                        if (charEvent(buf[readPointer])) {
+                            foundRecord = true;
+                            readPointer++;
+                            return target;
+                        }
                     }
                 }
                 if (eof()) {
                     foundRecord = true;
                 }
             } else {
-                while ((c = in.read()) != -1) {
-                    if (charEvent((char) c)) {
-                        validator.accept(target, this::logRowValidationProblem);
-                        foundRecord = true;
-                        if (passedValidation()) {
-                            break;
+                    for (; readPointer < writtenLimit; readPointer++) {
+                        if (charEvent(buf[readPointer])) {
+                            validator.accept(target, this::logRowValidationProblem);
+                            foundRecord = true;
+                            readPointer++;
+                            if(passedValidation()){
+                                return target;
+                            }
+                        }
+                    }
+                    //consume from reader
+                    while ((c = in.read(buf, readPointer, buf.length - readPointer)) != -1) {
+                        writtenLimit = readPointer + c;
+                        for (; readPointer < c; readPointer++) {
+                            if (charEvent(buf[readPointer])) {
+                                validator.accept(target, this::logRowValidationProblem);
+                                foundRecord = true;
+                                readPointer++;
+                                if(passedValidation()){
+                                    return target;
+                                }
+                            }
                         }
                     }
                 }
@@ -108,7 +145,6 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                     validator.accept(target, this::logRowValidationProblem);
                     foundRecord = true;
                 }
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (CsvProcessingException processingException) {
@@ -123,23 +159,30 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         int c;
         try {
             if (validator == null) {
-                while ((c = in.read()) != -1) {
-                    if (charEvent((char) c)) {
-                        consumer.accept(target);
-                    }
-                }
-                if (eof()) {
-                    consumer.accept(target);
-                }
-            } else {
-                while ((c = in.read()) != -1) {
-                    if (charEvent((char) c)) {
-                        validator.accept(target, this::logRowValidationProblem);
-                        if (passedValidation()) {
+                //buffer read
+                while ((c = in.read(buf)) != -1) {
+                    for (int i = 0; i < c; i++) {
+                        if (charEvent(buf[i])) {
                             consumer.accept(target);
                         }
                     }
                 }
+
+                if (eof()) {
+                    consumer.accept(target);
+                }
+            } else {
+                while ((c = in.read(buf)) != -1) {
+                    for (int i = 0; i < c; i++) {
+                        if (charEvent(buf[i])) {
+                            validator.accept(target, this::logRowValidationProblem);
+                            if (passedValidation()) {
+                                consumer.accept(target);
+                            }
+                        }
+                    }
+                }
+
                 if (eof()) {
                     validator.accept(target, this::logRowValidationProblem);
                     if (passedValidation()) {
@@ -243,6 +286,8 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         fieldIndex = 0;
         writeIndex = 0;
         rowNumber = 0;
+        readPointer = 0;
+        writtenLimit = -1;
         previousChar = '\0';
         firstCharOfField = true;
     }
