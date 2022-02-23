@@ -22,6 +22,8 @@ package com.fluxtion.extension.csvcompiler.processor.model;
 public interface CsvToFieldInfoModel {
     String getTargetSetMethodName();
 
+    String getTargetGetMethodName();
+
     String getFieldIdentifier();
 
     int getFieldIndex();

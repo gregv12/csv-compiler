@@ -22,6 +22,7 @@ import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationPr
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -54,6 +55,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     private final char[] buf = new char[READ_SIZE];
     int readPointer = 0;
     int writtenLimit = -1;
+    protected StringBuilder builder = new StringBuilder(8192);
 
     protected BaseMarshaller(boolean failOnError) {
         this.failOnError = failOnError;
@@ -290,6 +292,19 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         writtenLimit = -1;
         previousChar = '\0';
         firstCharOfField = true;
+        builder.setLength(0);
+    }
+
+    public void writeRow(T target, Writer write) throws IOException {
+        builder.setLength(0);
+        writeRow(target, builder);
+        write.append(builder);
+    }
+
+    public void writeHeaders(Writer write) throws IOException {
+        builder.setLength(0);
+        writeHeaders(builder);
+        write.append(builder);
     }
 
     protected abstract boolean processRow();

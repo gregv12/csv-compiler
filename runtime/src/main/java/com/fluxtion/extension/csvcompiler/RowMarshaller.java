@@ -21,8 +21,10 @@ package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationProcessor;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
@@ -142,4 +144,12 @@ public interface RowMarshaller<T> {
                 .findAny()
                 .get();
     }
+
+    void writeHeaders(StringBuilder builder);
+
+    void writeRow(T target, StringBuilder builder);
+
+    void writeRow(T target, Writer write) throws IOException;
+
+    void writeHeaders(Writer write) throws IOException;
 }
