@@ -30,4 +30,6 @@ public @interface DataMapping {
     String configuration() default "";
 
     String lookupName() default "";
+
+    boolean checkNullOnWrite() default true;
 }

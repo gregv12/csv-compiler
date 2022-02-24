@@ -21,10 +21,34 @@ package com.fluxtion.extension.csvcompiler.processor.model;
 
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class FieldToCsvInfo {
-    
-    private String srcMethod;
-    private String headerName;
-    private String converterMethod;
+
+    private String sourceMethod;
+    private String nullValue;
+    private String converterId;
+    private String sourceType;
+    private boolean enumField;
+
+    public String getWriteStatement() {
+        String writeStatement;
+        if (converterId == null) {
+            writeStatement = "builder.append(target." + sourceMethod + "());";
+        } else {
+            writeStatement = converterId + ".toCharSequence(target." + sourceMethod + "() , builder);";
+        }
+        if (nullValue != null && !isPrimitive(sourceType)) {
+            //null check
+            writeStatement = "if(target." + sourceMethod + "() != null) {"
+                    + writeStatement
+                    + "}";
+        }
+        return writeStatement;
+    }
+
+    public static boolean isPrimitive(String targetType) {
+        return Set.of("int", "short", "byte", "char", "long", "float", "boolean", "double").contains(targetType);
+    }
 }

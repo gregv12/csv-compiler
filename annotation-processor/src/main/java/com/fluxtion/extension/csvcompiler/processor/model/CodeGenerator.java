@@ -424,9 +424,9 @@ public class CodeGenerator {
         String options = String.format(
                 "    public void writeRow(%s target, StringBuilder builder){\n", codeGeneratorModel.getTargetClassName());
 
-        options += codeGeneratorModel.fieldInfoList().stream()
-                .filter(f -> !f.isIndexField())
-                .map(s -> "builder.append(target." + s.getTargetGetMethodName() + "());")
+        options += codeGeneratorModel.outputFieldInfoList().stream()
+                .map(FieldToCsvInfo::getWriteStatement)
+//                .map(s -> "builder.append(target." + s.getTargetGetMethodName() + "());")
                 .collect(Collectors.joining(
                         "\nbuilder.append(',');\n",
                         "",

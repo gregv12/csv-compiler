@@ -127,6 +127,13 @@ public class CsvMetaModel implements CodeGeneratorModel {
                 .collect(Collectors.toList());
     }
 
+    public List<FieldToCsvInfo> outputFieldInfoList(){
+        return fieldMap.values().stream()
+                .map(FieldModel::getFieldToCsvInfoInfo)
+//                .map(CsvToFieldInfoModel.class::cast)
+                .collect(Collectors.toList());
+    }
+
     @Data(staticConstructor = "of")
     private static class FieldModel {
         private final String name;
@@ -145,6 +152,11 @@ public class CsvMetaModel implements CodeGeneratorModel {
             csvToFieldInfo = new CsvToFieldInfo();
             csvToFieldInfo.setSourceFieldName(name);
             csvToFieldInfo.setTarget(getterMethod, setterMethod, false, type, "target");
+            fieldToCsvInfoInfo = new FieldToCsvInfo();
+            fieldToCsvInfoInfo.setSourceMethod(getterMethod);
+            fieldToCsvInfoInfo.setNullValue("");
+            fieldToCsvInfoInfo.setEnumField(false);
+            fieldToCsvInfoInfo.setSourceType(type);
         }
 
         public void setColumnName(String columnName){
@@ -169,6 +181,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setFieldConverter(String converterClass, String convertConfiguration, String converterMethod) {
             csvToFieldInfo.setConverter(converterClass, convertConfiguration, converterMethod);
+            fieldToCsvInfoInfo.setConverterId(csvToFieldInfo.getConverterInstanceId());
         }
 
         public void setFieldValidator(ValidatorConfig validatorConfig){

@@ -26,6 +26,8 @@ public interface CodeGeneratorModel {
 
     List<CsvToFieldInfoModel> fieldInfoList();
 
+    List<FieldToCsvInfo> outputFieldInfoList();
+
     String getFqn();
 
     int getHeaderLines();
