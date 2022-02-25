@@ -105,6 +105,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldValidator(validatorConfig);
     }
 
+    public void setNullWriteValue(String fieldName, String nullValue){
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setNullWriteValue(nullValue);
+    }
+
     public void buildModel(){
         pruneInvalidFields();
         fieldMap.values().forEach(FieldModel::buildFieldModel);
@@ -154,7 +158,6 @@ public class CsvMetaModel implements CodeGeneratorModel {
             csvToFieldInfo.setTarget(getterMethod, setterMethod, false, type, "target");
             fieldToCsvInfoInfo = new FieldToCsvInfo();
             fieldToCsvInfoInfo.setSourceMethod(getterMethod);
-            fieldToCsvInfoInfo.setNullValue("");
             fieldToCsvInfoInfo.setEnumField(false);
             fieldToCsvInfoInfo.setSourceType(type);
         }
@@ -186,6 +189,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setFieldValidator(ValidatorConfig validatorConfig){
             csvToFieldInfo.setValidatorConfig(validatorConfig);
+        }
+
+        public void setNullWriteValue(String nullValue){
+            fieldToCsvInfoInfo.setNullValue(nullValue);
         }
 
         public void setLookupName(String lookupName){

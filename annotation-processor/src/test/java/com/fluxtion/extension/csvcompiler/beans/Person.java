@@ -20,8 +20,8 @@
 package com.fluxtion.extension.csvcompiler.beans;
 
 import com.fluxtion.extension.csvcompiler.annotations.*;
-import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
 import com.fluxtion.extension.csvcompiler.converters.ConstantStringConverter;
+import com.fluxtion.extension.csvcompiler.converters.LocalTimeConverter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -188,10 +188,17 @@ public class Person {
     }
 
     @CsvMarshaller(formatSource = true)
-    public static class Validation extends Person{
+    public static class Validation extends Person {
 
         @Validator(value = "(int age) -> age > 0", errorMessage = "age must be greater 0", exitOnFailure = false)
         private int age;
 
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class NoNullWriteCheck extends Person {
+
+        @DataMapping(checkNullOnWrite = false)
+        private String name;
     }
 }

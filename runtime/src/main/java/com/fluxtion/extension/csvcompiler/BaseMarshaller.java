@@ -199,7 +199,6 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
         }
     }
 
-
     @Override
     public final RowMarshaller<T> setHeaderTransformer(Function<String, String> headerTransformer) {
         this.headerTransformer = headerTransformer;

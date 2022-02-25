@@ -160,6 +160,11 @@ public class CsvMarshallerGenerator implements Processor {
                     if(!dataMapping.lookupName().isBlank()){
                         csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
                     }
+                    if(dataMapping.checkNullOnWrite()){
+                        csvMetaModel.setNullWriteValue(variableName.toString(), dataMapping.nullWriteValue());
+                    }else{
+                        csvMetaModel.setNullWriteValue(variableName.toString(), null);
+                    }
             }
 
             Validator validator = e.getAnnotation((Validator.class));
