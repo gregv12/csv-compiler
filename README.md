@@ -18,6 +18,12 @@ in the cloud the only cpu cycles billed are used to parse the data. For smaller 
 finished well before interpreting parsers have completed. CSV compiler can be effectively combined with AOT Graal for
 low startup times as the only code executing is statically compiled parsing logic with no indirection costs.
 
+### Example for calculating a sum of doubles in a column. Single column and 10 Columns
+
+![](images/CsvCompilerPerformanceGraphRelative.png)
+
+10 column version, 9 columns are ignored.
+
 The parser itself employs several optimisations at runtime:
 
 - Can operate as a zerogc source, re-using the target bean as a flyweight
@@ -30,7 +36,6 @@ The parser itself employs several optimisations at runtime:
 
 If reducing costs and energy consumption are important to you please consider using or help improve CVS compiler.
 
-![](images/CsvCompilerPerformanceGraphRelative.png)
 
 ## Dependencies
 
