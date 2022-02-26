@@ -1,27 +1,45 @@
 # CSV Compiler
-A java csv marshalling library that generates and compiles a CSV marshaller at build time. Driven by annotations 
-CSV compiler generates a self-contained class that is a highly optimised customised marshaller equivalent to a 
-handwritten marshaller in performance.
+
+A highly optimised and simple to use java csv marshalling library driven by annotations. Converts a csv source into a
+stream of java beans for processing within an application, equivalent to a handwritten marshaller in performance.
+Executes as an annotation processor generating CSV marshallers at build time for any classes annotated
+with ```@CsvMarshaller```.
+
 - Probably the fastest java csv parser that operates in the cloud
 - Zero GC field marshaller
 - No external runtime dependencies
 - Simple to use annotations
+- No runtime byte code generation
 
 ## Performance
-CSV compiler generates a marshaller during compilation resulting in a once only cost at development time. When deployed 
-as a stateless function in the cloud the only cpu cycles billed are used to parse the data. Most other parsers pay the 
-cost of introspection and document processing on every invocation. For smaller documents CSV compiler will have finished 
-well before dynamically generated parsers have completed. If CSV compiler is combined with AOT Graal compilation the disparity becomes 
-even greater as byte code generation optimisation that many dynamic parsers employ is not available with Graal AOT.
 
-If reducing costs and emissions are important to you please consider using or help improve CVS compiler.
+The CSV compiler annotation processor generates a marshaller during compilation. When deployed as a stateless function
+in the cloud the only cpu cycles billed are used to parse the data. For smaller documents CSV compiler will have
+finished well before interpreting parsers have completed. CSV compiler can be effectively combined with AOT Graal for
+low startup times as the only code executing is statically compiled parsing logic with no indirection costs.
+
+The parser itself employs several optimisations at runtime:
+
+- Can operate as a zerogc source, re-using the target bean as a flyweight
+- Converts primitives in a zerogc manner
+- Highly optimised number parsers
+- Native support of CharSequence, reusing buffers
+- Zero cost abstraction only generating features if specified in annotations
+- Skips columns if they are not required in the target bean
+- Reduced internal conditional execution to aid branch prediction
+
+If reducing costs and energy consumption are important to you please consider using or help improve CVS compiler.
+
+![](images/CsvCompilerPerformanceGraphRelative.png)
 
 ## Dependencies
-- The annotation processor: used during compile time to generate the custom marshaller, not required in runtime operation. 
-Use provided scope
-- CSV compiler runtime: small library that provides efficient marshalling and interface definitions
+
+- CSV compiler annotation processor: executes at build time generating custom marshallers. Not required in runtime
+  operation, use provided scope
+- CSV compiler runtime: small library that provides zerogc utilities and interface definitions
 
 ```xml
+
 <dependency>
     <groupId>com.fluxtion.csv-compiler</groupId>
     <artifactId>csv-compiler</artifactId>
@@ -34,13 +52,17 @@ Use provided scope
     <scope>provided</scope>
 </dependency>
 ```
+
 ## Example
+
 This example converts csv -> bean -> process each bean record in a java stream. The example is available [here]()
 
 ### Code
+
 Mark a java bean with annotation ```@CSVMarshaller```
 
 ```java
+
 @ToString
 @CsvMarshaller
 public class Person {
@@ -66,6 +88,7 @@ public class Person {
 ```
 
 Load CSV marshaller for the bean, set error listener, stream from a reader or String and push records to a consumer.
+
 ```java
 public class Main {
 
@@ -85,6 +108,7 @@ public class Main {
 ```
 
 Application execution output:
+
 ```text
 Main.Person(name=Linda Smith, age=43)
 Main.Person(name=Soren Miller, age=33)
@@ -93,12 +117,13 @@ Max age:43
 ```
 
 steps to process a CSV source:
+
 1. Add CVS compiler dependencies to you project.
 2. Create a java bean with getters and setter for persistent properties
 3. Add a ```@CSVMarshaller``` annotation to the java bean source file
 4. Load marshaller using ```RowMarshaller.load([Bean.class])```
 5. Optionally supply an error listener to handle any marshalling errors. ```.setErrorLog(ValidationLogger.CONSOLE)```
-6. Stream from a reader or a String  to the marshaller add a consumer that will process marshalled instances 
-```.stream(Consumer<[Bean.class]>, [Reader])```
+6. Stream from a reader or a String to the marshaller add a consumer that will process marshalled instances
+   ```.stream(Consumer<[Bean.class]>, [Reader])```
 
 
