@@ -20,7 +20,7 @@ low startup times as the only code executing is statically compiled parsing logi
 
 ### Example for calculating a sum of doubles in a column. Single column and 10 Columns
 
-![](images/CsvCompilerPerformanceGraphRelative.png)
+![](docs/images/CsvCompilerPerformanceGraphRelative.png)
 
 10 column version, 9 columns are ignored.
 

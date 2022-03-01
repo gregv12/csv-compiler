@@ -22,7 +22,7 @@ package com.fluxtion.extension.csvcompiler.processor.model;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class CsvMetaModel implements CodeGeneratorModel {
 
     private final ImportMap importMap = ImportMap.newMap();
-    private final Map<String, FieldModel> fieldMap = new HashMap<>();
+    private final Map<String, FieldModel> fieldMap = new LinkedHashMap<>();
     private final String marshallerClassName;
     private final String targetClassName;
     private final String packageName;
