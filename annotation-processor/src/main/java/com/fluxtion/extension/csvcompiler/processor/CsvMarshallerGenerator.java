@@ -20,12 +20,9 @@
 package com.fluxtion.extension.csvcompiler.processor;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
-import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
-import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
-import com.fluxtion.extension.csvcompiler.annotations.PostProcessMethod;
-import com.fluxtion.extension.csvcompiler.annotations.Validator;
+import com.fluxtion.extension.csvcompiler.annotations.*;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGenerator;
+import com.fluxtion.extension.csvcompiler.processor.model.CodeGeneratorNoBufferCopy;
 import com.fluxtion.extension.csvcompiler.processor.model.CsvMetaModel;
 import com.fluxtion.extension.csvcompiler.processor.model.ValidatorConfig;
 import com.google.auto.common.MoreElements;
@@ -38,13 +35,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeKind;
@@ -101,8 +92,13 @@ public class CsvMarshallerGenerator implements Processor {
         final CsvMetaModel model = modelCsvMarshaller(element);
         final JavaFileObject fileObject = processingEnv.getFiler().createSourceFile(model.getFqn());
         try (Writer writer = fileObject.openWriter()) {
-            CodeGenerator codeGenerator = new CodeGenerator(writer, model);
-            codeGenerator.writeMarshaller();
+            if (model.getVersion() == 1) {
+                CodeGenerator codeGenerator = new CodeGenerator(writer, model);
+                codeGenerator.writeMarshaller();
+            } else {
+                CodeGeneratorNoBufferCopy codeGenerator = new CodeGeneratorNoBufferCopy(writer, model);
+                codeGenerator.writeMarshaller();
+            }
         }
     }
 
@@ -133,8 +129,8 @@ public class CsvMarshallerGenerator implements Processor {
                 }
                 if (columnMapping.columnIndex() > -1) {
                     csvMetaModel.setColumnIndex(variableName.toString(), columnMapping.columnIndex());
-                }else{
-                    if(!csvMetaModel.isMappingRowPresent()){
+                } else {
+                    if (!csvMetaModel.isMappingRowPresent()) {
                         processingEnv.getMessager().printMessage(
                                 Diagnostic.Kind.ERROR,
                                 "index column required if no mapping row is present",
@@ -146,29 +142,29 @@ public class CsvMarshallerGenerator implements Processor {
             }
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
-            if (dataMapping != null){
-                    List<? extends TypeMirror> types = getTypeMirrorFromAnnotationValue(dataMapping::converter);
-                    TypeMirror typeMirror = types.get(0);
-                    Types TypeUtils = this.processingEnv.getTypeUtils();
-                    TypeElement typeElement1 = (TypeElement) TypeUtils.asElement(typeMirror);
-                    String fqnConverter = typeElement1.getQualifiedName().toString();
-                    if(!fqnConverter.equalsIgnoreCase(FieldConverter.NULL.class.getCanonicalName())){
-                        String format = dataMapping.configuration();
-                        String converterMethod = dataMapping.conversionMethod();
-                        csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), converterMethod, format);
-                    }
-                    if(!dataMapping.lookupName().isBlank()){
-                        csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
-                    }
-                    if(dataMapping.checkNullOnWrite()){
-                        csvMetaModel.setNullWriteValue(variableName.toString(), dataMapping.nullWriteValue());
-                    }else{
-                        csvMetaModel.setNullWriteValue(variableName.toString(), null);
-                    }
+            if (dataMapping != null) {
+                List<? extends TypeMirror> types = getTypeMirrorFromAnnotationValue(dataMapping::converter);
+                TypeMirror typeMirror = types.get(0);
+                Types TypeUtils = this.processingEnv.getTypeUtils();
+                TypeElement typeElement1 = (TypeElement) TypeUtils.asElement(typeMirror);
+                String fqnConverter = typeElement1.getQualifiedName().toString();
+                if (!fqnConverter.equalsIgnoreCase(FieldConverter.NULL.class.getCanonicalName())) {
+                    String format = dataMapping.configuration();
+                    String converterMethod = dataMapping.conversionMethod();
+                    csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), converterMethod, format);
+                }
+                if (!dataMapping.lookupName().isBlank()) {
+                    csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
+                }
+                if (dataMapping.checkNullOnWrite()) {
+                    csvMetaModel.setNullWriteValue(variableName.toString(), dataMapping.nullWriteValue());
+                } else {
+                    csvMetaModel.setNullWriteValue(variableName.toString(), null);
+                }
             }
 
             Validator validator = e.getAnnotation((Validator.class));
-            if(validator != null && !validator.value().isBlank()){
+            if (validator != null && !validator.value().isBlank()) {
                 csvMetaModel.setValidator(variableName.toString(), ValidatorConfig.fromAnnotation(validator));
             }
 
@@ -186,8 +182,7 @@ public class CsvMarshallerGenerator implements Processor {
     public static List<? extends TypeMirror> getTypeMirrorFromAnnotationValue(GetClassValue c) {
         try {
             c.execute();
-        }
-        catch(MirroredTypesException ex) {
+        } catch (MirroredTypesException ex) {
             return ex.getTypeMirrors();
         }
         return null;
@@ -237,10 +232,10 @@ public class CsvMarshallerGenerator implements Processor {
 
     private void setMarshallerOptions(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
-        if(annotation.noHeader()){
+        if (annotation.noHeader()) {
             csvMetaModel.setMappingRow(0);
             csvMetaModel.setHeaderLines(0);
-        }else{
+        } else {
             csvMetaModel.setMappingRow(annotation.mappingRow());
             csvMetaModel.setHeaderLines(Math.max(annotation.mappingRow(), annotation.headerLines()));
         }
@@ -254,6 +249,7 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setNewBeanPerRecord(annotation.newBeanPerRecord());
         csvMetaModel.setAcceptPartials(annotation.acceptPartials());
         csvMetaModel.setTrim(annotation.trim());
+        csvMetaModel.setVersion(annotation.versionNumber());
     }
 
 }

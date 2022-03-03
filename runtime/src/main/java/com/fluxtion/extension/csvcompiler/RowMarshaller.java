@@ -118,7 +118,7 @@ public interface RowMarshaller<T> {
      * @param consumer Marshalled instance consumer
      * @param in       Reader source to process
      */
-    void forEach(Consumer<T> consumer, Reader in);
+    void forEach(Consumer<? super T> consumer, Reader in);
 
     /**
      * Creates an iterator over marshalled instances from the supplied {@link Reader}

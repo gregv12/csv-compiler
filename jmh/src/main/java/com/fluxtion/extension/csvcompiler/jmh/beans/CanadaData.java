@@ -17,18 +17,15 @@
  *
  */
 
-package com.fluxtion.extension.csvcompiler.jmh;
+package com.fluxtion.extension.csvcompiler.jmh.beans;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
-import com.fluxtion.extension.csvcompiler.converters.JavaDoubleParserConverter;
 
 @CsvMarshaller(noHeader = true, newBeanPerRecord = false)
-public class CanadaDataJavaParser {
+public class CanadaData {
 
     @ColumnMapping(columnIndex = 0)
-    @DataMapping(converter = JavaDoubleParserConverter.class)
     double doubleValue;
 
     public double getDoubleValue() {

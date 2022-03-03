@@ -17,35 +17,22 @@
  *
  */
 
-package com.fluxtion.extension.csvcompiler.jmh;
+package com.fluxtion.extension.csvcompiler.jmh.beans;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
-import lombok.ToString;
 
-@CsvMarshaller(processEscapeSequences = true, mappingRow = 0, headerLines = 0, formatSource = true, newBeanPerRecord = false)
-@ToString
-public class SampleDataFlyweight {
+@CsvMarshaller(noHeader = true, newBeanPerRecord = false)
+public class CanadaCharData {
 
     @ColumnMapping(columnIndex = 0)
-    private int rowId;
-    @ColumnMapping(columnIndex = 1)
-    private CharSequence description;
+    CharSequence doubleValue;
 
-    public int getRowId() {
-        return rowId;
+    public CharSequence getDoubleValue() {
+        return doubleValue;
     }
 
-    public void setRowId(int rowId) {
-        this.rowId = rowId;
+    public void setDoubleValue(CharSequence CharSequence) {
+        this.doubleValue = doubleValue;
     }
-
-    public CharSequence getDescription() {
-        return description;
-    }
-
-    public void setDescription(CharSequence description) {
-        this.description = description;
-    }
-
 }

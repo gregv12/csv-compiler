@@ -27,6 +27,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface CsvMarshaller {
 
+    int versionNumber() default 0;
     /**
      * The row containing the column identifiers for this bean marshaller. A value of less 1 than indicates
      * no mapping row

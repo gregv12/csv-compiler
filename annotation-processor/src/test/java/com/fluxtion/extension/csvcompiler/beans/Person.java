@@ -84,6 +84,16 @@ public class Person {
     public static class Escaped extends Person {
     }
 
+
+    @CsvMarshaller(formatSource = true, noHeader = true, processEscapeSequences = true)
+    public static class EscapedIndexFields extends Person {
+
+        @ColumnMapping(columnIndex = 0)
+        private String name;
+
+        @ColumnMapping(columnIndex = 1)
+        private int age;
+    }
     @CsvMarshaller(formatSource = true, fieldSeparator = '|')
     public static class PipeSeparator extends Person {
     }

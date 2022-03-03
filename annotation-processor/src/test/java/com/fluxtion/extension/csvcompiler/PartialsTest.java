@@ -23,6 +23,8 @@ import com.fluxtion.extension.csvcompiler.beans.StringsOnly;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,7 +97,7 @@ public class PartialsTest {
     public void newLineFeed(){
         assertGoodParse("A\nB", new StringsOnly("A"), new StringsOnly("B"));
         assertGoodParse("D\n", new StringsOnly("D"));
-        assertGoodParse("\nD", new StringsOnly(""), new StringsOnly("D"));
+        assertGoodParse("\nD", new StringsOnly(), new StringsOnly("D"));
         assertGoodParseSkip("\nD", new StringsOnly.SkipEmptyLines("D"));
     }
 
@@ -111,7 +113,7 @@ public class PartialsTest {
     public void LegacyMacLfTest(){
         assertGoodParse("A\rB", new StringsOnly("A"), new StringsOnly("B"));
         assertGoodParse("D\r", new StringsOnly("D"));
-        assertGoodParse("\rD", new StringsOnly(""), new StringsOnly("D"));
+        assertGoodParse("\rD", new StringsOnly(), new StringsOnly("D"));
         assertGoodParseSkip("\rD", new StringsOnly.SkipEmptyLines("D"));
     }
     /**
@@ -125,7 +127,7 @@ public class PartialsTest {
     public void windowsCrLfTest(){
         assertGoodParse("A\r\nB", new StringsOnly("A"), new StringsOnly("B"));
         assertGoodParse("D\r\n", new StringsOnly("D"));
-        assertGoodParse("\r\nD", new StringsOnly(""), new StringsOnly("D"));
+        assertGoodParse("\r\nD", new StringsOnly(), new StringsOnly("D"));
         assertGoodParseSkip("\r\nD", new StringsOnly.SkipEmptyLines("D"));
     }
 
@@ -210,7 +212,7 @@ public class PartialsTest {
 
     @Test
     public void nonRfcConformingDataTest(){
-        assertGoodParse("\"D\" ", new StringsOnly("D "));
+        assertGoodParse("\"D\"XYZ", new StringsOnly("DXYZ"));
         assertGoodParse("\"A,B\" ", new StringsOnly("A,B "));
         assertGoodParse(" \"D\"", new StringsOnly(" \"D\""));
         assertGoodParse(" \"D\" ", new StringsOnly(" \"D\" "));
@@ -223,12 +225,28 @@ public class PartialsTest {
     }
 
     static void assertGoodParse(String input, StringsOnly... expected){
-        List<StringsOnly> results = RowMarshaller.load(StringsOnly.class).stream(input).collect(Collectors.toList());
-        Assertions.assertIterableEquals( Arrays.asList(expected), results, "contents differ for input:" + input);
+        List<StringsOnly> results;
+        results = RowMarshaller.load(StringsOnly.class).stream(input).collect(Collectors.toList());
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "streaming contents differ for input:" + input);
+        //stream with validator
+        results = RowMarshaller.load(StringsOnly.class).setRowValidator((s,p) -> {}).stream(input).collect(Collectors.toList());
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "streaming with validator contents differ for input:" + input);
+        //for each
+        results = new ArrayList<>();
+        RowMarshaller.load(StringsOnly.class).forEach(results::add, new StringReader(input));
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "forEach contents differ for input:" + input);
     }
 
     static void assertGoodParseSkip(String input, StringsOnly.SkipEmptyLines... expected){
-        List<StringsOnly.SkipEmptyLines> results = RowMarshaller.load(StringsOnly.SkipEmptyLines.class).stream(input).collect(Collectors.toList());
-        Assertions.assertIterableEquals( Arrays.asList(expected), results, "contents differ for input:'" + input + "'");
+        List<StringsOnly.SkipEmptyLines> results;
+        results = RowMarshaller.load(StringsOnly.SkipEmptyLines.class).stream(input).collect(Collectors.toList());
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "streaming contents differ for input:'" + input + "'");
+        //stream with validator
+        results = RowMarshaller.load(StringsOnly.SkipEmptyLines.class).setRowValidator((s,p) -> {}).stream(input).collect(Collectors.toList());
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "streaming with validator contents differ for input:" + input);
+        //for each
+        results = new ArrayList<>();
+        RowMarshaller.load(StringsOnly.SkipEmptyLines.class).forEach(results::add, new StringReader(input));
+        Assertions.assertIterableEquals( Arrays.asList(expected), results, "firEach contents differ for input:" + input);
     }
 }

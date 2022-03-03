@@ -156,7 +156,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     @Override
-    public final void forEach(Consumer<T> consumer, Reader in) {
+    public final void forEach(Consumer<? super T> consumer, Reader in) {
         init();
         int c;
         try {

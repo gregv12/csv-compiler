@@ -51,6 +51,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
     private boolean skipEmptyLines;
     private boolean failOnFirstError;
     private String postProcessMethod;
+    private int version;
 
     public CsvMetaModel(String targetClassName, String marshallerClassName, String packageName) {
         this.targetClassName = targetClassName;
