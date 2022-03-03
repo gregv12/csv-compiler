@@ -16,8 +16,12 @@
  * limitations under the License.
  *
  */
-package com.fluxtion.extension.csvcompiler;
+package com.fluxtion.extension.csvcompiler.processor.nobuffer;
 
+import com.fluxtion.extension.csvcompiler.CharArrayCharSequence;
+import com.fluxtion.extension.csvcompiler.CsvProcessingException;
+import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import com.fluxtion.extension.csvcompiler.ValidationLogger;
 import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationProcessor;
 
 import java.io.IOException;
@@ -43,18 +47,22 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected final char[] chars = new char[READ_SIZE*2];
     protected final int[] delimiterIndex = new int[1024];
     protected final CharArrayCharSequence sequence = new CharArrayCharSequence(chars);
+
+    //the last read point of the buffer
+    int readPointer = 0;
+    //the last index in the buffer data was written to
+    int writtenLimit = -1;
+    //chars read pointers
     protected int fieldIndex = 0;
-    protected int writeIndex = 0;
-    protected BiConsumer<T, FailedRowValidationProcessor> validator;
-    protected Function<String, String> headerTransformer = Function.identity();
+    protected boolean emptyRow = true;
     protected char previousChar = '\0';
     protected boolean firstCharOfField = true;
+
+    protected BiConsumer<T, FailedRowValidationProcessor> validator;
+    protected Function<String, String> headerTransformer = Function.identity();
     protected boolean passedValidation;
     protected Consumer<CsvProcessingException> fatalExceptionHandler;
     private boolean foundRecord;
-    private final char[] buf = new char[READ_SIZE];
-    int readPointer = 0;
-    int writtenLimit = -1;
     protected StringBuilder builder = new StringBuilder(8192);
 
     protected BaseMarshaller(boolean failOnError) {
@@ -93,21 +101,23 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
             if (validator == null) {
                 //clear unprocessed
                 for (; readPointer < writtenLimit; readPointer++) {
-                    if (charEvent(buf[readPointer])) {
+                    if (charEvent(chars[readPointer])) {
                         foundRecord = true;
                         readPointer++;
                         return target;
                     }
                 }
+                //just perform copy and move remaining - or will this be enough
                 if(writtenLimit==readPointer){
                     writtenLimit = -1;
                     readPointer = 0;
                 }
                 //consume from reader
-                while ((c = in.read(buf, readPointer, buf.length - readPointer)) != -1) {
+                //log the read size
+                while ((c = in.read(chars, readPointer, chars.length - readPointer)) != -1) {
                     writtenLimit = readPointer + c;
                     for (; readPointer < c; readPointer++) {
-                        if (charEvent(buf[readPointer])) {
+                        if (charEvent(chars[readPointer])) {
                             foundRecord = true;
                             readPointer++;
                             return target;
@@ -118,30 +128,30 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
                     foundRecord = true;
                 }
             } else {
-                    for (; readPointer < writtenLimit; readPointer++) {
-                        if (charEvent(buf[readPointer])) {
-                            validator.accept(target, this::logRowValidationProblem);
-                            foundRecord = true;
-                            readPointer++;
-                            if(passedValidation()){
-                                return target;
-                            }
-                        }
-                    }
-                    //consume from reader
-                    while ((c = in.read(buf, readPointer, buf.length - readPointer)) != -1) {
-                        writtenLimit = readPointer + c;
-                        for (; readPointer < c; readPointer++) {
-                            if (charEvent(buf[readPointer])) {
-                                validator.accept(target, this::logRowValidationProblem);
-                                foundRecord = true;
-                                readPointer++;
-                                if(passedValidation()){
-                                    return target;
-                                }
-                            }
-                        }
-                    }
+//                    for (; readPointer < writtenLimit; readPointer++) {
+//                        if (charEvent(buf[readPointer])) {
+//                            validator.accept(target, this::logRowValidationProblem);
+//                            foundRecord = true;
+//                            readPointer++;
+//                            if(passedValidation()){
+//                                return target;
+//                            }
+//                        }
+//                    }
+//                    //consume from reader
+//                    while ((c = in.read(buf, readPointer, buf.length - readPointer)) != -1) {
+//                        writtenLimit = readPointer + c;
+//                        for (; readPointer < c; readPointer++) {
+//                            if (charEvent(buf[readPointer])) {
+//                                validator.accept(target, this::logRowValidationProblem);
+//                                foundRecord = true;
+//                                readPointer++;
+//                                if(passedValidation()){
+//                                    return target;
+//                                }
+//                            }
+//                        }
+//                    }
                 }
                 if (eof()) {
                     validator.accept(target, this::logRowValidationProblem);
@@ -157,46 +167,46 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
     @Override
     public final void forEach(Consumer<T> consumer, Reader in) {
-        init();
-        int c;
-        try {
-            if (validator == null) {
-                //buffer read
-                while ((c = in.read(buf)) != -1) {
-                    for (int i = 0; i < c; i++) {
-                        if (charEvent(buf[i])) {
-                            consumer.accept(target);
-                        }
-                    }
-                }
-
-                if (eof()) {
-                    consumer.accept(target);
-                }
-            } else {
-                while ((c = in.read(buf)) != -1) {
-                    for (int i = 0; i < c; i++) {
-                        if (charEvent(buf[i])) {
-                            validator.accept(target, this::logRowValidationProblem);
-                            if (passedValidation()) {
-                                consumer.accept(target);
-                            }
-                        }
-                    }
-                }
-
-                if (eof()) {
-                    validator.accept(target, this::logRowValidationProblem);
-                    if (passedValidation()) {
-                        consumer.accept(target);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (CsvProcessingException processingException) {
-            this.handleFatalProcessingError(processingException);
-        }
+//        init();
+//        int c;
+//        try {
+//            if (validator == null) {
+//                //buffer read
+//                while ((c = in.read(buf)) != -1) {
+//                    for (int i = 0; i < c; i++) {
+//                        if (charEvent(buf[i])) {
+//                            consumer.accept(target);
+//                        }
+//                    }
+//                }
+//
+//                if (eof()) {
+//                    consumer.accept(target);
+//                }
+//            } else {
+//                while ((c = in.read(buf)) != -1) {
+//                    for (int i = 0; i < c; i++) {
+//                        if (charEvent(buf[i])) {
+//                            validator.accept(target, this::logRowValidationProblem);
+//                            if (passedValidation()) {
+//                                consumer.accept(target);
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                if (eof()) {
+//                    validator.accept(target, this::logRowValidationProblem);
+//                    if (passedValidation()) {
+//                        consumer.accept(target);
+//                    }
+//                }
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } catch (CsvProcessingException processingException) {
+//            this.handleFatalProcessingError(processingException);
+//        }
     }
 
     @Override
@@ -285,7 +295,8 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
 
     protected void init() {
         fieldIndex = 0;
-        writeIndex = 0;
+        emptyRow = true;
+//        writeIndex = 0;
         rowNumber = 0;
         readPointer = 0;
         writtenLimit = -1;
@@ -317,7 +328,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     }
 
     protected final boolean eof() {
-        if (writeIndex != 0) {
+        if (!emptyRow) {
             return processRow();
         }
         return false;
@@ -326,7 +337,7 @@ public abstract class BaseMarshaller<T> implements RowMarshaller<T> {
     protected final void updateFieldIndex() {
         firstCharOfField = true;
         fieldIndex++;
-        delimiterIndex[fieldIndex] = writeIndex + 1;
+        delimiterIndex[fieldIndex] = readPointer + 1;
     }
 
     protected final void logException(String prefix, boolean fatal, Exception e) {
