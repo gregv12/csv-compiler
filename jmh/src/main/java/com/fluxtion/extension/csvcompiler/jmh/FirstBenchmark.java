@@ -19,6 +19,10 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import com.fluxtion.extension.csvcompiler.jmh.beans.SampleData;
+import com.fluxtion.extension.csvcompiler.jmh.beans.SampleDataFlyweight;
+import com.fluxtion.extension.csvcompiler.jmh.beans.TwoColumnData;
+import com.fluxtion.extension.csvcompiler.jmh.beans.TwoColumnDataEscaped;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;

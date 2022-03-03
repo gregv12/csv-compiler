@@ -17,22 +17,22 @@
  *
  */
 
-package com.fluxtion.extension.csvcompiler.jmh;
+package com.fluxtion.extension.csvcompiler.jmh.beans;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 
-@CsvMarshaller(noHeader = true, newBeanPerRecord = false)
-public class CanadaCharData {
+@CsvMarshaller(noHeader = true)
+public class CanadaDataNoReuse {
 
     @ColumnMapping(columnIndex = 0)
-    CharSequence doubleValue;
+    double doubleValue;
 
-    public CharSequence getDoubleValue() {
+    public double getDoubleValue() {
         return doubleValue;
     }
 
-    public void setDoubleValue(CharSequence CharSequence) {
+    public void setDoubleValue(double doubleValue) {
         this.doubleValue = doubleValue;
     }
 }

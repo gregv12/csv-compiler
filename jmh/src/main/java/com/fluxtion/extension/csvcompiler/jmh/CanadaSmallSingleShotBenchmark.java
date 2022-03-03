@@ -20,6 +20,9 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import com.fluxtion.extension.csvcompiler.jmh.beans.CanadaCharData;
+import com.fluxtion.extension.csvcompiler.jmh.beans.CanadaData;
+import com.fluxtion.extension.csvcompiler.jmh.beans.CanadaDataJavaParser;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;

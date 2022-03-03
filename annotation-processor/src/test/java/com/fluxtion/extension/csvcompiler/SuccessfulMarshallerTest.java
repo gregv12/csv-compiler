@@ -22,6 +22,7 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationProcessor;
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import com.fluxtion.extension.csvcompiler.beans.Person.EscapedIndexFields;
 import com.fluxtion.extension.csvcompiler.beans.Person.MultipleHeaderLines;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
@@ -140,6 +142,17 @@ public class SuccessfulMarshallerTest {
                 ,
                 Person.build(Person.Escaped::new, "t, s", 32),
                 Person.build(Person.Escaped::new, "\"lisa\"", 44)
+        );
+    }
+
+
+    @Test
+    public void processIndexEscapeSequence(){
+        testPerson(
+                EscapedIndexFields.class,
+                        "\"\"\"L\"\"\",44\n"
+                ,
+                Person.build(EscapedIndexFields::new, "\"L\"", 44)
         );
     }
 
@@ -297,14 +310,45 @@ public class SuccessfulMarshallerTest {
         assertIterableEquals(
                 errorRowsExpected,
                 errorRowsActual,
-                "indexes of invalid rows does not match"
+                "forEach indexes of invalid rows does not match"
         );
 
         assertIterableEquals(
                 List.of(people),
                 resultList,
-                "number of valid rows is different"
+                "forEach number of valid rows is different"
         );
 
+        //perform test with streaming
+        errorRowsActual.clear();
+        resultList = RowMarshaller
+                .load(personClass)
+                .setValidationLogger(new ValidationLogger() {
+                    @Override
+                    public void logFatal(CsvProcessingException csvProcessingException) {
+//                        System.out.println(csvProcessingException);
+                        errorRowsActual.add(csvProcessingException.getLineNumber());
+                    }
+
+                    @Override
+                    public void logWarning(CsvProcessingException csvProcessingException) {
+//                        System.out.println(csvProcessingException);
+                        errorRowsActual.add(csvProcessingException.getLineNumber());
+                    }
+                })
+                .setRowValidator(validator)
+                .stream(input).collect(Collectors.toList());
+
+        assertIterableEquals(
+                errorRowsExpected,
+                errorRowsActual,
+                "streaming indexes of invalid rows does not match"
+        );
+
+        assertIterableEquals(
+                List.of(people),
+                resultList,
+                "streaming number of valid rows is different"
+        );
     }
 }

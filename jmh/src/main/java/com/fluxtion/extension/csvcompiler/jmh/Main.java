@@ -20,6 +20,7 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import com.fluxtion.extension.csvcompiler.jmh.beans.CanadaData;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
