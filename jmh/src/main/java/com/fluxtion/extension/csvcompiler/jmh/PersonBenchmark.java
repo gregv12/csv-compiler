@@ -20,7 +20,12 @@
 package com.fluxtion.extension.csvcompiler.jmh;
 
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import com.fluxtion.extension.csvcompiler.converters.Conversion;
+import com.fluxtion.extension.csvcompiler.jmh.beans.CanadaData;
+import com.fluxtion.extension.csvcompiler.jmh.beans.DataWithNames;
+import com.fluxtion.extension.csvcompiler.jmh.beans.NameOnly;
 import com.fluxtion.extension.csvcompiler.jmh.beans.Person;
+import de.siegmar.fastcsv.reader.CsvReader;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -37,6 +42,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.concurrent.TimeUnit;
 
+import static com.fluxtion.extension.csvcompiler.jmh.UtilGeneratePersonData.PERSON_10_COLUMNS_TXT;
+import static com.fluxtion.extension.csvcompiler.jmh.UtilGeneratePersonData.PERSON_COLUMNS_TXT;
+
 @BenchmarkMode({Mode.Throughput})
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
@@ -45,50 +53,110 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 1, time = 2)
 public class PersonBenchmark {
 
-    @Benchmark
-    public void readDoublesColumnsWithBufferCopy(Blackhole blackhole) throws FileNotFoundException {
-        double maxValue = RowMarshaller.load(Person.PersonBufferCopy.class)
-                .stream(new BufferedReader(new FileReader(UtilGeneratePersonData.PERSON_10_COLUMNS_TXT)))
-                .mapToDouble(Person::getAge)
-                .sum();
-        blackhole.consume(maxValue);
-    }
-
-    @Benchmark
-    public void readDoublesColumnsNoBufferCopy(Blackhole blackhole) throws FileNotFoundException {
-        double maxValue = RowMarshaller.load(Person.class)
-                .stream(new BufferedReader(new FileReader(UtilGeneratePersonData.PERSON_10_COLUMNS_TXT)))
-                .mapToDouble(Person::getAge)
-                .sum();
-        blackhole.consume(maxValue);
-    }
-
-
-    double maxValue;
-    @Benchmark
-    public void readDoublesForEacColumnsWithBufferCopy(Blackhole blackhole) throws FileNotFoundException {
-        RowMarshaller.load(Person.PersonBufferCopy.class)
-                .forEach(p -> maxValue += p.getAge(),
-                        new BufferedReader(new FileReader(UtilGeneratePersonData.PERSON_10_COLUMNS_TXT)));
-        blackhole.consume(maxValue);
-    }
-
-    @Benchmark
-    public void readDoublesForEachColumnsNoBufferCopy(Blackhole blackhole) throws FileNotFoundException {
-        RowMarshaller.load(Person.class)
-                .forEach(p -> maxValue += p.getAge(),
-                        new BufferedReader(new FileReader(UtilGeneratePersonData.PERSON_10_COLUMNS_TXT)));
-        blackhole.consume(maxValue);
-    }
-
 //    @Benchmark
-//    public void readDoubles10Columns(Blackhole blackhole) throws FileNotFoundException {
-//
-////        PersonNoBufferCsvMarshaller marshaller = new PersonNoBufferCsvMarshaller();
-////        double maxValue = marshaller
-////                .stream(new BufferedReader(new FileReader(FILENAME_10COLUMNS)))
-////                .mapToDouble(Person::getAge)
-////                .sum();
-////        blackhole.consume(maxValue);
+//    public void readDoublesColumnsWithBufferCopy_1_Column(Blackhole blackhole) throws FileNotFoundException {
+//        double maxValue = RowMarshaller.load(Person.PersonBufferCopy.class)
+//                .stream(new BufferedReader(new FileReader(PERSON_COLUMNS_TXT)))
+//                .mapToDouble(Person::getAge)
+//                .sum();
+//        blackhole.consume(maxValue);
 //    }
+//
+//    @Benchmark
+//    public void readDoublesColumnsWithBufferCopy_10_Column(Blackhole blackhole) throws FileNotFoundException {
+//        double maxValue = RowMarshaller.load(Person.PersonBufferCopy.class)
+//                .stream(new BufferedReader(new FileReader(PERSON_10_COLUMNS_TXT)))
+//                .mapToDouble(Person::getAge)
+//                .sum();
+//        blackhole.consume(maxValue);
+//    }
+
+    @Benchmark
+    public void readDoublesColumnsNoBufferCopy_10_ColumnALLUSED(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = RowMarshaller.load(DataWithNames.class)
+                .stream(new BufferedReader(new FileReader(PERSON_10_COLUMNS_TXT)))
+                .mapToDouble(Person::getAge)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+    @Benchmark
+    public void readDoublesColumnsNoBufferCopy_10_Column(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = RowMarshaller.load(NameOnly.class)
+                .stream(new BufferedReader(new FileReader(PERSON_10_COLUMNS_TXT)))
+                .mapToDouble(n -> 0.0)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+    @Benchmark
+    public void readDoublesColumnsNoBufferCopy_1_Column(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = RowMarshaller.load(NameOnly.class)
+                .stream(new BufferedReader(new FileReader(PERSON_COLUMNS_TXT)))
+                .mapToDouble(n -> 0.0)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+    @Benchmark
+    public void readDoubleFastCsvParser_1_Column(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = CsvReader.builder().build(new BufferedReader(new FileReader(PERSON_COLUMNS_TXT)))
+                .stream()
+                .filter(row -> !row.getField(0).equalsIgnoreCase("name"))
+                .map(row -> {
+                    Person person = new Person();
+                    person.setName(row.getField(0));
+                    person.setAge(Double.parseDouble(row.getField(1)));
+//                    person.setAge(Conversion.atod(row.getField(1)));
+                    return person;
+                })
+                .mapToDouble(Person::getAge)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+
+    @Benchmark
+    public void readDoubleFastCsvParser_10_Column(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = CsvReader.builder().build(new BufferedReader(new FileReader(PERSON_10_COLUMNS_TXT)))
+                .stream()
+                .filter(row -> !row.getField(0).equalsIgnoreCase("name"))
+                .map(row -> {
+                    Person person = new Person();
+                    person.setName(row.getField(0));
+//                    person.setAge(Double.parseDouble(row.getField(1)));
+//                    person.setAge(Conversion.atod(row.getField(1)));
+                    return person;
+                })
+                .mapToDouble(Person::getAge)
+                .sum();
+        blackhole.consume(maxValue);
+    }
+
+
+    @Benchmark
+    public void readDoubleFastCsvParser_10_ColumnALLUSED(Blackhole blackhole) throws FileNotFoundException {
+        double maxValue = CsvReader.builder().build(new BufferedReader(new FileReader(PERSON_10_COLUMNS_TXT)))
+                .stream()
+                .filter(row -> !row.getField(0).equalsIgnoreCase("name"))
+                .map(row -> {
+                    DataWithNames person = new DataWithNames();
+                    person.setName(row.getField(0));
+//                    person.setAge(Double.parseDouble(row.getField(1)));
+                    person.setName1(row.getField(2));
+                    person.setName2(row.getField(3));
+                    person.setName3(row.getField(4));
+                    person.setName4(row.getField(5));
+                    person.setName5(row.getField(6));
+                    person.setName6(row.getField(7));
+                    person.setName7(row.getField(8));
+                    person.setName8(row.getField(9));
+                    person.setName9(row.getField(10));
+//                    person.setAge(Conversion.atod(row.getField(1)));
+                    return person;
+                })
+                .mapToDouble(Person::getAge)
+                .sum();
+        blackhole.consume(maxValue);
+    }
 }

@@ -5,9 +5,9 @@ import lombok.ToString;
 
 @ToString
 @CsvMarshaller(formatSource = true)
-public class Person {
+public class NameOnly {
+
     private String name;
-    private double age;
 
     public String getName() {
         return name;
@@ -17,16 +17,4 @@ public class Person {
         this.name = name;
     }
 
-    public double getAge() {
-        return age;
-    }
-
-    public void setAge(double age) {
-        this.age = age;
-    }
-
-    @CsvMarshaller(formatSource = true, versionNumber = 1)
-    public static class PersonBufferCopy extends Person{
-
-    }
 }
