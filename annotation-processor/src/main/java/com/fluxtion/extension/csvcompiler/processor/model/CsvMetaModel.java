@@ -46,6 +46,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
     private boolean trim;
     private boolean processEscapeSequence;
     private boolean ignoreQuotes;
+    private int maximumInlineFieldsLimit;
     private boolean formatSource;
     private boolean skipCommentLines;
     private boolean skipEmptyLines;

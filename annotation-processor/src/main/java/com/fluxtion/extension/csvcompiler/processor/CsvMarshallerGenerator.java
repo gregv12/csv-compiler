@@ -250,6 +250,7 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.setAcceptPartials(annotation.acceptPartials());
         csvMetaModel.setTrim(annotation.trim());
         csvMetaModel.setVersion(annotation.versionNumber());
+        csvMetaModel.setMaximumInlineFieldsLimit(annotation.loopAssignmentLimit());
     }
 
 }

@@ -96,4 +96,10 @@ public interface CodeGeneratorModel {
     boolean isTrim();
 
     boolean isFailOnFirstError();
+
+    int getMaximumInlineFieldsLimit();
+
+    default boolean isLoopAssignment(){
+        return getMaximumInlineFieldsLimit() < fieldInfoList().size();
+    }
 }

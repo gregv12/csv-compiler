@@ -131,4 +131,11 @@ public @interface CsvMarshaller {
      */
     boolean failOnFirstError() default false;
 
+    /**
+     * Force the generated parser to use loop assignment if the number of fields is greater than this limit value.
+     * The default is 5, if more than 5 fields are present loop assignmemnt will be used.
+     * @return the maximum number of fields for inline assignment
+     */
+    int loopAssignmentLimit() default 5;
+
 }

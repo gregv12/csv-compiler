@@ -84,7 +84,6 @@ public class Person {
     public static class Escaped extends Person {
     }
 
-
     @CsvMarshaller(formatSource = true, noHeader = true, processEscapeSequences = true)
     public static class EscapedIndexFields extends Person {
 
@@ -94,6 +93,7 @@ public class Person {
         @ColumnMapping(columnIndex = 1)
         private int age;
     }
+
     @CsvMarshaller(formatSource = true, fieldSeparator = '|')
     public static class PipeSeparator extends Person {
     }
@@ -171,7 +171,27 @@ public class Person {
     @CsvMarshaller(formatSource = true)
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    public static class ConverterFlled extends Person {
+    public static class ConverterField extends Person {
+
+        @DataMapping(converter = LocalTimeConverter.class, configuration = "HH:mm")
+        private LocalTime birthTime;
+
+        @DataMapping(converter = ConstantStringConverter.class, configuration = "ALWAYS_LINDA")
+        private String name;
+
+        public LocalTime getBirthTime() {
+            return birthTime;
+        }
+
+        public void setBirthTime(LocalTime birthTime) {
+            this.birthTime = birthTime;
+        }
+    }
+
+    @CsvMarshaller(formatSource = true, loopAssignmentLimit = 0)
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    public static class ConverterFieldLoopAssignment extends Person {
 
         @DataMapping(converter = LocalTimeConverter.class, configuration = "HH:mm")
         private LocalTime birthTime;
@@ -210,5 +230,10 @@ public class Person {
 
         @DataMapping(checkNullOnWrite = false)
         private String name;
+    }
+
+    @CsvMarshaller(loopAssignmentLimit = 0)
+    public static class LoopAssignment extends Person{
+
     }
 }

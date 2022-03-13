@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Writer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class CodeGeneratorNoBufferCopy {
@@ -42,6 +43,7 @@ public class CodeGeneratorNoBufferCopy {
             "\n" +
             "    public %3$s() {\n" +
             "        super(%7$s);\n" +
+            "        %8$s" +
             "    }\n" +
             "\n" +
             "@Override\n" +
@@ -69,7 +71,8 @@ public class CodeGeneratorNoBufferCopy {
                 codeGeneratorModel.getTargetClassName(),
                 buildDeclarations(codeGeneratorModel),
                 buildCharacterProcessing(codeGeneratorModel),
-                codeGeneratorModel.isFailOnFirstError()
+                codeGeneratorModel.isFailOnFirstError(),
+                buildLoopAssignments(codeGeneratorModel)
         );
         if (codeGeneratorModel.isFormatSource()) {
             sourceString = new Formatter(
@@ -77,6 +80,16 @@ public class CodeGeneratorNoBufferCopy {
             ).formatSource(sourceString);
         }
         writer.write(sourceString);
+    }
+
+    public static String buildLoopAssignments(CodeGeneratorModel codeGeneratorModel){
+        String assignment = "";
+        if(codeGeneratorModel.isLoopAssignment()){
+            assignment += "assignmentOperations = ";
+            assignment += fieldAssignment(codeGeneratorModel, true);
+            assignment += "\n";
+        }
+        return assignment;
     }
 
     private static String buildDeclarations(CodeGeneratorModel codeGeneratorModel) {
@@ -90,6 +103,9 @@ public class CodeGeneratorNoBufferCopy {
         if (codeGeneratorModel.isProcessEscapeSequence()) {
             options += "    private boolean escaping = false;\n";
             options += "    private boolean prevIsQuote = false;\n";
+        }
+        if(codeGeneratorModel.isLoopAssignment()){
+            options += "    private final Runnable[] assignmentOperations;\n";
         }
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
@@ -338,9 +354,35 @@ public class CodeGeneratorNoBufferCopy {
         }
         options += "try{\n" +
                 "    updateFieldIndex();\n";
+        if(codeGeneratorModel.isLoopAssignment()){
+            options += "    for (Runnable assignmentOperation : assignmentOperations) {\n" +
+                    "       assignmentOperation.run();\n" +
+                    "   }\n";
+        }else{
+            options += fieldAssignment(codeGeneratorModel, false);
+        }
+
+        if (codeGeneratorModel.isPostProcessMethodSet())
+            options += "\ntarget." + codeGeneratorModel.getPostProcessMethod() + "();\n";
+
+        options += "    } catch (Exception e) {\n" +
+                "        logException(\"problem pushing '\"\n" +
+                "                + sequence.subSequence(delimiterIndex[fieldIndex], delimiterIndex[fieldIndex + 1] - 1).toString() + \"'\"\n" +
+                "                + \" from row:'\" +rowNumber +\"'\", false, e);\n" +
+                "        passedValidation = false;\n" +
+                "        return false;\n" +
+                "    } finally {\n" +
+                "        fieldIndex = 0;\n" +
+                "    }\n" +
+                "    return publish;\n" +
+                "}\n";
+        return options;
+    }
+
+    private static String fieldAssignment(CodeGeneratorModel codeGeneratorModel, boolean isLoopAssignment){
         final boolean acceptPartials = codeGeneratorModel.isAcceptPartials();
         final boolean trim = codeGeneratorModel.isTrim();
-        options += codeGeneratorModel.fieldInfoList().stream()
+        Stream<String> assignmentStringStream = codeGeneratorModel.fieldInfoList().stream()
                 .map(s -> {
                             String fieldIdentifier = s.getFieldIdentifier();
                             String readField = s.getTargetSetMethodName() + ".subSequenceNoOffset(delimiterIndex["
@@ -385,24 +427,16 @@ public class CodeGeneratorNoBufferCopy {
                             }
                             return out;
                         }
-                )
-                .collect(Collectors.joining(""));
-
-        if (codeGeneratorModel.isPostProcessMethodSet())
-            options += "\ntarget." + codeGeneratorModel.getPostProcessMethod() + "();\n";
-
-        options += "    } catch (Exception e) {\n" +
-                "        logException(\"problem pushing '\"\n" +
-                "                + sequence.subSequence(delimiterIndex[fieldIndex], delimiterIndex[fieldIndex + 1] - 1).toString() + \"'\"\n" +
-                "                + \" from row:'\" +rowNumber +\"'\", false, e);\n" +
-                "        passedValidation = false;\n" +
-                "        return false;\n" +
-                "    } finally {\n" +
-                "        fieldIndex = 0;\n" +
-                "    }\n" +
-                "    return publish;\n" +
-                "}\n";
-        return options;
+                );
+        if(isLoopAssignment){
+            return assignmentStringStream.collect(Collectors.joining("\n},\n" +
+                            "                () ->{\n",
+                    "new Runnable[]{\n" +
+                            "                () ->{\n",
+                    "}};\n"
+            ));
+        }
+        return assignmentStringStream.collect(Collectors.joining(""));
     }
 
     public static String mapHeaderMethod(CodeGeneratorModel codeGeneratorModel) {

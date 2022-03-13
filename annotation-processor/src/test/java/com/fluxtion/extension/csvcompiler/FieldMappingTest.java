@@ -20,6 +20,8 @@
 package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import com.fluxtion.extension.csvcompiler.beans.Person.ConverterField;
+import com.fluxtion.extension.csvcompiler.beans.Person.ConverterFieldLoopAssignment;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
@@ -116,12 +118,27 @@ public class FieldMappingTest {
 
     @Test
     public void converterFields(){
-        Person.ConverterFlled converted = new Person.ConverterFlled();
+        ConverterField converted = new ConverterField();
         converted.setAge(44);
         converted.setName("ALWAYS_LINDA");
         converted.setBirthTime(LocalTime.of(12,34));
         testPerson(
-                Person.ConverterFlled.class,
+                ConverterField.class,
+                "name,age,birthTime\n" +
+                "lisa,44,12:34\n",
+                converted
+        );
+
+    }
+
+    @Test
+    public void converterFieldsLoopAssignment(){
+        ConverterFieldLoopAssignment converted = new ConverterFieldLoopAssignment();
+        converted.setAge(44);
+        converted.setName("ALWAYS_LINDA");
+        converted.setBirthTime(LocalTime.of(12,34));
+        testPerson(
+                ConverterFieldLoopAssignment.class,
                 "name,age,birthTime\n" +
                 "lisa,44,12:34\n",
                 converted
