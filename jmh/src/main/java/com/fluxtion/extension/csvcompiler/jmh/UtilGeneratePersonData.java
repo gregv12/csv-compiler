@@ -48,7 +48,7 @@ public class UtilGeneratePersonData {
         DataWithNames data = new DataWithNames();
         Person person = new Person();
         Person personLongName = new Person();
-        for (int i = 0; i < 100_000; i++) {
+        for (int i = 0; i < 1_000_000; i++) {
             //
             person.setAge((int) (random.nextDouble() * 20 + 2));
             person.setName("greg");

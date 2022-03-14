@@ -6,14 +6,14 @@ import lombok.ToString;
 @ToString
 @CsvMarshaller(formatSource = true, newBeanPerRecord = false)
 public class Person {
-    private String name;
+    private CharSequence name;
     private double age;
 
-    public String getName() {
+    public CharSequence getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(CharSequence name) {
         this.name = name;
     }
 
