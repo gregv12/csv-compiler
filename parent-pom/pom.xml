@@ -14,6 +14,7 @@
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
     </properties>
 
+    <description>Root build pom for use by non-pom projects</description>
     <url>https://github.com/v12technology/csv-compiler</url>
 
     <licenses>

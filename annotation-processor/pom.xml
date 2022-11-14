@@ -13,6 +13,8 @@
     <version>0.1.1-SNAPSHOT</version>
     <name>csv-compiler :: annotation processor</name>
 
+    <description>Build time annotation processor for generating CSV parsers</description>
+
     <dependencies>
         <dependency>
             <groupId>com.fluxtion.csv-compiler</groupId>

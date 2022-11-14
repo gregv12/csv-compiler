@@ -13,6 +13,8 @@
     <version>0.1.1-SNAPSHOT</version>
     <name>csv-compiler :: runtime</name>
 
+    <description>Runtime library required to use generated CSV parsers</description>
+
     <dependencies>
         <dependency>
             <groupId>com.google.auto.service</groupId>
