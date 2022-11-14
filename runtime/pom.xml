@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>csv-compiler</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <name>csv-compiler :: runtime</name>
 
     <dependencies>

@@ -4,3 +4,6 @@
 /runtime/target/
 /.idea
 /jmh/target/
+/jmh/src/main/data/person.txt
+/jmh/src/main/data/person10Columns.txt
+/jmh/src/main/data/personLongName.txt
