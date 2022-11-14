@@ -88,13 +88,19 @@ public class CharArrayCharSequence implements CharSequence {
 
         private int start;
         private int end;
+        private int length;
         private boolean updated = true;
         private String myString = null;
 
         public CharSequenceView(int start, int end) {
             this.start = start;
             this.end = end;
+            calcLength();
             updated = true;
+        }
+
+        private final void calcLength(){
+            length = end - start;
         }
 
         @Override
@@ -104,7 +110,7 @@ public class CharArrayCharSequence implements CharSequence {
 
         @Override
         public int length() {
-            return end - start;
+            return length;
         }
 
         public boolean isEmpty() {
@@ -115,6 +121,7 @@ public class CharArrayCharSequence implements CharSequence {
             updated = true;
             this.start = start;
             this.end = end;
+            calcLength();
             return this;
         }
 
@@ -123,6 +130,7 @@ public class CharArrayCharSequence implements CharSequence {
             updated = true;
             this.start = newStart + start;
             this.end = newEnd + start;
+            calcLength();
             return this;
         }
 
@@ -155,6 +163,7 @@ public class CharArrayCharSequence implements CharSequence {
             while ((start < end) && (array[end - 1] <= ' ')) {
                 end--;
             }
+            calcLength();
             return this;
         }
 

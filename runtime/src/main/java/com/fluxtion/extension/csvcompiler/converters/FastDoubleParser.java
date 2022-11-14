@@ -249,7 +249,7 @@ public class FastDoubleParser {
 
         // Skip leading whitespace
         // -------------------
-        int index = skipWhitespace(str, offset, endIndex);
+        int index = 0;//skipWhitespace(str, offset, endIndex);
         if (index == endIndex) {
             throw new NumberFormatException("empty String");
         }
