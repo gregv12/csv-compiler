@@ -16,6 +16,8 @@
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
     </properties>
 
+    <url>https://github.com/v12technology/csv-compiler</url>
+
     <licenses>
         <license>
             <distribution>repo</distribution>
