@@ -15,6 +15,10 @@
     <version>1.0-SNAPSHOT</version>
     <name>csv-compiler :: example</name>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.fluxtion.csv-compiler</groupId>

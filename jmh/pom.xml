@@ -31,8 +31,12 @@
 
     <artifactId>csv-compiler-jmh</artifactId>
     <name>csv-compiler :: jmh</name>
-    <build>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
