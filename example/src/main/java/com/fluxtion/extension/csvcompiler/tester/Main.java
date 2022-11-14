@@ -5,6 +5,9 @@ import com.fluxtion.extension.csvcompiler.ValidationLogger;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.ToString;
 
+/**
+ * Example to demonstrate the use of csv-compiler
+ */
 public class Main {
 
     public static void main(String[] args) {
