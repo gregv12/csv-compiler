@@ -32,8 +32,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static java.util.ServiceLoader.Provider;
-
 /**
  * A class that provides a marshalling service that converts row style character data into a stream of marshalled instances.
  *
@@ -137,12 +135,12 @@ public interface RowMarshaller<T> {
      */
     @SuppressWarnings("unchecked")
     static <T> RowMarshaller<T> load(Class<T> clazz) {
-        return ServiceLoader.load(RowMarshaller.class).stream()
-                .map(Provider::get)
-                .map(obj -> (RowMarshaller<T>) obj)
-                .filter(svc -> svc.targetClass().equals(clazz))
-                .findAny()
-                .get();
+        for (RowMarshaller<T> rowMarshaller: ServiceLoader.load(RowMarshaller.class)) {
+            if(rowMarshaller.targetClass().equals(clazz)){
+                return rowMarshaller;
+            }
+        }
+        throw new RuntimeException("unable to find RowMarshaller registered with ServiceLoader, class:" + clazz);
     }
 
     void writeHeaders(StringBuilder builder);
