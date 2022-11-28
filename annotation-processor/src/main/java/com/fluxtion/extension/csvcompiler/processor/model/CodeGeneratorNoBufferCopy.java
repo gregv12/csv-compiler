@@ -37,7 +37,7 @@ public class CodeGeneratorNoBufferCopy {
             "%2$s\n" +
             "\n" +
             "@AutoService(RowMarshaller.class)\n" +
-            "public final class %3$s extends BaseMarshallerNoBufferCopy<%4$s>{\n" +
+            "public final class %3$s extends BaseMarshallerNoBufferCopy<%4$s> {\n" +
             "\n" +
             "%5$s\n" +
             "\n" +
@@ -47,7 +47,7 @@ public class CodeGeneratorNoBufferCopy {
             "    }\n" +
             "\n" +
             "    @Override\n" +
-            "    public Class<%4$s> targetClass(){\n" +
+            "    public Class<%4$s> targetClass() {\n" +
             "        return %4$s.class;\n" +
             "    }\n" +
             "\n" +
@@ -124,13 +124,13 @@ public class CodeGeneratorNoBufferCopy {
                         .map(CsvToFieldInfoModel::getValidatorDeclaration)
                         .collect(Collectors.joining("\n    ", "\n    ", ""));
         options = StringUtils.chomp(options.trim());
-        return options;
+        return "    " + options;
     }
 
     private static String buildLookup(CodeGeneratorModel codeGeneratorModel) {
         String options = "";
         if (codeGeneratorModel.fieldInfoList().stream().anyMatch(CsvToFieldInfoModel::isLookupApplied)) {
-            options = "    public " + codeGeneratorModel.getMarshallerClassName() + " addLookup(String lookupName, Function<CharSequence, CharSequence> lookup){\n" +
+            options = "    public " + codeGeneratorModel.getMarshallerClassName() + " addLookup(String lookupName, Function<CharSequence, CharSequence> lookup) {\n" +
                     "        switch(lookupName){\n";
             options +=
                     codeGeneratorModel.fieldInfoList().stream()
@@ -165,12 +165,12 @@ public class CodeGeneratorNoBufferCopy {
     @NotNull
     private static String initMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = "@Override\n"
-                + "    public void init(){\n"
+                + "    public void init() {\n"
                 + "        super.init();\n";
         if (codeGeneratorModel.isNewBeanPerRecord()) {
             options += "        target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
         } else {
-            options += "        if(target==null){\n"
+            options += "        if (target==null){\n"
                     + "             target = new " + codeGeneratorModel.getTargetClassName() + "();\n"
                     + "        }\n";
         }
@@ -196,12 +196,12 @@ public class CodeGeneratorNoBufferCopy {
                 "        char charToTest = previousChar;\n" +
                 "        previousChar = character;\n";
         if (codeGeneratorModel.isIgnoreQuotes()) {
-            options += "    if(character == '\\\"'){\n" +
+            options += "    if (character == '\\\"'){\n" +
                     "        return false;\n" +
                     "    }\n";
         }
         if (codeGeneratorModel.isProcessEscapeSequence()) {
-            options += "        if(!processChar(character)){\n" +
+            options += "        if (!processChar(character)){\n" +
                     "            return false;\n" +
                     "        }\n" +
                     "        if (escaping) {\n" +
@@ -210,13 +210,13 @@ public class CodeGeneratorNoBufferCopy {
                     "        }\n";
         }
         options += String.format(
-                "        if(character == '\\r'){\n" +
+                "        if (character == '\\r'){\n" +
                         "            return processRow();\n" +
                         "        }\n" +
                         "        if (character == '\\n' & charToTest != '\\r') {\n" +
                         "            return processRow();\n" +
                         "        }\n" +
-                        "        if(character == '\\n'){\n" +
+                        "        if (character == '\\n'){\n" +
                         "            writtenLimit--;\n" +
                         "            System.arraycopy(chars, readPointer + 1, chars, readPointer, chars.length - readPointer - 1);\n" +
                         "            readPointer--;\n" +
@@ -286,22 +286,22 @@ public class CodeGeneratorNoBufferCopy {
                 "        boolean targetChanged = false;\n" +
                 "        rowNumber++;\n";
         if (codeGeneratorModel.isSkipCommentLines()) {
-            options += "        if(sequence.charAt(delimiterIndex[0]) == '#'){\n" +
+            options += "        if (sequence.charAt(delimiterIndex[0]) == '#'){\n" +
                     "            delimiterIndex[fieldIndex] = readPointer + 1;\n" +
                     "            fieldIndex = 0;\n" +
                     "            return targetChanged;\n" +
                     "        }\n";
         }
         if (codeGeneratorModel.isSkipEmptyLines()) {
-            options += "        if(emptyRow){\n" +
+            options += "        if (emptyRow){\n" +
                     "            removeCharFromBuffer();//delimiterIndex[fieldIndex] = readPointer + 1;\n" +
                     "            return targetChanged;\n" +
                     "        }\n";
         } else {
             if (codeGeneratorModel.isHeaderPresent()) {
-                options += "        if(HEADER_ROWS < rowNumber & emptyRow)";
+                options += "        if (HEADER_ROWS < rowNumber & emptyRow)";
             } else {
-                options += "        if(emptyRow)";
+                options += "        if (emptyRow)";
             }
             options += "{\n" +
                     "            removeCharFromBuffer();\n" +
@@ -318,7 +318,7 @@ public class CodeGeneratorNoBufferCopy {
             options += "    targetChanged = updateTarget();";
         }
         if (codeGeneratorModel.isMappingRowPresent()) {
-            options += "        if (rowNumber==MAPPING_ROW) {\n" +
+            options += "        if (rowNumber == MAPPING_ROW) {\n" +
                     "            mapHeader();\n" +
                     "        }\n";
         }
@@ -387,13 +387,13 @@ public class CodeGeneratorNoBufferCopy {
                             }
                             String out;
                             if (acceptPartials) {
-                                out = String.format("            if (maxFieldIndex >= %s ){\n", fieldIdentifier);
+                                out = String.format("            if (maxFieldIndex >= %s){\n", fieldIdentifier);
                             } else {
                                 out = String.format("            fieldIndex = %s;\n", fieldIdentifier);
                             }
 
                             if (s.isDefaultOptionalField()) {
-                                out += String.format("            if(fieldIndex > -1){\n" +
+                                out += String.format("            if (fieldIndex > -1){\n" +
                                         "                %s" +
                                         "            }else{\n" +
                                         "                %s" +
@@ -403,7 +403,7 @@ public class CodeGeneratorNoBufferCopy {
                                 out += "            " + readField;
                                 out += "            " + s.getUpdateTarget();
                             } else {
-                                out += String.format("            if(fieldIndex > -1){\n" +
+                                out += String.format("            if (fieldIndex > -1){\n" +
                                         "                %s" +
                                         "                %s\n" +
                                         "            }", readField, s.getUpdateTarget());
@@ -414,7 +414,7 @@ public class CodeGeneratorNoBufferCopy {
                             if (acceptPartials) {
                                 out += "\n            }";
                             }
-                            if(isLoopAssignment){
+                            if (isLoopAssignment){
                                 out = out.replace("            ", "                    ");
                             }
                             return out;
@@ -436,7 +436,7 @@ public class CodeGeneratorNoBufferCopy {
         if (!codeGeneratorModel.isHeaderPresent()) {
             return "";
         }
-        String options = "\n    private void mapHeader(){\n" +
+        String options = "\n    private void mapHeader() {\n" +
                 "        firstCharOfField = true;\n" +
                 "        String header = new String(chars).trim().substring(delimiterIndex[0], readPointer);\n" +
                 "        header = headerTransformer.apply(header);\n";
@@ -463,7 +463,7 @@ public class CodeGeneratorNoBufferCopy {
     }
 
     public static String writeHeadersMethod(CodeGeneratorModel codeGeneratorModel) {
-        String options = "\n    public void writeHeaders( StringBuilder builder){\n";//
+        String options = "\n    public void writeHeaders(StringBuilder builder) {\n";//
         options += codeGeneratorModel.fieldInfoList().stream()
                 .filter(f -> !f.isIndexField())
                 .map(s -> "        builder.append(\"" + s.getFieldName() + "\");")
@@ -476,7 +476,7 @@ public class CodeGeneratorNoBufferCopy {
 
     public static String writeRowMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = String.format(
-                "\n    public void writeRow(%s target, StringBuilder builder){\n", codeGeneratorModel.getTargetClassName());
+                "\n    public void writeRow(%s target, StringBuilder builder) {\n", codeGeneratorModel.getTargetClassName());
 
         options += codeGeneratorModel.outputFieldInfoList().stream()
                 .map(FieldToCsvInfo::getWriteStatement)
