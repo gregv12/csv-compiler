@@ -40,12 +40,12 @@ public class Util {
                         fqn, content,
                         new CompileOptions()
                                 .processors(new CsvMarshallerGenerator())
-//                                .options("-source", "11")
-//                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
-//                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
-//                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED ")
-//                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED ")
-//                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+                                .options("-source", "11")
+                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED ")
+                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED ")
+                                .options("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
                 )
                 .get();
         return classT.getDeclaredConstructor().newInstance();
