@@ -19,6 +19,8 @@
 
 package com.fluxtion.extension.csvcompiler.processor.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -74,7 +76,7 @@ public interface CodeGeneratorModel {
     String getPostProcessMethod();
 
     default boolean isPostProcessMethodSet(){
-        return Objects.nonNull(getPostProcessMethod()) && !getPostProcessMethod().isBlank();
+        return Objects.nonNull(getPostProcessMethod()) && !StringUtils.isBlank(getPostProcessMethod());
     }
 
     boolean isProcessEscapeSequence();

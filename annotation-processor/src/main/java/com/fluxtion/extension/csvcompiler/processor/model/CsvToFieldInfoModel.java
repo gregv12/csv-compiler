@@ -19,6 +19,8 @@
 
 package com.fluxtion.extension.csvcompiler.processor.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 public interface CsvToFieldInfoModel {
     String getTargetSetMethodName();
 
@@ -48,7 +50,7 @@ public interface CsvToFieldInfoModel {
     String getConvertConfiguration();
 
     default boolean isConverterApplied() {
-        return getConverterClassName() != null && !getConverterClassName().isBlank() && getConverterClassName().length() > 0;
+        return getConverterClassName() != null && !StringUtils.isBlank(getConverterClassName()) && getConverterClassName().length() > 0;
     }
 
     //validator
@@ -64,7 +66,7 @@ public interface CsvToFieldInfoModel {
     String getLookupKey();
 
     default boolean isLookupApplied() {
-        return getLookupKey() != null && !getLookupKey().isBlank();
+        return getLookupKey() != null && !StringUtils.isBlank(getLookupKey());
     }
 
 }
