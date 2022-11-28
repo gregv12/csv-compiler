@@ -19,12 +19,11 @@
 
 package com.fluxtion.extension.csvcompiler.processor.model;
 
-import com.google.googlejavaformat.java.Formatter;
-import com.google.googlejavaformat.java.JavaFormatterOptions;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -60,25 +59,6 @@ public class CodeGenerator {
         this.codeGeneratorModel = codeGeneratorModel;
     }
 
-    @SneakyThrows
-    public void writeMarshaller() {
-        String sourceString = String.format(CODE_TEMPLATE_DECLARATIONS,
-                codeGeneratorModel.getPackageName(),
-                codeGeneratorModel.getImports(),
-                codeGeneratorModel.getMarshallerClassName(),
-                codeGeneratorModel.getTargetClassName(),
-                buildDeclarations(codeGeneratorModel),
-                buildCharacterProcessing(codeGeneratorModel),
-                codeGeneratorModel.isFailOnFirstError()
-        );
-        if (codeGeneratorModel.isFormatSource()) {
-            sourceString = new Formatter(
-                    JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.AOSP).build()
-            ).formatSource(sourceString);
-        }
-        writer.write(sourceString);
-    }
-
     private static String buildDeclarations(CodeGeneratorModel codeGeneratorModel) {
         String options = "";
         if (codeGeneratorModel.isHeaderPresent()) {
@@ -98,7 +78,7 @@ public class CodeGenerator {
                         .collect(Collectors.joining("\n", "\n", ""));
         options +=
                 codeGeneratorModel.fieldInfoList().stream()
-                        .filter(Predicate.not(CsvToFieldInfoModel::isIndexField))
+                        .filter(not(CsvToFieldInfoModel::isIndexField))
                         .map(s -> "private int " + s.getFieldIdentifier() + " = " + s.getFieldIndex() + ";")
                         .collect(Collectors.joining("\n", "\n", ""));
 
@@ -434,4 +414,32 @@ public class CodeGenerator {
         return options;
     }
 
+    @SneakyThrows
+    public void writeMarshaller() {
+        String sourceString = String.format(CODE_TEMPLATE_DECLARATIONS,
+                codeGeneratorModel.getPackageName(),
+                codeGeneratorModel.getImports(),
+                codeGeneratorModel.getMarshallerClassName(),
+                codeGeneratorModel.getTargetClassName(),
+                buildDeclarations(codeGeneratorModel),
+                buildCharacterProcessing(codeGeneratorModel),
+                codeGeneratorModel.isFailOnFirstError()
+        );
+        sourceString = sourceString.replace("\n\n\n\n\n\n\n", "\n");
+        sourceString = sourceString.replace("\n\n\n\n\n\n", "\n");
+        sourceString = sourceString.replace("\n\n\n\n\n", "\n");
+        sourceString = sourceString.replace("\n\n\n\n", "\n");
+        sourceString = sourceString.replace("\n\n\n", "\n");
+        sourceString = sourceString.replace("\n\n", "\n");
+        sourceString = sourceString.replace("\n", "\n   ");
+        if (codeGeneratorModel.isFormatSource()) {
+            sourceString = CodeFormatter.formatJavaString(sourceString);
+        }
+        writer.write(sourceString);
+    }
+
+    static <T> Predicate<T> not(Predicate<? super T> target) {
+        Objects.requireNonNull(target);
+        return (Predicate<T>)target.negate();
+    }
 }

@@ -2,6 +2,7 @@ package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import lombok.val;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,7 @@ public class LoopingTest {
         bean.setStringProperty("hello");
 
         assertIterableEquals(
-                List.of(bean),
+                Util.listOf(bean),
                 resultList
         );
     }
@@ -50,8 +51,8 @@ public class LoopingTest {
                 "true,1,10.7,1.5,100,2000,4,hello\n" +
                 "true,2,10.7,1.5,200,2000,4,hello\n" +
                 "";
-        var resultList = new ArrayList<>();
-        var iterator = RowMarshaller.load(AllNativeMarshallerTypes.class)
+        val resultList = new ArrayList<>();
+        val iterator = RowMarshaller.load(AllNativeMarshallerTypes.class)
                 .iterator(new StringReader(input));
 
         while (iterator.hasNext()) {
@@ -59,7 +60,7 @@ public class LoopingTest {
             resultList.add(data);
         }
 
-        var bean = new AllNativeMarshallerTypes();
+        val bean = new AllNativeMarshallerTypes();
         bean.setBooleanProperty(true);
         bean.setByteProperty((byte) 1);
         bean.setDoubleProperty(10.7);
@@ -81,7 +82,7 @@ public class LoopingTest {
         bean2.setStringProperty("hello");
 
         assertIterableEquals(
-                List.of(bean, bean2),
+                Util.listOf(bean, bean2),
                 resultList
         );
     }
@@ -90,8 +91,8 @@ public class LoopingTest {
     public void iteratorHeaderTest() {
         String input = "booleanProperty,byteProperty,doubleProperty,floatProperty,intProperty,longProperty,shortProperty,stringProperty\n" +
                 "";
-        var resultList = new ArrayList<>();
-        var iterator = RowMarshaller
+        val resultList = new ArrayList<>();
+        val iterator = RowMarshaller
                 .load(AllNativeMarshallerTypes.class)
                 .iterator(new StringReader(input));
         while (iterator.hasNext()) {
@@ -104,8 +105,8 @@ public class LoopingTest {
     @Test
     public void iteratorNoDataTest() {
         String input = "";
-        var resultList = new ArrayList<>();
-        var iterator = RowMarshaller
+        val resultList = new ArrayList<>();
+        val iterator = RowMarshaller
                 .load(AllNativeMarshallerTypes.class)
                 .iterator(new StringReader(input));
         while (iterator.hasNext()) {
@@ -135,7 +136,7 @@ public class LoopingTest {
         bean.setStringProperty("hello");
 
         assertIterableEquals(
-                List.of(bean),
+                Util.listOf(bean),
                 resultList
         );
     }
@@ -171,7 +172,7 @@ public class LoopingTest {
         bean2.setStringProperty("hello");
 
         assertIterableEquals(
-                List.of(bean, bean2),
+                Util.listOf(bean, bean2),
                 resultList
         );
     }

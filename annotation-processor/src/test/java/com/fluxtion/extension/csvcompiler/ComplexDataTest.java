@@ -57,7 +57,7 @@ public class ComplexDataTest {
         );
     }
 
-    @CsvMarshaller(processEscapeSequences = true, mappingRow = 0, headerLines = 0, formatSource = true)
+    @CsvMarshaller(processEscapeSequences = true, mappingRow = 0, headerLines = 0, formatSource = false)
     @ToString
     public static class SampleData {
 

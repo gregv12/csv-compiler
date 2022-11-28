@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import org.joor.CompileOptions;
 import org.joor.Reflect;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Util {
@@ -47,5 +49,14 @@ public class Util {
                 )
                 .get();
         return classT.getDeclaredConstructor().newInstance();
+    }
+
+    public static <E> List<E> listOf(E... input) {
+        @SuppressWarnings("unchecked")
+        List<E> target = new ArrayList<>(input.length);
+        for (int i = 0; i < input.length; i++) {
+            target.add(input[i]);
+        }
+        return target;
     }
 }

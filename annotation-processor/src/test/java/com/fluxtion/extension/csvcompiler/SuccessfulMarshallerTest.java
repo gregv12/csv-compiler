@@ -238,7 +238,7 @@ public class SuccessfulMarshallerTest {
         bean.setStringProperty("hello");
 
         assertIterableEquals(
-                List.of(bean),
+                Util.listOf(bean),
                 resultList
         );
     }
@@ -263,7 +263,7 @@ public class SuccessfulMarshallerTest {
         bean.setStringProperty("hello");
 
         assertIterableEquals(
-                List.of(bean),
+                Util.listOf(bean),
                 resultList
         );
     }
@@ -274,7 +274,7 @@ public class SuccessfulMarshallerTest {
 
     @SafeVarargs
     static <T extends Person> void testPerson(Class<T> personClass, String input, T... people) {
-        testPersonErrors(personClass, input, List.of(), people);
+        testPersonErrors(personClass, input, Util.listOf(), people);
     }
 
     @SafeVarargs
@@ -314,7 +314,7 @@ public class SuccessfulMarshallerTest {
         );
 
         assertIterableEquals(
-                List.of(people),
+                Util.listOf(people),
                 resultList,
                 "forEach number of valid rows is different"
         );
@@ -346,7 +346,7 @@ public class SuccessfulMarshallerTest {
         );
 
         assertIterableEquals(
-                List.of(people),
+                Util.listOf(people),
                 resultList,
                 "streaming number of valid rows is different"
         );
