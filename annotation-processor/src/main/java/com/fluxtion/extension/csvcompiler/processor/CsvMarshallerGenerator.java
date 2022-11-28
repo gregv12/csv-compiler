@@ -118,10 +118,10 @@ public class CsvMarshallerGenerator implements Processor {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             Name variableName = e.getSimpleName();
             if (columnMapping != null) {
-                if (!columnMapping.columnName().isBlank()) {
+                if (!StringUtils.isBlank(columnMapping.columnName())) {
                     csvMetaModel.setColumnName(variableName.toString(), columnMapping.columnName());
                 }
-                if (!columnMapping.defaultValue().isBlank()) {
+                if (!StringUtils.isBlank(columnMapping.defaultValue())) {
                     csvMetaModel.setDefaultFieldValue(variableName.toString(), columnMapping.defaultValue());
                 }
                 if (columnMapping.optionalField()) {
@@ -153,7 +153,7 @@ public class CsvMarshallerGenerator implements Processor {
                     String converterMethod = dataMapping.conversionMethod();
                     csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), converterMethod, format);
                 }
-                if (!dataMapping.lookupName().isBlank()) {
+                if (!StringUtils.isBlank(dataMapping.lookupName())) {
                     csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
                 }
                 if (dataMapping.checkNullOnWrite()) {
@@ -164,7 +164,7 @@ public class CsvMarshallerGenerator implements Processor {
             }
 
             Validator validator = e.getAnnotation((Validator.class));
-            if (validator != null && !validator.value().isBlank()) {
+            if (validator != null && !StringUtils.isBlank(validator.value())) {
                 csvMetaModel.setValidator(variableName.toString(), ValidatorConfig.fromAnnotation(validator));
             }
 

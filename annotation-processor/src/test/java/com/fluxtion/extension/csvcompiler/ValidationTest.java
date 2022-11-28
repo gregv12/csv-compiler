@@ -41,7 +41,7 @@ public class ValidationTest {
                     if (person.getAge() > 40)
                         validationResultStore.validationFailure("TOO OLD", false);
                 },
-                List.of(3),
+                Util.listOf(3),
                 Person.build(Person::new, "tim", 32)
         );
     }
@@ -58,7 +58,7 @@ public class ValidationTest {
                 (person, validationResultStore) -> {
                     if (person.getAge() > 40)
                         validationResultStore.validationFailure("TOO OLD", false);
-                }, List.of(3),
+                }, Util.listOf(3),
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "siobhan", 18)
         );
@@ -81,7 +81,7 @@ public class ValidationTest {
                         "siobhan,18\n")
                 .forEach(results::add);
 
-        Assertions.assertIterableEquals(List.of(Person.build(Person::new, "tim", 32)), results);
+        Assertions.assertIterableEquals(Util.listOf(Person.build(Person::new, "tim", 32)), results);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class ValidationTest {
                         "siobhan,18\n")
                 .forEach(results::add)
         );
-        Assertions.assertIterableEquals(List.of(Person.build(Person::new, "tim", 32)), results);
+        Assertions.assertIterableEquals(Util.listOf(Person.build(Person::new, "tim", 32)), results);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class ValidationTest {
                         "tim,32\n" +
                         "lisa,-10\n" +
                         "siobhan,18\n"
-                , List.of(3),
+                , Util.listOf(3),
                 Person.build(Person.Validation::new, "tim", 32),
                 Person.build(Person.Validation::new, "siobhan", 18)
         );
@@ -130,7 +130,7 @@ public class ValidationTest {
                         "siobhan,18\n")
                 .forEach(results::add);
 
-        Assertions.assertIterableEquals(List.of(Person.build(Person.FailFast::new, "tim", 32)), results);
+        Assertions.assertIterableEquals(Util.listOf(Person.build(Person.FailFast::new, "tim", 32)), results);
     }
 
     @Test
@@ -145,7 +145,7 @@ public class ValidationTest {
                 .forEach(results::add)
         );
 
-        Assertions.assertIterableEquals(List.of(Person.build(Person.FailFast::new, "tim", 32)), results);
+        Assertions.assertIterableEquals(Util.listOf(Person.build(Person.FailFast::new, "tim", 32)), results);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class ValidationTest {
                         "siobhan,18\n")
                 .forEach(results::add);
 
-        Assertions.assertIterableEquals(List.of(
+        Assertions.assertIterableEquals(Util.listOf(
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "siobhan", 18)
         ), results);

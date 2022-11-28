@@ -20,6 +20,7 @@
 package com.fluxtion.extension.csvcompiler.processor.model;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Greg Higgins
@@ -131,7 +132,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     }
 
     public void setConverter(String converterClass, String convertConfiguration, String converterMethod) {
-        if (converterClass == null || converterClass.isBlank()) {
+        if (converterClass == null || StringUtils.isBlank(converterClass)) {
         } else {
             this.converterInstanceId = getFieldIdentifier() + "Converter";
             if(converterMethod==null || converterMethod.isEmpty()){

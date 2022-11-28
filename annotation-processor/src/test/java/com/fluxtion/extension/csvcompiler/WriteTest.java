@@ -24,7 +24,7 @@ public class WriteTest {
                 .collect(Collectors.toList());
 
         Assertions.assertIterableEquals(
-                List.of(person),
+                Util.listOf(person),
                 results
         );
     }

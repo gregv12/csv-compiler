@@ -38,7 +38,7 @@ public class FailingMarshallerTest {
                         "tim,sfgdg\n" +
                         "lisa,44\n" +
                         "lisa,fddg\n",
-                List.of(2, 4),
+                Util.listOf(2, 4),
                 Person.build(Person::new, "lisa", 44)
         );
     }
@@ -51,7 +51,7 @@ public class FailingMarshallerTest {
                         "tim,32\n" +
                         "\n" +
                         "lisa,44\n",
-                List.of(3),
+                Util.listOf(3),
                 Person.build(Person::new, "tim", 32),
                 Person.build(Person::new, "lisa", 44)
         );
@@ -65,7 +65,7 @@ public class FailingMarshallerTest {
                         "tim,dfrfrf\n" +
                         "\n" +
                         "lisa\n",
-                List.of(2)
+                Util.listOf(2)
         ));
     }
 

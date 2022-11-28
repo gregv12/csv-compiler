@@ -21,6 +21,7 @@ package com.fluxtion.extension.csvcompiler.processor.model;
 
 import lombok.Data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -31,6 +32,17 @@ public class FieldToCsvInfo {
     private String converterId;
     private String sourceType;
     private boolean enumField;
+    private static final Set<String> primitiveTypeSet = new HashSet<>();
+    static{
+        primitiveTypeSet.add("int");
+        primitiveTypeSet.add("short");
+        primitiveTypeSet.add("byte");
+        primitiveTypeSet.add("char");
+        primitiveTypeSet.add("long");
+        primitiveTypeSet.add("float");
+        primitiveTypeSet.add("boolean");
+        primitiveTypeSet.add("double");
+    }
 
     public String getWriteStatement() {
         String writeStatement;
@@ -49,6 +61,6 @@ public class FieldToCsvInfo {
     }
 
     public static boolean isPrimitive(String targetType) {
-        return Set.of("int", "short", "byte", "char", "long", "float", "boolean", "double").contains(targetType);
+        return primitiveTypeSet.contains(targetType);
     }
 }
