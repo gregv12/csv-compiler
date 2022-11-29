@@ -43,7 +43,8 @@
         <module>parent-pom</module>
         <module>annotation-processor</module>
         <module>runtime</module>
-<!--        <module>example</module>-->
+        <module>server</module>
+        <!--        <module>example</module>-->
 <!--        <module>jmh</module>-->
     </modules>
 </project>
