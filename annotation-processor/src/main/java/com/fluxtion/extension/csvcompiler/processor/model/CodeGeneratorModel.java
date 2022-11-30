@@ -54,6 +54,9 @@ public interface CodeGeneratorModel {
                "import java.util.ArrayList;\n" +
                "import java.util.HashMap;\n" +
                "import java.util.List;\n" +
+               "import java.util.function.BiConsumer;\n" +
+               "import java.util.function.BiPredicate;\n" +
+               "import java.util.function.Consumer;\n" +
                "import java.util.function.Consumer;\n" +
                "import java.util.function.Function;\n" +
                "import java.util.regex.Pattern;\n" +

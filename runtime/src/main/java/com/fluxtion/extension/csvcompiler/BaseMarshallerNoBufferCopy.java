@@ -289,6 +289,10 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
         return true;
     }
 
+    protected boolean validateField(java.util.function.BiPredicate<T, BiConsumer<String, Boolean>> rowValidator){
+        return rowValidator.test(target, this::logFieldValidationProblem);
+    }
+
     protected final void logRowValidationProblem(String errorMessage, boolean isFatal) {
         passedValidation = false;
         String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;

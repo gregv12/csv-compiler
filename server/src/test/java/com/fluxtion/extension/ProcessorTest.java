@@ -71,13 +71,13 @@ public class ProcessorTest {
                   ageInYears: {csvColumnName: 'latest age', optional: true, defaultValue: 50, type: int}
                   name:
                     defaultValue: testing
-                    type: java.lang.String
+                    type: string
                     converterCode:  |
                       String myString = input.toString();
                       return myString.toUpperCase();
                   registered: {type: int}
                   resident: {type: boolean}
-                  town: {type: java.lang.String, converterFunction: toLowerCase}
+                  town: {type: string, converterFunction: toLowerCase}
                 
                 derivedColumns:
                   nameAndTown:
@@ -86,7 +86,7 @@ public class ProcessorTest {
                  
                 conversionFunctions:
                   toLowerCase:
-                    convertsTo: java.lang.String
+                    convertsTo: string
                     code:  |
                       String myString = input.toString();
                       return myString.toLowerCase();

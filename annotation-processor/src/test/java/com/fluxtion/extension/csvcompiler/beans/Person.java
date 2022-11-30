@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.LocalTime;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @EqualsAndHashCode
@@ -278,6 +279,23 @@ public class Person {
 
         @Validator(value = "(int age) -> age > 0", errorMessage = "age must be greater 0", exitOnFailure = false)
         private int age;
+
+    }
+
+    @CsvMarshaller(formatSource = true)
+    public static class ValidationLocalMethod extends Person {
+
+        @Validator(validationMethod = "validateAge")
+        private int age;
+
+        public boolean validateAge(BiConsumer<String, Boolean> validatorLog){
+            boolean valid = true;
+            if(super.age > 40){
+                valid = false;
+                validatorLog.accept("too old, must be less than 40", false);
+            }
+            return valid;
+        }
 
     }
 

@@ -23,6 +23,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.BiConsumer;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
@@ -34,7 +35,14 @@ public @interface Validator {
      *
      * @return The validation predicate
      */
-    String value();
+    String value() default "";
+
+    /**
+     * A validation method in the target class that accepts a {@link BiConsumer <String, Boolean> validatorLog }
+     *
+     * @return the validation method
+     */
+    String validationMethod() default "";
 
     /**
      * Error message to log on a validation failure

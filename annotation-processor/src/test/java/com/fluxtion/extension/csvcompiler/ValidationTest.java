@@ -119,6 +119,20 @@ public class ValidationTest {
     }
 
     @Test
+    public void fieldValidationWithLocalMethod() {
+        testPersonErrors(
+                Person.ValidationLocalMethod.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,410\n" +
+                        "siobhan,18\n"
+                , Util.listOf(3),
+                Person.build(Person.ValidationLocalMethod::new, "tim", 32),
+                Person.build(Person.ValidationLocalMethod::new, "siobhan", 18)
+        );
+    }
+
+    @Test
     public void failFastAnnotation() {
         List<Person.FailFast> results = new ArrayList<>();
         RowMarshaller.load(Person.FailFast.class)

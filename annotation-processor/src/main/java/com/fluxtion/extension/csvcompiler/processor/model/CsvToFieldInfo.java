@@ -101,9 +101,15 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public void setValidatorConfig(ValidatorConfig validatorConfig) {
         this.validatorId = getFieldIdentifier() + "Validator";
+        if(!StringUtils.isBlank(validatorConfig.getMethod())) {
+            validatorInvocation = "validateField(" + getValidatorId() + ");\n";
+            String enclosingTargetType = validatorConfig.getClassName();
+            validatorDeclaration = "private final BiPredicate<" + enclosingTargetType + ", BiConsumer<String, Boolean>> "
+                    + validatorId + " = " + enclosingTargetType + "::" + validatorConfig.getMethod() + ";";
+            return;
+        }
         validatorLambda = validatorConfig.getLambda();
-
-        String predicate = "private java.util.function.";
+        String predicate = "private final java.util.function.";
         switch (targetArgType) {
             case "int":
             case "short":
@@ -116,6 +122,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
                 break;
             case "long":
                 predicate += "LongPredicate ";
+                break;
             default:
                 predicate += "Predicate<" + targetArgType + "> ";
         }

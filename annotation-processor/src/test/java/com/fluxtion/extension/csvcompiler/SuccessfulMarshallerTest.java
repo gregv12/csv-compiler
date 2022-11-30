@@ -311,13 +311,13 @@ public class SuccessfulMarshallerTest {
         assertIterableEquals(
                 errorRowsExpected,
                 errorRowsActual,
-                "forEach indexes of invalid rows does not match"
+                "failed rows do not match"
         );
 
         assertIterableEquals(
                 Util.listOf(people),
                 resultList,
-                "forEach number of valid rows is different"
+                "number of valid rows is different"
         );
 
         //perform test with streaming

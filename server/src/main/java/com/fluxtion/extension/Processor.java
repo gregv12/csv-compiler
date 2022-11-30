@@ -21,16 +21,25 @@ import org.yaml.snakeyaml.Yaml;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Date;
+import java.util.Map;
 
 
 public class Processor {
 
-    public static final String PACKAGE_NAME = "com.example.helloworld";
+    public static final String PACKAGE_NAME = "com.fluxtion.extension.csvcompilere.generated";
     private final CsvProcessingConfig processingConfig;
     private final Builder csvBeanClassBuilder;
     private final MethodSpec.Builder toStringBuilder;
     private final MethodSpec.Builder accessByNameBuilder;
     private String previousFieldName = null;
+    private static Map<String, String> classShortNameMap =  Map.of(
+            "String", String.class.getCanonicalName(),
+            "string", String.class.getCanonicalName(),
+            "date", Date.class.getCanonicalName(),
+            "Date", Date.class.getCanonicalName()
+    );
+
 
     public Processor(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
@@ -45,7 +54,7 @@ public class Processor {
         toStringBuilder = MethodSpec.methodBuilder("toString")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(String.class)
-                .addStatement("$T toString = $S", String.class, processingConfig.getName() + "[");
+                .addStatement("$T toString = $S", String.class, processingConfig.getName() + ": {");
         accessByNameBuilder = MethodSpec.methodBuilder("getField")
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TypeVariableName.get("T"))
@@ -105,8 +114,8 @@ public class Processor {
     }
 
     private void addToString() {
-        toStringBuilder.addStatement("toString += $S + $L + $S", previousFieldName + ":'", previousFieldName, "'");
-        toStringBuilder.addStatement("toString += $S", "]");
+        toStringBuilder.addStatement("toString += $S + $L", previousFieldName + ": ", previousFieldName);
+        toStringBuilder.addStatement("toString += $S", "}");
         toStringBuilder.addStatement("return toString");
         csvBeanClassBuilder.addMethod(toStringBuilder.build());
     }
@@ -146,7 +155,7 @@ public class Processor {
         addConverterMethods(fieldBuilder, columnMapping);
         //toString
         if (previousFieldName != null) {
-            toStringBuilder.addStatement("toString += $S + $L + $S", previousFieldName + ":'", previousFieldName, "', ");
+            toStringBuilder.addStatement("toString += $S + $L + $S", previousFieldName + ": ", previousFieldName, ", ");
         }
         //field accessor
         accessByNameBuilder.addCode("case $S:\n", fieldName)
@@ -225,7 +234,8 @@ public class Processor {
                 typeName = TypeName.BOOLEAN;
                 break;
             default:
-                typeName = TypeName.get(Class.forName(typeNameString));
+                String lookupName = classShortNameMap.getOrDefault(typeNameString, typeNameString);
+                typeName = TypeName.get(Class.forName(lookupName));
         }
         return typeName;
     }

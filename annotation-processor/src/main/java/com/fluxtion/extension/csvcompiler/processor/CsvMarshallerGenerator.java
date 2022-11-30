@@ -168,10 +168,9 @@ public class CsvMarshallerGenerator implements Processor {
             }
 
             Validator validator = e.getAnnotation((Validator.class));
-            if (validator != null && !StringUtils.isBlank(validator.value())) {
-                csvMetaModel.setValidator(variableName.toString(), ValidatorConfig.fromAnnotation(validator));
+            if (validator != null && (!StringUtils.isBlank(validator.value()) || !StringUtils.isBlank(validator.validationMethod()))) {
+                csvMetaModel.setValidator(variableName.toString(), ValidatorConfig.fromAnnotation(validator, targetType));
             }
-
         });
 
         return csvMetaModel;
