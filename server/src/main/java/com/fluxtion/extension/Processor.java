@@ -5,11 +5,14 @@ import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
+import com.fluxtion.extension.csvcompiler.annotations.Validator;
 import com.fluxtion.extension.csvcompiler.processor.Util;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
@@ -23,27 +26,28 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 
 public class Processor {
 
     public static final String PACKAGE_NAME = "com.fluxtion.extension.csvcompilere.generated";
-    private final CsvProcessingConfig processingConfig;
-    private final Builder csvBeanClassBuilder;
-    private final MethodSpec.Builder toStringBuilder;
-    private final MethodSpec.Builder accessByNameBuilder;
-    private String previousFieldName = null;
-    private static Map<String, String> classShortNameMap =  Map.of(
+    private static Map<String, String> classShortNameMap = Map.of(
             "String", String.class.getCanonicalName(),
             "string", String.class.getCanonicalName(),
             "date", Date.class.getCanonicalName(),
             "Date", Date.class.getCanonicalName()
     );
+    private final CsvProcessingConfig processingConfig;
+    private final Builder csvBeanClassBuilder;
+    private final MethodSpec.Builder toStringBuilder;
+    private final MethodSpec.Builder accessByNameBuilder;
+    private String previousFieldName = null;
 
 
     public Processor(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
-        processingConfig.getDerivedColumns().forEach((k, v) ->{
+        processingConfig.getDerivedColumns().forEach((k, v) -> {
             v.setDerived(true);
             v.setName(k);
         });
@@ -62,8 +66,8 @@ public class Processor {
                 .addParameter(String.class, "fieldName")
                 .beginControlFlow("switch(fieldName)")
                 .returns(TypeVariableName.get("T"));
-        Yaml yaml = new Yaml();
-        System.out.println("myconfig:\n" + yaml.dump(processingConfig));
+//        Yaml yaml = new Yaml();
+//        System.out.println("myconfig:\n" + yaml.dump(processingConfig));
     }
 
     @SneakyThrows
@@ -72,9 +76,42 @@ public class Processor {
     }
 
     @SneakyThrows
+    public static TypeName asTypeName(String typeNameString) {
+        TypeName typeName;
+        switch (typeNameString) {
+            case "int":
+                typeName = TypeName.INT;
+                break;
+            case "double":
+                typeName = TypeName.DOUBLE;
+                break;
+            case "short":
+                typeName = TypeName.SHORT;
+                break;
+            case "long":
+                typeName = TypeName.LONG;
+                break;
+            case "char":
+                typeName = TypeName.CHAR;
+                break;
+            case "float":
+                typeName = TypeName.FLOAT;
+                break;
+            case "boolean":
+                typeName = TypeName.BOOLEAN;
+                break;
+            default:
+                String lookupName = classShortNameMap.getOrDefault(typeNameString, typeNameString);
+                typeName = TypeName.get(Class.forName(lookupName));
+        }
+        return typeName;
+    }
+
+    @SneakyThrows
     public RowMarshaller<FieldAccessor> load() throws IOException {
         addClassAnnotations();
         addConversionFunctions();
+        addValidationFunctions();
         processingConfig.getColumns().forEach((k, v) -> v.setName(k));
         processingConfig.getColumns().values().forEach(this::addFields);
         addGetField();
@@ -84,7 +121,7 @@ public class Processor {
 
         StringWriter stringWriter = new StringWriter();
         javaFile.writeTo(stringWriter);
-        System.out.println("compiling:\n" + stringWriter.toString());
+//        System.out.println("compiling:\n" + stringWriter.toString());
         String fqn = PACKAGE_NAME + "." + beanCsvClass.name;
         String marshallerFqn = fqn + "CsvMarshaller";
         Object instance = Util.compileInstance(fqn, stringWriter.toString());
@@ -92,9 +129,25 @@ public class Processor {
         return (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
     }
 
+    private void addValidationFunctions() {
+        final TypeName validationLogType = ParameterizedTypeName.get(
+                ClassName.get(BiConsumer.class),
+                ClassName.get(String.class), ClassName.get(Boolean.class));
+        processingConfig.getValidationFunctions().forEach(
+                (k, v) -> {
+                    csvBeanClassBuilder.addMethod(MethodSpec.methodBuilder(k)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(validationLogType, "validationLog")
+                            .returns(TypeName.BOOLEAN)
+                            .addCode(v.getCode())
+                            .build());
+                }
+        );
+    }
+
     private void addConversionFunctions() {
         processingConfig.getConversionFunctions().forEach(
-                (k, v) ->{
+                (k, v) -> {
                     csvBeanClassBuilder.addMethod(MethodSpec.methodBuilder(k)
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(CharSequence.class, "input")
@@ -153,6 +206,8 @@ public class Processor {
         csvBeanClassBuilder.addMethod(setter);
         //converter methods
         addConverterMethods(fieldBuilder, columnMapping);
+        //validation methods
+        addValidationMethod(fieldBuilder, columnMapping);
         //toString
         if (previousFieldName != null) {
             toStringBuilder.addStatement("toString += $S + $L + $S", previousFieldName + ": ", previousFieldName, ", ");
@@ -169,7 +224,7 @@ public class Processor {
     private void addConverterMethods(FieldSpec.Builder fieldBuilder, ColumnMapping columnMapping) {
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(DataMapping.class);
         boolean addedAnnotation = false;
-        if(!StringUtils.isBlank(columnMapping.getConverterCode())){
+        if (!StringUtils.isBlank(columnMapping.getConverterCode())) {
             addedAnnotation = true;
             String conversionFunctionName = "convert_" + StringUtils.capitalize(columnMapping.getName());
             annotationBuilder.addMember("conversionMethod", "$S", conversionFunctionName);
@@ -179,16 +234,25 @@ public class Processor {
                     .returns(columnMapping.asTypeName())
                     .addCode(columnMapping.getConverterCode())
                     .build());
-        }else if(!StringUtils.isBlank(columnMapping.getConverterFunction())){
+        } else if (!StringUtils.isBlank(columnMapping.getConverterFunction())) {
             addedAnnotation = true;
             annotationBuilder.addMember("conversionMethod", "$S", columnMapping.getConverterFunction());
         }
-        if(columnMapping.isDerived()){
+        if (columnMapping.isDerived()) {
             addedAnnotation = true;
             annotationBuilder.addMember("derivedColumn", "$L", true);
         }
-        if(addedAnnotation){
+        if (addedAnnotation) {
             fieldBuilder.addAnnotation(annotationBuilder.build());
+        }
+    }
+
+    private void addValidationMethod(FieldSpec.Builder fieldBuilder, ColumnMapping columnMapping) {
+        if (!StringUtils.isBlank(columnMapping.getValidationFunction())) {
+            fieldBuilder.addAnnotation(
+                    AnnotationSpec.builder(Validator.class)
+                            .addMember("validationMethod", "$S", columnMapping.getValidationFunction())
+                            .build());
         }
     }
 
@@ -206,37 +270,5 @@ public class Processor {
                         .addMember("trim", "$L", processingConfig.isTrim())
                         .addMember("failOnFirstError", "$L", processingConfig.isFailOnFirstError())
                         .build());
-    }
-
-    @SneakyThrows
-    public static TypeName asTypeName(String typeNameString){
-        TypeName typeName;
-        switch (typeNameString) {
-            case "int":
-                typeName = TypeName.INT;
-                break;
-            case "double":
-                typeName = TypeName.DOUBLE;
-                break;
-            case "short":
-                typeName = TypeName.SHORT;
-                break;
-            case "long":
-                typeName = TypeName.LONG;
-                break;
-            case "char":
-                typeName = TypeName.CHAR;
-                break;
-            case "float":
-                typeName = TypeName.FLOAT;
-                break;
-            case "boolean":
-                typeName = TypeName.BOOLEAN;
-                break;
-            default:
-                String lookupName = classShortNameMap.getOrDefault(typeNameString, typeNameString);
-                typeName = TypeName.get(Class.forName(lookupName));
-        }
-        return typeName;
     }
 }

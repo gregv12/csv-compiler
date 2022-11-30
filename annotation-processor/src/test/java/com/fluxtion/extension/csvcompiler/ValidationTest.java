@@ -133,6 +133,21 @@ public class ValidationTest {
     }
 
     @Test
+    public void multipleFieldValidationWithLocalMethod() {
+        testPersonErrors(
+                Person.ValidationLMultipleoLcalMethod.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,410\n" +
+                        "IGNORE tim,18\n" +
+                        "siobhan,18\n"
+                , Util.listOf(3,4),
+                Person.build(Person.ValidationLMultipleoLcalMethod::new, "tim", 32),
+                Person.build(Person.ValidationLMultipleoLcalMethod::new, "siobhan", 18)
+        );
+    }
+
+    @Test
     public void failFastAnnotation() {
         List<Person.FailFast> results = new ArrayList<>();
         RowMarshaller.load(Person.FailFast.class)

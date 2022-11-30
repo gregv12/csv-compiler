@@ -18,6 +18,7 @@ public class CsvProcessingConfig {
     private Map<String, ColumnMapping> columns = new HashMap<>();
     private Map<String, ColumnMapping> derivedColumns = new HashMap<>();
     private Map<String, ConversionFunction> conversionFunctions = new HashMap<>();
+    private Map<String, ValidationFunction> validationFunctions = new HashMap<>();
 
     public String getName() {
         return name;
@@ -129,5 +130,13 @@ public class CsvProcessingConfig {
 
     public void setDerivedColumns(Map<String, ColumnMapping> derivedColumns) {
         this.derivedColumns = derivedColumns;
+    }
+
+    public Map<String, ValidationFunction> getValidationFunctions() {
+        return validationFunctions;
+    }
+
+    public void setValidationFunctions(Map<String, ValidationFunction> validationFunctions) {
+        this.validationFunctions = validationFunctions;
     }
 }

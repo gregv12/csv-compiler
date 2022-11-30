@@ -300,6 +300,35 @@ public class Person {
     }
 
     @CsvMarshaller(formatSource = true)
+    public static class ValidationLMultipleoLcalMethod extends Person {
+
+        @Validator(validationMethod = "validateAge")
+        private int age;
+
+        @Validator(validationMethod = "validateName")
+        private String name;
+
+        public boolean validateAge(BiConsumer<String, Boolean> validatorLog){
+            boolean valid = true;
+            if(super.age > 40){
+                valid = false;
+                validatorLog.accept("too old, must be less than 40", false);
+            }
+            return valid;
+        }
+
+        public boolean validateName(BiConsumer<String, Boolean> validatorLog){
+            boolean valid = true;
+            if(super.getName().startsWith("IGNORE")){
+                valid = false;
+                validatorLog.accept("IGNORE starts name", false);
+            }
+            return valid;
+        }
+
+    }
+
+    @CsvMarshaller(formatSource = true)
     public static class NoNullWriteCheck extends Person {
 
         @DataMapping(checkNullOnWrite = false)

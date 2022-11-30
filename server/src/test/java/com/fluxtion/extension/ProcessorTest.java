@@ -5,6 +5,7 @@ import com.fluxtion.extension.csvcompiler.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -57,9 +58,10 @@ public class ProcessorTest {
     public void loadFromYamlTest() {
         String data = """
                 latest age,name,registered,resident,town
-                ,greg higgins, 34,true,London
+                48,greg higgins, 34,true,London
                 ,bilbo, 105,true,New york
                 54,tim higgins, 34,false,Sheffield
+                154,Rip Van Winkle, 2,true,Toy town
                 """;
 
 
@@ -68,7 +70,7 @@ public class ProcessorTest {
                 trim: true
                 
                 columns:
-                  ageInYears: {csvColumnName: 'latest age', optional: true, defaultValue: 50, type: int}
+                  ageInYears: {type: int, csvColumnName: 'latest age', optional: true, defaultValue: 50, validationFunction: checkAge}
                   name:
                     defaultValue: testing
                     type: string
@@ -81,7 +83,7 @@ public class ProcessorTest {
                 
                 derivedColumns:
                   nameAndTown:
-                    type: java.lang.String
+                    type: string
                     converterCode: return name + "->" + town;
                  
                 conversionFunctions:
@@ -90,15 +92,27 @@ public class ProcessorTest {
                     code:  |
                       String myString = input.toString();
                       return myString.toLowerCase();
+                      
+                validationFunctions:
+                  checkAge:
+                    code: |
+                      if(ageInYears > 100){
+                        validationLog.accept(ageInYears +  " way too old!!", false);
+                        return false;
+                      }
+                      return true;      
                 """;
 
-        double averageAgeResidents = Processor.fromYaml(csvConfig).stream(data)
+        var summaryStats = Processor.fromYaml(csvConfig).stream(data)
                 .filter(r -> r.getField("resident"))
-                .peek(System.out::println)
+//                .peek(System.out::println)
                 .mapToInt(r -> r.getField("ageInYears"))
-                .summaryStatistics()
-                .getAverage();
+                .summaryStatistics();
 
-        System.out.println("averageAgeResidents:" + averageAgeResidents);
+        Assertions.assertEquals(98.0, summaryStats.getSum());
+        Assertions.assertEquals(50, summaryStats.getMax());
+        Assertions.assertEquals(48, summaryStats.getMin());
+        Assertions.assertEquals(2, summaryStats.getCount());
+
     }
 }

@@ -14,6 +14,7 @@ public class ColumnMapping {
     private String defaultValue = "";
     private String converterCode = "";
     private String converterFunction = "";
+    private String validationFunction = "";
     private boolean derived = false;
 
     public String getName() {
@@ -86,6 +87,14 @@ public class ColumnMapping {
 
     public void setConverterFunction(String converterFunction) {
         this.converterFunction = converterFunction;
+    }
+
+    public String getValidationFunction() {
+        return validationFunction;
+    }
+
+    public void setValidationFunction(String validationFunction) {
+        this.validationFunction = validationFunction;
     }
 
     public boolean isDerived() {
