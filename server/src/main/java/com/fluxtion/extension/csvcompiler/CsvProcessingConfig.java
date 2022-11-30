@@ -16,6 +16,7 @@ public class CsvProcessingConfig {
     boolean trim = false;
     boolean processEscapeSequences = false;
     private Map<String, ColumnMapping> columns = new HashMap<>();
+    private Map<String, ColumnMapping> derivedColumns = new HashMap<>();
     private Map<String, ConversionFunction> conversionFunctions = new HashMap<>();
 
     public String getName() {
@@ -120,5 +121,13 @@ public class CsvProcessingConfig {
 
     public void setConversionFunctions(Map<String, ConversionFunction> conversionFunctions) {
         this.conversionFunctions = conversionFunctions;
+    }
+
+    public Map<String, ColumnMapping> getDerivedColumns() {
+        return derivedColumns;
+    }
+
+    public void setDerivedColumns(Map<String, ColumnMapping> derivedColumns) {
+        this.derivedColumns = derivedColumns;
     }
 }

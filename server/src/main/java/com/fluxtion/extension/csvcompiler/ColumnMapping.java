@@ -14,6 +14,7 @@ public class ColumnMapping {
     private String defaultValue = "";
     private String converterCode = "";
     private String converterFunction = "";
+    private boolean derived = false;
 
     public String getName() {
         return name;
@@ -85,6 +86,14 @@ public class ColumnMapping {
 
     public void setConverterFunction(String converterFunction) {
         this.converterFunction = converterFunction;
+    }
+
+    public boolean isDerived() {
+        return derived;
+    }
+
+    public void setDerived(boolean derived) {
+        this.derived = derived;
     }
 
     @SneakyThrows

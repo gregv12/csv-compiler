@@ -34,6 +34,11 @@ public class Processor {
 
     public Processor(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
+        processingConfig.getDerivedColumns().forEach((k, v) ->{
+            v.setDerived(true);
+            v.setName(k);
+        });
+        processingConfig.getColumns().putAll(processingConfig.getDerivedColumns());
         csvBeanClassBuilder = TypeSpec.classBuilder(processingConfig.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(FieldAccessor.class);
@@ -168,6 +173,10 @@ public class Processor {
         }else if(!StringUtils.isBlank(columnMapping.getConverterFunction())){
             addedAnnotation = true;
             annotationBuilder.addMember("conversionMethod", "$S", columnMapping.getConverterFunction());
+        }
+        if(columnMapping.isDerived()){
+            addedAnnotation = true;
+            annotationBuilder.addMember("derivedColumn", "$L", true);
         }
         if(addedAnnotation){
             fieldBuilder.addAnnotation(annotationBuilder.build());

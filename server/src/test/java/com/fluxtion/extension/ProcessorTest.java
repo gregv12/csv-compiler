@@ -62,6 +62,7 @@ public class ProcessorTest {
                 54,tim higgins, 34,false,Sheffield
                 """;
 
+
         String csvConfig = """
                 name: Royalty
                 trim: true
@@ -77,8 +78,12 @@ public class ProcessorTest {
                   registered: {type: int}
                   resident: {type: boolean}
                   town: {type: java.lang.String, converterFunction: toLowerCase}
-                  
-                  
+                
+                derivedColumns:
+                  nameAndTown:
+                    type: java.lang.String
+                    converterCode: return name + "->" + town;
+                 
                 conversionFunctions:
                   toLowerCase:
                     convertsTo: java.lang.String
@@ -86,7 +91,6 @@ public class ProcessorTest {
                       String myString = input.toString();
                       return myString.toLowerCase();
                 """;
-
 
         double averageAgeResidents = Processor.fromYaml(csvConfig).stream(data)
                 .filter(r -> r.getField("resident"))
