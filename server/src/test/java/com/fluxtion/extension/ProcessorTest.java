@@ -56,24 +56,41 @@ public class ProcessorTest {
     @Test
     public void loadFromYamlTest() {
         String data = """
-                latest age,name,registered,resident
-                ,greg higgins, 34,true
-                ,bilbo, 105,true
-                54,tim higgins, 34,false
+                latest age,name,registered,resident,town
+                ,greg higgins, 34,true,London
+                ,bilbo, 105,true,New york
+                54,tim higgins, 34,false,Sheffield
                 """;
 
         String csvConfig = """
                 name: Royalty
                 trim: true
+                
                 columns:
                   ageInYears: {csvColumnName: 'latest age', optional: true, defaultValue: 50, type: int}
-                  name: {defaultValue: testing, type: java.lang.String}
+                  name:
+                    defaultValue: testing
+                    type: java.lang.String
+                    converterCode:  |
+                      String myString = input.toString();
+                      return myString.toUpperCase();
                   registered: {type: int}
                   resident: {type: boolean}
+                  town: {type: java.lang.String, converterFunction: toLowerCase}
+                  
+                  
+                conversionFunctions:
+                  toLowerCase:
+                    convertsTo: java.lang.String
+                    code:  |
+                      String myString = input.toString();
+                      return myString.toLowerCase();
                 """;
+
 
         double averageAgeResidents = Processor.fromYaml(csvConfig).stream(data)
                 .filter(r -> r.getField("resident"))
+                .peek(System.out::println)
                 .mapToInt(r -> r.getField("ageInYears"))
                 .summaryStatistics()
                 .getAverage();

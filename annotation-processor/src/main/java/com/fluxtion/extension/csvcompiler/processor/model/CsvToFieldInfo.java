@@ -65,6 +65,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     private String validatorInvocation;
     //lookup
     private String lookupKey;
+    private boolean derived = false;
 
     public void setSourceColIndex(int colIndex) {
         this.fieldIndex = colIndex;
@@ -133,6 +134,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public void setConverter(String converterClass, String convertConfiguration, String converterMethod) {
         if (converterClass == null || StringUtils.isBlank(converterClass)) {
+            this.converterMethod = "target." + converterMethod;
         } else {
             this.converterInstanceId = getFieldIdentifier() + "Converter";
             if(converterMethod==null || converterMethod.isEmpty()){

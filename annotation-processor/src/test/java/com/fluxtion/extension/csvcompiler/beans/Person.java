@@ -188,6 +188,62 @@ public class Person {
         }
     }
 
+    @CsvMarshaller(formatSource = true)
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    public static class ConverterFieldLocalMethod extends Person {
+
+        @DataMapping(converter = LocalTimeConverter.class, configuration = "HH:mm")
+        private LocalTime birthTime;
+
+        @DataMapping(conversionMethod = "alwaysLinda")
+        private String name;
+
+        public LocalTime getBirthTime() {
+            return birthTime;
+        }
+
+        public void setBirthTime(LocalTime birthTime) {
+            this.birthTime = birthTime;
+        }
+
+        public String alwaysLinda(CharSequence charSequence){
+            return "ALWAYS_LINDA";
+        }
+    }
+
+    @CsvMarshaller(formatSource = true)
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    public static class DerivedFieldLocalMethod extends Person {
+
+        @DataMapping(converter = LocalTimeConverter.class, configuration = "HH:mm")
+        private LocalTime birthTime;
+
+        @DataMapping(conversionMethod = "checkAllSet", derivedColumn = true)
+        private boolean derivedName = false;
+
+        public LocalTime getBirthTime() {
+            return birthTime;
+        }
+
+        public void setBirthTime(LocalTime birthTime) {
+            this.birthTime = birthTime;
+        }
+
+        public boolean isDerivedName() {
+            return derivedName;
+        }
+
+        public void setDerivedName(boolean derivedName) {
+            this.derivedName = derivedName;
+        }
+
+        public boolean checkAllSet(CharSequence charSequence){
+            return birthTime!=null && getName()!=null && getAge() > 0;
+        }
+    }
+
     @CsvMarshaller(formatSource = true, loopAssignmentLimit = 0)
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)

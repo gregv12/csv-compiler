@@ -22,6 +22,7 @@ package com.fluxtion.extension.csvcompiler.processor.model;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +100,14 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldConverter(converterClass, convertConfiguration, converterMethod);
     }
 
+    public void setDerivedFlag(String fieldName, boolean derived){
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setDerived(derived);
+        if(derived){
+            setOptionalField(fieldName, true);
+            setDefaultFieldValue(fieldName, "");
+        }
+    }
+
     public void setLookupName(String fieldName, String lookupName){
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setLookupName(lookupName);
     }
@@ -127,10 +136,25 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
     @Override
     public List<CsvToFieldInfoModel> fieldInfoList(){
-        return fieldMap.values().stream()
+        List<CsvToFieldInfoModel> csvToFieldInfoModelList = fieldMap.values().stream()
                 .map(FieldModel::getCsvToFieldInfo)
                 .map(CsvToFieldInfoModel.class::cast)
                 .collect(Collectors.toList());
+        csvToFieldInfoModelList.sort(new Comparator<CsvToFieldInfoModel>() {
+            @Override
+            public int compare(CsvToFieldInfoModel o1, CsvToFieldInfoModel o2) {
+                boolean derived1 = o1.isDerived();
+                boolean derived2 = o2.isDerived();
+                if(derived1 && derived2 || !derived1 &&!derived2){
+                    return 0;
+                }
+                if(derived1){
+                    return 1;
+                }
+                return -1;
+            }
+        });
+        return csvToFieldInfoModelList;
     }
 
     public List<FieldToCsvInfo> outputFieldInfoList(){
@@ -199,6 +223,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setLookupName(String lookupName){
             csvToFieldInfo.setLookupKey(lookupName);
+        }
+
+        public void setDerived(boolean derived) {
+            csvToFieldInfo.setDerived(derived);
         }
     }
 

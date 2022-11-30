@@ -34,4 +34,6 @@ public @interface DataMapping {
     boolean checkNullOnWrite() default true;
 
     String nullWriteValue() default "";
+
+    boolean derivedColumn() default false;
 }

@@ -152,6 +152,9 @@ public class CsvMarshallerGenerator implements Processor {
                     String format = dataMapping.configuration();
                     String converterMethod = dataMapping.conversionMethod();
                     csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), converterMethod, format);
+                }else if(!StringUtils.isBlank(dataMapping.conversionMethod())){
+                    //local converter method
+                    csvMetaModel.setFieldConverter(variableName.toString(), null, dataMapping.conversionMethod(), "");
                 }
                 if (!StringUtils.isBlank(dataMapping.lookupName())) {
                     csvMetaModel.setLookupName(variableName.toString(), dataMapping.lookupName());
@@ -161,6 +164,7 @@ public class CsvMarshallerGenerator implements Processor {
                 } else {
                     csvMetaModel.setNullWriteValue(variableName.toString(), null);
                 }
+                csvMetaModel.setDerivedFlag(variableName.toString(), dataMapping.derivedColumn());
             }
 
             Validator validator = e.getAnnotation((Validator.class));

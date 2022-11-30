@@ -1,5 +1,6 @@
 package com.fluxtion.extension.csvcompiler;
 
+import com.fluxtion.extension.Processor;
 import com.squareup.javapoet.TypeName;
 import lombok.SneakyThrows;
 
@@ -11,6 +12,8 @@ public class ColumnMapping {
     private boolean optional = false;
     private boolean trimOverride = false;
     private String defaultValue = "";
+    private String converterCode = "";
+    private String converterFunction = "";
 
     public String getName() {
         return name;
@@ -68,34 +71,24 @@ public class ColumnMapping {
         this.csvColumnName = csvColumnName;
     }
 
+    public String getConverterCode() {
+        return converterCode;
+    }
+
+    public void setConverterCode(String converterCode) {
+        this.converterCode = converterCode;
+    }
+
+    public String getConverterFunction() {
+        return converterFunction;
+    }
+
+    public void setConverterFunction(String converterFunction) {
+        this.converterFunction = converterFunction;
+    }
+
     @SneakyThrows
     public TypeName asTypeName(){
-        TypeName typeName;
-        switch (getType()) {
-            case "int":
-                typeName = TypeName.INT;
-                break;
-            case "double":
-                typeName = TypeName.DOUBLE;
-                break;
-            case "short":
-                typeName = TypeName.SHORT;
-                break;
-            case "long":
-                typeName = TypeName.LONG;
-                break;
-            case "char":
-                typeName = TypeName.CHAR;
-                break;
-            case "float":
-                typeName = TypeName.FLOAT;
-                break;
-            case "boolean":
-                typeName = TypeName.BOOLEAN;
-                break;
-            default:
-                typeName = TypeName.get(Class.forName(getType()));
-        }
-        return typeName;
+        return Processor.asTypeName(getType());
     }
 }
