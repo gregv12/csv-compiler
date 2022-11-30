@@ -19,7 +19,6 @@
 
 package com.fluxtion.extension.csvcompiler.processor;
 
-import com.fluxtion.extension.csvcompiler.processor.CsvMarshallerGenerator;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.joor.CompileOptions;
