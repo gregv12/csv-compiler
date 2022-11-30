@@ -33,7 +33,7 @@ public class ValidatorConfig {
 
     public static ValidatorConfig fromAnnotation(Validator validator, String className){
         return new ValidatorConfig(
-                validator.value(),
+                validator.validationLambda(),
                 validator.validationMethod(),
                 validator.errorMessage(),
                 validator.exitOnFailure(),

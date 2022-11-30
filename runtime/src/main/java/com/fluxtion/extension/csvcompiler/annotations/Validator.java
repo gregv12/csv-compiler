@@ -35,7 +35,7 @@ public @interface Validator {
      *
      * @return The validation predicate
      */
-    String value() default "";
+    String validationLambda() default "";
 
     /**
      * A validation method in the target class that accepts a {@link BiConsumer <String, Boolean> validatorLog }

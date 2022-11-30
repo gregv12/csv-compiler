@@ -277,7 +277,7 @@ public class Person {
     @CsvMarshaller(formatSource = true)
     public static class Validation extends Person {
 
-        @Validator(value = "(int age) -> age > 0", errorMessage = "age must be greater 0", exitOnFailure = false)
+        @Validator(validationLambda = "(int age) -> age > 0", errorMessage = "age must be greater 0", exitOnFailure = false)
         private int age;
 
     }
