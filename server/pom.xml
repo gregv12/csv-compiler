@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>0.1.4</version>
+        <version>0.1.5-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

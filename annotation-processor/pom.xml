@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>0.1.4</version>
+        <version>0.1.5-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>csv-compiler-processor</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5-SNAPSHOT</version>
     <name>csv-compiler :: annotation processor</name>
 
     <description>Build time annotation processor for generating CSV parsers</description>
