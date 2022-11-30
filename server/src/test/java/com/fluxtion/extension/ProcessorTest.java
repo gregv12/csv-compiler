@@ -5,6 +5,7 @@ import com.fluxtion.extension.csvcompiler.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.io.IOException;
 public class ProcessorTest {
 
     @Test
+    @Disabled
     public void loadTest() throws IOException {
         CsvProcessingConfig csvProcessingConfig = new CsvProcessingConfig();
         csvProcessingConfig.setName("Royalty");
@@ -54,7 +56,7 @@ public class ProcessorTest {
     @Test
     public void loadFromYamlTest() {
         String data = """
-                age,name,registered,resident
+                latest age,name,registered,resident
                 ,greg higgins, 34,true
                 ,bilbo, 105,true
                 54,tim higgins, 34,false
@@ -62,11 +64,12 @@ public class ProcessorTest {
 
         String csvConfig = """
                 name: Royalty
+                trim: true
                 columns:
-                  ageInYears: {csvColumnName: age, optional: true, defaultValue: 50, type: int}
+                  ageInYears: {csvColumnName: 'latest age', optional: true, defaultValue: 50, type: int}
                   name: {defaultValue: testing, type: java.lang.String}
-                  registered: {trimOverride: true, type: int}
-                  resident: {trimOverride: true, type: boolean}
+                  registered: {type: int}
+                  resident: {type: boolean}
                 """;
 
         double averageAgeResidents = Processor.fromYaml(csvConfig).stream(data)

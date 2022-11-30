@@ -231,11 +231,11 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public String getFieldIdentifier() {
         if (indexField) {
-            fieldIdentifier = "fieldIndex_" + getFieldName();
+            fieldIdentifier = "fieldIndex_" + getFieldName().replace(" ", "_");
         } else if (fixedWidth) {
             fieldIdentifier = "fixedStart_" + getFieldIndex();
         } else {
-            fieldIdentifier = "fieldName_" + getFieldName();
+            fieldIdentifier = "fieldName_" + getFieldName().replace(" ", "_");
         }
         return fieldIdentifier;
     }
