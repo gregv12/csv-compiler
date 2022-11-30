@@ -15,7 +15,7 @@ public class CsvProcessingConfig {
     boolean failOnFirstError = false;
     boolean trim = false;
     boolean processEscapeSequences = false;
-    private Map<String, ColumnMapping> columnMap = new HashMap<>();
+    private Map<String, ColumnMapping> columns = new HashMap<>();
 
     public String getName() {
         return name;
@@ -105,11 +105,11 @@ public class CsvProcessingConfig {
         this.processEscapeSequences = processEscapeSequences;
     }
 
-    public Map<String, ColumnMapping> getColumnMap() {
-        return columnMap;
+    public Map<String, ColumnMapping> getColumns() {
+        return columns;
     }
 
-    public void setColumnMap(Map<String, ColumnMapping> columnMap) {
-        this.columnMap = columnMap;
+    public void setColumns(Map<String, ColumnMapping> columns) {
+        this.columns = columns;
     }
 }

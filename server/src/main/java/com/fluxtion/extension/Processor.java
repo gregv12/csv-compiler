@@ -12,6 +12,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
+import com.squareup.javapoet.TypeVariableName;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -25,27 +26,46 @@ public class Processor {
 
     public static final String PACKAGE_NAME = "com.example.helloworld";
     private final CsvProcessingConfig processingConfig;
-    private Builder csvBeanClassBuilder;
+    private final Builder csvBeanClassBuilder;
+    private final MethodSpec.Builder toStringBuilder;
+    private final MethodSpec.Builder accessByNameBuilder;
+    private String previousFieldName = null;
 
     public Processor(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
+        csvBeanClassBuilder = TypeSpec.classBuilder(processingConfig.getName())
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addSuperinterface(FieldAccessor.class);
+        toStringBuilder = MethodSpec.methodBuilder("toString")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addStatement("$T toString = $S", String.class, processingConfig.getName() + "[");
+        accessByNameBuilder = MethodSpec.methodBuilder("getField")
+                .addModifiers(Modifier.PUBLIC)
+                .addTypeVariable(TypeVariableName.get("T"))
+                .addAnnotation(Override.class)
+                .addParameter(String.class, "fieldName")
+                .beginControlFlow("switch(fieldName)")
+                .returns(TypeVariableName.get("T"));
         Yaml yaml = new Yaml();
         System.out.println("myconfig:\n" + yaml.dump(processingConfig));
     }
 
     @SneakyThrows
-    public void load() throws IOException {
-        csvBeanClassBuilder = TypeSpec.classBuilder(processingConfig.getName())
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+    public static RowMarshaller<FieldAccessor> fromYaml(String csvProcessingConfig){
+        return new Processor(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
+    }
 
+    @SneakyThrows
+    public RowMarshaller<FieldAccessor> load() throws IOException {
         addClassAnnotations();
-        processingConfig.getColumnMap().values().forEach(this::addFields);
+        processingConfig.getColumns().forEach((k, v) -> v.setName(k));
+        processingConfig.getColumns().values().forEach(this::addFields);
+        addGetField();
+        addToString();
+        TypeSpec beanCsvClass = csvBeanClassBuilder.build();
+        JavaFile javaFile = JavaFile.builder(PACKAGE_NAME, beanCsvClass).build();
 
-        TypeSpec beanCsvClass = csvBeanClassBuilder
-                .build();
-
-        JavaFile javaFile = JavaFile.builder(PACKAGE_NAME, beanCsvClass)
-                .build();
         StringWriter stringWriter = new StringWriter();
         javaFile.writeTo(stringWriter);
         System.out.println("compiling:\n" + stringWriter.toString());
@@ -53,24 +73,27 @@ public class Processor {
         String marshallerFqn = fqn + "CsvMarshaller";
         Object instance = Util.compileInstance(fqn, stringWriter.toString());
         Class<?> aClass = instance.getClass().getClassLoader().loadClass(marshallerFqn);
-        RowMarshaller<?> rowMarshaller = (RowMarshaller<?>) aClass.getConstructor().newInstance();
-        StringBuilder sb = new StringBuilder();
-        rowMarshaller.writeHeaders(sb);
+        return (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
+    }
+
+    private void addGetField() {
+        accessByNameBuilder.addCode("default:\n")
+                .addStatement("$>break")
+                .endControlFlow()
+                .addStatement("return null");
+        csvBeanClassBuilder.addMethod(accessByNameBuilder.build());
+    }
+
+    private void addToString(){
+        toStringBuilder.addStatement("toString += $S + $L + $S", previousFieldName + ":'", previousFieldName, "'");
+        toStringBuilder.addStatement("toString += $S", "]");
+        toStringBuilder.addStatement("return toString");
+        csvBeanClassBuilder.addMethod(toStringBuilder.build());
     }
 
     @lombok.SneakyThrows
     private void addFields(ColumnMapping columnMapping) {
-        TypeName typeName;
-        switch (columnMapping.getType()) {
-            case "int":
-                typeName = TypeName.INT;
-                break;
-            case "boolean":
-                typeName = TypeName.BOOLEAN;
-                break;
-            default:
-                typeName = TypeName.get(Class.forName(columnMapping.getType()));
-        }
+        TypeName typeName = columnMapping.asTypeName();
         String fieldName = columnMapping.getName();
         FieldSpec field = FieldSpec.builder(typeName, fieldName)
                 .addModifiers(Modifier.PRIVATE)
@@ -101,7 +124,14 @@ public class Processor {
                 .addStatement("this." + fieldName + " = " + fieldName)
                 .build();
         csvBeanClassBuilder.addMethod(setter);
-
+        //toString
+        if(previousFieldName != null){
+            toStringBuilder.addStatement("toString += $S + $L + $S", previousFieldName + ":'", previousFieldName, "', ");
+        }
+        //field accessor
+        accessByNameBuilder.addCode("case $S:\n", fieldName)
+                .addStatement("$>return (T)(Object)$L$<", fieldName);
+        previousFieldName = fieldName;
     }
 
     private void addClassAnnotations() {

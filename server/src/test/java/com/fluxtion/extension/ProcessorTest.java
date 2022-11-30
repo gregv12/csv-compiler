@@ -3,6 +3,8 @@ package com.fluxtion.extension;
 
 import com.fluxtion.extension.csvcompiler.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
+import com.fluxtion.extension.csvcompiler.RowMarshaller;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,24 +18,63 @@ public class ProcessorTest {
         csvProcessingConfig.setAcceptPartials(true);
         //columns
         ColumnMapping columnMapping = new ColumnMapping();
-        columnMapping.setName("ageInYears");
         columnMapping.setCsvColumnName("age");
         columnMapping.setType("int");
         columnMapping.setOptional(true);
-        csvProcessingConfig.getColumnMap().put(columnMapping.getName(), columnMapping);
+        csvProcessingConfig.getColumns().put("ageInYears", columnMapping);
         //
         columnMapping = new ColumnMapping();
-        columnMapping.setName("name");
         columnMapping.setType("java.lang.String");
         columnMapping.setDefaultValue("testing");
-        csvProcessingConfig.getColumnMap().put(columnMapping.getName(), columnMapping);
+        csvProcessingConfig.getColumns().put("name", columnMapping);
         //
         columnMapping = new ColumnMapping();
-        columnMapping.setName("registered");
         columnMapping.setType("int");
-        csvProcessingConfig.getColumnMap().put(columnMapping.getName(), columnMapping);
+        columnMapping.setTrimOverride(true);
+        csvProcessingConfig.getColumns().put("registered", columnMapping);
         //generate
         Processor processor = new Processor(csvProcessingConfig);
-        processor.load();
+        RowMarshaller<FieldAccessor> rowMarshaller = processor.load();
+
+        String data = """
+                age,name,registered
+                52,greg higgins, 34
+                48,tim higgins, 34
+                """;
+
+        int ageSum = rowMarshaller.stream(data)
+                .map(r -> r.getField("ageInYears"))
+                .mapToInt(Integer.class::cast)
+                .sum();
+
+        System.out.println("ageSum:" + ageSum);
+    }
+
+    @SneakyThrows
+    @Test
+    public void loadFromYamlTest() {
+        String data = """
+                age,name,registered,resident
+                ,greg higgins, 34,true
+                ,bilbo, 105,true
+                54,tim higgins, 34,false
+                """;
+
+        String csvConfig = """
+                name: Royalty
+                columns:
+                  ageInYears: {csvColumnName: age, optional: true, defaultValue: 50, type: int}
+                  name: {defaultValue: testing, type: java.lang.String}
+                  registered: {trimOverride: true, type: int}
+                  resident: {trimOverride: true, type: boolean}
+                """;
+
+        double averageAgeResidents = Processor.fromYaml(csvConfig).stream(data)
+                .filter(r -> r.getField("resident"))
+                .mapToInt(r -> r.getField("ageInYears"))
+                .summaryStatistics()
+                .getAverage();
+
+        System.out.println("averageAgeResidents:" + averageAgeResidents);
     }
 }
