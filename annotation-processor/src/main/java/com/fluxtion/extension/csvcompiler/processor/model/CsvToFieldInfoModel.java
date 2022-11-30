@@ -65,6 +65,8 @@ public interface CsvToFieldInfoModel {
 
     String getLookupKey();
 
+    boolean isDerived();
+
     default boolean isLookupApplied() {
         return getLookupKey() != null && !StringUtils.isBlank(getLookupKey());
     }

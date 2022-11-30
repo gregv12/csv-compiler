@@ -20,6 +20,7 @@
 package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
+import com.fluxtion.extension.csvcompiler.processor.Util;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
@@ -100,16 +101,16 @@ public class CsvMarshallerGeneratorAnnotationTest {
 //    @SneakyThrows
     public void nestedClassCompileTest() {
 
-        Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyBooleanTest",
+        Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyBooleanTest2",
                 "    package  com.fluxtion.extension.csvcompiler;\n" +
                         "\n" +
                         "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
                         "    import com.fluxtion.extension.csvcompiler.annotations.*;\n" +
                         "\n" +
                         "    @CsvMarshaller\n" +
-                        "    public final class MyBooleanTest{\n" +
+                        "    public final class MyBooleanTest2{\n" +
                         "\n" +
-                        "       @DataMapping(converter = ConstantStringConverter.class, configuration = \"ALWAYS_LINDA\")\n" +
+                        "        //@DataMapping(converter = ConstantStringConverter.class, configuration = \"ALWAYS_LINDA\")\n" +
                         "        boolean name;\n" +
                         "\n" +
                         "        public boolean isName(){\n" +
@@ -123,7 +124,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
                         "public static class MyNestedClass{}" +
                         "    }\n");
 
-        MYTestClass.MyNestedClass x = new MYTestClass.MyNestedClass();
+//        MYTestClass.MyNestedClass x = new MYTestClass.MyNestedClass();
     }
 
     public static class MYTestClass {

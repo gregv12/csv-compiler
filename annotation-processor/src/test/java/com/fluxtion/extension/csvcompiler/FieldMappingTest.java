@@ -21,7 +21,9 @@ package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.Person;
 import com.fluxtion.extension.csvcompiler.beans.Person.ConverterField;
+import com.fluxtion.extension.csvcompiler.beans.Person.ConverterFieldLocalMethod;
 import com.fluxtion.extension.csvcompiler.beans.Person.ConverterFieldLoopAssignment;
+import com.fluxtion.extension.csvcompiler.beans.Person.DerivedFieldLocalMethod;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
@@ -126,6 +128,37 @@ public class FieldMappingTest {
                 ConverterField.class,
                 "name,age,birthTime\n" +
                 "lisa,44,12:34\n",
+                converted
+        );
+
+    }
+
+    @Test
+    public void converterFieldsWithLocalMappingMethod(){
+        ConverterFieldLocalMethod converted = new ConverterFieldLocalMethod();
+        converted.setAge(44);
+        converted.setName("ALWAYS_LINDA");
+        converted.setBirthTime(LocalTime.of(12,34));
+        testPerson(
+                ConverterFieldLocalMethod.class,
+                "name,age,birthTime\n" +
+                        "lisa,44,12:34\n",
+                converted
+        );
+
+    }
+
+    @Test
+    public void derivedFieldsWithLocalMappingMethodIsAfterRealColumns(){
+        DerivedFieldLocalMethod converted = new DerivedFieldLocalMethod();
+        converted.setAge(44);
+        converted.setName("lisa");
+        converted.setBirthTime(LocalTime.of(12,34));
+        converted.setDerivedName(true);
+        testPerson(
+                DerivedFieldLocalMethod.class,
+                "name,age,birthTime\n" +
+                        "lisa,44,12:34\n",
                 converted
         );
 

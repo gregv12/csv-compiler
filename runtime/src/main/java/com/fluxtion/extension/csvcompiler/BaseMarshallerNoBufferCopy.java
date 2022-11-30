@@ -59,6 +59,7 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
     protected boolean passedValidation;
     protected Consumer<CsvProcessingException> fatalExceptionHandler;
     private boolean foundRecord;
+    protected boolean publish;
     protected StringBuilder builder = new StringBuilder(8192);
 
     protected BaseMarshallerNoBufferCopy(boolean failOnError) {
@@ -289,9 +290,13 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
         return true;
     }
 
+    protected boolean validateField(java.util.function.BiPredicate<T, BiConsumer<String, Boolean>> rowValidator){
+        return rowValidator.test(target, this::logFieldValidationProblem);
+    }
+
     protected final void logRowValidationProblem(String errorMessage, boolean isFatal) {
         passedValidation = false;
-        String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
+        String msg = errorMessage + " validation problem line:" + getRowNumber();
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
         if (isFatal) {
             errorLog.logFatal(exception);
@@ -303,7 +308,7 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
 
     protected final void logFieldValidationProblem(String errorMessage, boolean failFast) {
         passedValidation = false;
-        String msg = "Validation problem line:" + getRowNumber() + " " + errorMessage;
+        String msg = errorMessage + " validation problem line:" + getRowNumber();
 
         msg += " fieldIndex:'"
                 + fieldIndex

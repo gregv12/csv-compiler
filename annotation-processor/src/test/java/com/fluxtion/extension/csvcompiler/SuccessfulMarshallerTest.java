@@ -24,6 +24,7 @@ import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
 import com.fluxtion.extension.csvcompiler.beans.Person.EscapedIndexFields;
 import com.fluxtion.extension.csvcompiler.beans.Person.MultipleHeaderLines;
+import com.fluxtion.extension.csvcompiler.processor.Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -310,13 +311,13 @@ public class SuccessfulMarshallerTest {
         assertIterableEquals(
                 errorRowsExpected,
                 errorRowsActual,
-                "forEach indexes of invalid rows does not match"
+                "failed rows do not match"
         );
 
         assertIterableEquals(
                 Util.listOf(people),
                 resultList,
-                "forEach number of valid rows is different"
+                "number of valid rows is different"
         );
 
         //perform test with streaming

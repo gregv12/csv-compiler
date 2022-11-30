@@ -65,6 +65,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     private String validatorInvocation;
     //lookup
     private String lookupKey;
+    private boolean derived = false;
 
     public void setSourceColIndex(int colIndex) {
         this.fieldIndex = colIndex;
@@ -100,9 +101,15 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public void setValidatorConfig(ValidatorConfig validatorConfig) {
         this.validatorId = getFieldIdentifier() + "Validator";
+        if(!StringUtils.isBlank(validatorConfig.getMethod())) {
+            validatorInvocation = "validateField(" + getValidatorId() + ");\n";
+            String enclosingTargetType = validatorConfig.getClassName();
+            validatorDeclaration = "private final BiPredicate<" + enclosingTargetType + ", BiConsumer<String, Boolean>> "
+                    + validatorId + " = " + enclosingTargetType + "::" + validatorConfig.getMethod() + ";";
+            return;
+        }
         validatorLambda = validatorConfig.getLambda();
-
-        String predicate = "private java.util.function.";
+        String predicate = "private final java.util.function.";
         switch (targetArgType) {
             case "int":
             case "short":
@@ -115,6 +122,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
                 break;
             case "long":
                 predicate += "LongPredicate ";
+                break;
             default:
                 predicate += "Predicate<" + targetArgType + "> ";
         }
@@ -133,6 +141,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public void setConverter(String converterClass, String convertConfiguration, String converterMethod) {
         if (converterClass == null || StringUtils.isBlank(converterClass)) {
+            this.converterMethod = "target." + converterMethod;
         } else {
             this.converterInstanceId = getFieldIdentifier() + "Converter";
             if(converterMethod==null || converterMethod.isEmpty()){
@@ -231,11 +240,11 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public String getFieldIdentifier() {
         if (indexField) {
-            fieldIdentifier = "fieldIndex_" + getFieldName();
+            fieldIdentifier = "fieldIndex_" + getFieldName().replace(" ", "_");
         } else if (fixedWidth) {
             fieldIdentifier = "fixedStart_" + getFieldIndex();
         } else {
-            fieldIdentifier = "fieldName_" + getFieldName();
+            fieldIdentifier = "fieldName_" + getFieldName().replace(" ", "_");
         }
         return fieldIdentifier;
     }

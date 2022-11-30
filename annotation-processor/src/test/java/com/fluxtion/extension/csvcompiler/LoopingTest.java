@@ -2,6 +2,7 @@ package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import com.fluxtion.extension.csvcompiler.processor.Util;
 import lombok.val;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

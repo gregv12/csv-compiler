@@ -26,10 +26,18 @@ import lombok.Value;
 public class ValidatorConfig {
 
     String lambda;
+    String method;
     String errorMessage;
     boolean exitOnFailure;
+    String className;
 
-    public static ValidatorConfig fromAnnotation(Validator validator){
-        return new ValidatorConfig(validator.value(), validator.errorMessage(), validator.exitOnFailure());
+    public static ValidatorConfig fromAnnotation(Validator validator, String className){
+        return new ValidatorConfig(
+                validator.validationLambda(),
+                validator.validationMethod(),
+                validator.errorMessage(),
+                validator.exitOnFailure(),
+                className
+        );
     }
 }

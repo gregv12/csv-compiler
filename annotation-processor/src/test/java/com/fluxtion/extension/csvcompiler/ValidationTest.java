@@ -20,6 +20,7 @@
 package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.beans.Person;
+import com.fluxtion.extension.csvcompiler.processor.Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +115,35 @@ public class ValidationTest {
                 , Util.listOf(3),
                 Person.build(Person.Validation::new, "tim", 32),
                 Person.build(Person.Validation::new, "siobhan", 18)
+        );
+    }
+
+    @Test
+    public void fieldValidationWithLocalMethod() {
+        testPersonErrors(
+                Person.ValidationLocalMethod.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,410\n" +
+                        "siobhan,18\n"
+                , Util.listOf(3),
+                Person.build(Person.ValidationLocalMethod::new, "tim", 32),
+                Person.build(Person.ValidationLocalMethod::new, "siobhan", 18)
+        );
+    }
+
+    @Test
+    public void multipleFieldValidationWithLocalMethod() {
+        testPersonErrors(
+                Person.ValidationLMultipleoLcalMethod.class,
+                "name,age\n" +
+                        "tim,32\n" +
+                        "lisa,410\n" +
+                        "IGNORE tim,18\n" +
+                        "siobhan,18\n"
+                , Util.listOf(3,4),
+                Person.build(Person.ValidationLMultipleoLcalMethod::new, "tim", 32),
+                Person.build(Person.ValidationLMultipleoLcalMethod::new, "siobhan", 18)
         );
     }
 

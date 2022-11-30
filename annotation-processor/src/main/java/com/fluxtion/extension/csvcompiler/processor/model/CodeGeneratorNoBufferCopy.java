@@ -334,7 +334,7 @@ public class CodeGeneratorNoBufferCopy {
     private static String updateTargetMethod(CodeGeneratorModel codeGeneratorModel) {
         String options = "\n" +
                 "    private boolean updateTarget() {\n" +
-                "        boolean publish = true;\n" +
+                "        publish = true;\n" +
                 "        int length = 0;\n";
         if (codeGeneratorModel.isNewBeanPerRecord()) {
             options += "        target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
@@ -409,7 +409,7 @@ public class CodeGeneratorNoBufferCopy {
                                         "            }", readField, s.getUpdateTarget());
                             }
                             if (s.isValidated()) {
-                                out += "\n            publish = " + s.getValidatorInvocation();
+                                out += "\n            publish &= " + s.getValidatorInvocation();
                             }
                             if (acceptPartials) {
                                 out += "\n            }";
