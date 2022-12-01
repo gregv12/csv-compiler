@@ -58,6 +58,7 @@ public final class Royalty implements FieldAccessor {
     @DataMapping(
             lookupName = "registeredId"
     )
+    @Validator(validationMethod = "checkRegistered")
     private int registered;
 
     @ColumnMapping(
@@ -102,6 +103,14 @@ public final class Royalty implements FieldAccessor {
     public boolean checkAge(BiConsumer<String, Boolean> validationLog) {
         if(ageInYears > 100){
             validationLog.accept(ageInYears +  " way too old!!", false);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkRegistered(BiConsumer<String, Boolean> validationLog) {
+        if(registered > 4){
+            validationLog.accept("Unsupported registration description", false);
             return false;
         }
         return true;
