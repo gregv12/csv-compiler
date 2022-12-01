@@ -2,6 +2,7 @@ package com.fluxtion.extension;
 
 import com.fluxtion.extension.csvcompiler.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
+import com.fluxtion.extension.csvcompiler.FieldAccessor;
 import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
@@ -126,7 +127,26 @@ public class Processor {
         String marshallerFqn = fqn + "CsvMarshaller";
         Object instance = Util.compileInstance(fqn, stringWriter.toString());
         Class<?> aClass = instance.getClass().getClassLoader().loadClass(marshallerFqn);
-        return (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
+        RowMarshaller<FieldAccessor> rowMarshaller = (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
+        addLookupTables(rowMarshaller);
+        return rowMarshaller;
+    }
+
+    private void addLookupTables(RowMarshaller<FieldAccessor> rowMarshaller) {
+        Map<String, Map<String, String>>  lookupTables = processingConfig.getLookupTables();
+        lookupTables.forEach((k, t) ->{
+            try {
+                rowMarshaller.addLookup(k, l -> {
+                    Object value = t.get(l);
+                    if(value == null){
+                        value = t.getOrDefault("default", "");
+                    }
+                    return value.toString();
+                });
+            }catch(Exception e){
+                System.out.println("problem adding the lookup:" + k + " error:" + e);
+            }
+        });
     }
 
     private void addValidationFunctions() {
@@ -242,6 +262,11 @@ public class Processor {
             addedAnnotation = true;
             annotationBuilder.addMember("derivedColumn", "$L", true);
         }
+        if (!StringUtils.isBlank(columnMapping.getLookupTable())) {
+            addedAnnotation = true;
+            annotationBuilder.addMember("lookupName", "$S", columnMapping.getLookupTable());
+        }
+        //lookupName
         if (addedAnnotation) {
             fieldBuilder.addAnnotation(annotationBuilder.build());
         }
