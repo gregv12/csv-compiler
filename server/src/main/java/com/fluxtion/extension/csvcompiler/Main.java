@@ -12,8 +12,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.fluxtion.extension.csvcompiler.Version.VERSION;
@@ -153,6 +155,11 @@ public class Main implements Runnable {
                 unknown: 4
                 default: 5
             """;
+    public static final String SAMPLE_DATA = """
+            age,name,registered
+            52,greg higgins, 34
+            48,tim higgins, 34
+            """;
     private static String SAMPLE_CONFIG = """
             name: Royalty
             trim: true
@@ -207,12 +214,6 @@ public class Main implements Runnable {
                 unknown: 4
                 default: 5
                 """;
-
-    public static final String SAMPLE_DATA = """
-            age,name,registered
-            52,greg higgins, 34
-            48,tim higgins, 34
-            """;
     @Option(names = {"-s", "--simpleConfig"}, description = "prints a minimal sample yaml config", arity = "0")
     boolean printSample;
     @Option(names = {"-f", "--fullConfig"}, description = "prints a sample yaml config showing all options", arity = "0")
@@ -249,10 +250,17 @@ public class Main implements Runnable {
     private void process() {
         System.out.println("config: " + configFile.getAbsolutePath());
         System.out.println("data  : " + dataFile.getAbsolutePath());
-        new File("valid.csv").delete();
-        new File("invalid.txt").delete();
-        Writer writer = new BufferedWriter(new FileWriter("valid.csv"));
-        Writer writerInvalid = new BufferedWriter(new FileWriter("invalid.txt"));
+
+        Path resultsDir = Paths.get("results");
+        if (!Files.exists(resultsDir)) {
+            Files.createDirectory(resultsDir);
+        }
+        File validResultFile = new File("results/valid.csv");
+        validResultFile.delete();
+        File invalidResultFile = new File("results/invalid.txt");
+        invalidResultFile.delete();
+        Writer writer = new BufferedWriter(new FileWriter(validResultFile));
+        Writer writerInvalid = new BufferedWriter(new FileWriter(invalidResultFile));
         LongAdder invalidCount = new LongAdder();
         LongAdder validCount = new LongAdder();
         var metaMap = new HashMap<String, String>();
