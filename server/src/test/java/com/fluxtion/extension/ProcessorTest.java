@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 public class ProcessorTest {
 
@@ -118,10 +119,20 @@ public class ProcessorTest {
                     default: 5
                 """;
 
-        var summaryStats = Processor.fromYaml(csvConfig)
+        RowMarshaller<FieldAccessor> rowMarshaller = Processor.fromYaml(csvConfig);
+        StringWriter successWriter = new StringWriter();
+        rowMarshaller.writeHeaders(successWriter);
+        var summaryStats = rowMarshaller
                 .stream(data)
                 .filter(r -> r.getField("resident"))
-                .peek(System.out::println)
+//                .peek(System.out::println)
+                .peek(r -> {
+                    try {
+                        rowMarshaller.writeRow(r, successWriter);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .mapToInt(r -> r.getField("ageInYears"))
                 .summaryStatistics();
 
@@ -129,5 +140,7 @@ public class ProcessorTest {
         Assertions.assertEquals(50, summaryStats.getMax());
         Assertions.assertEquals(48, summaryStats.getMin());
         Assertions.assertEquals(2, summaryStats.getCount());
+
+        System.out.println("Valid:\n" + successWriter.toString());
     }
 }
