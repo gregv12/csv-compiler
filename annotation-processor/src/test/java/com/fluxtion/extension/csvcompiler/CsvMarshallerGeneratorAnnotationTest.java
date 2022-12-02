@@ -101,28 +101,27 @@ public class CsvMarshallerGeneratorAnnotationTest {
 //    @SneakyThrows
     public void nestedClassCompileTest() {
 
-        Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyBooleanTest2",
-                "    package  com.fluxtion.extension.csvcompiler;\n" +
+        Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.DefaultLookupOptional",
+                "package  com.fluxtion.extension.csvcompiler;\n" +
+                        "import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;\n" +
+                        "import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                        "import com.fluxtion.extension.csvcompiler.annotations.DataMapping;\n" +
                         "\n" +
-                        "    import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
-                        "    import com.fluxtion.extension.csvcompiler.annotations.*;\n" +
-                        "\n" +
-                        "    @CsvMarshaller\n" +
-                        "    public final class MyBooleanTest2{\n" +
-                        "\n" +
-                        "        //@DataMapping(converter = ConstantStringConverter.class, configuration = \"ALWAYS_LINDA\")\n" +
-                        "        boolean name;\n" +
-                        "\n" +
-                        "        public boolean isName(){\n" +
-                        "            return name;\n" +
-                        "        }\n" +
-                        "\n" +
-                        "        public void setName(boolean name){\n" +
-                        "            this.name = name;\n" +
-                        "        }\n" +
                         "@CsvMarshaller\n" +
-                        "public static class MyNestedClass{}" +
-                        "    }\n");
+                        "public class DefaultLookupOptional {\n" +
+                        "\n" +
+                        "    @DataMapping(lookupName = \"meta\")\n" +
+                        "    @ColumnMapping(optionalField = true, defaultValue = \"myDefault\")//, defaultValue = \"dataFile\")\n" +
+                        "    private String dataFile;\n" +
+                        "\n" +
+                        "    public String getDataFile() {\n" +
+                        "        return dataFile;\n" +
+                        "    }\n" +
+                        "\n" +
+                        "    public void setDataFile(String dataFile) {\n" +
+                        "        this.dataFile = dataFile;\n" +
+                        "    }\n" +
+                        "}");
 
 //        MYTestClass.MyNestedClass x = new MYTestClass.MyNestedClass();
     }

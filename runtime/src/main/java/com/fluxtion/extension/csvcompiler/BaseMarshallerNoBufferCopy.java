@@ -308,12 +308,16 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
 
     protected final void logFieldValidationProblem(String errorMessage, boolean failFast) {
         passedValidation = false;
-        String msg = errorMessage + " validation problem line:" + getRowNumber();
+        String msg = "\n" + errorMessage + " validation problem line:" + getRowNumber();
 
         msg += " fieldIndex:'"
                 + fieldIndex
                 + "' targetMethod:'" + targetClass().getSimpleName() + "#"
-                + fieldMap.get(fieldIndex) + "'";
+                + fieldMap.get(fieldIndex) + "'"
+                + "\ninput : '" + sequence.subSequence(delimiterIndex[fieldIndex], delimiterIndex[fieldIndex+1]) + "'"
+                + "\noutput: " + target.toString()
+//                +"\n"
+        ;
 
         CsvProcessingException exception = new CsvProcessingException(msg, getRowNumber());
         if (failOnError || failFast) {

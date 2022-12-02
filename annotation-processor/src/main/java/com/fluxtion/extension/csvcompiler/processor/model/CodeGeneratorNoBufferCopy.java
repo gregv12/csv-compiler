@@ -141,7 +141,7 @@ public class CodeGeneratorNoBufferCopy {
                             .collect(Collectors.joining("\n", "", "\n"));
 
             options += "             default:\n" +
-                    "                throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+                    "                throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookupName);\n" +
                     "        }\n" +
                     "        return this;\n" +
                     "    }";

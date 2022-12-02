@@ -63,79 +63,82 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
     public void registerSetMethod(String methodName) {
         String fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, "set"));
-         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setSetterMethod(methodName);
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setSetterMethod(methodName);
     }
 
     public void registerGetMethod(String methodName) {
-        String prefix = methodName.startsWith("is")?"is":"get";
+        String prefix = methodName.startsWith("is") ? "is" : "get";
         String fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, prefix));
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setGetterMethod(methodName);
     }
 
-    public void registerFieldType(String fieldName, String type){
+    public void registerFieldType(String fieldName, String type) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setType(type);
     }
 
-    public void setColumnName(String fieldName, String columnName){
+    public void setColumnName(String fieldName, String columnName) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setColumnName(columnName);
     }
 
-    public void setDefaultFieldValue(String fieldName, String columnName){
+    public void setDefaultFieldValue(String fieldName, String columnName) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setDefaultFieldName(columnName);
     }
 
-    public void setOptionalField(String fieldName, boolean optionalField){
+    public void setOptionalField(String fieldName, boolean optionalField) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setOptionalField(optionalField);
     }
 
-    public void setTrimField(String fieldName, boolean trimField){
+    public void setTrimField(String fieldName, boolean trimField) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setTrimField(trimField);
     }
 
-    public void setColumnIndex(String fieldName, int columnIndex){
+    public void setColumnIndex(String fieldName, int columnIndex) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setColumnIndex(columnIndex);
     }
 
-    public void setFieldConverter(String fieldName, String converterClass, String converterMethod, String convertConfiguration){
+    public void setFieldConverter(String fieldName, String converterClass, String converterMethod, String convertConfiguration) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldConverter(converterClass, convertConfiguration, converterMethod);
     }
 
-    public void setDerivedFlag(String fieldName, boolean derived){
+    public void setDerivedFlag(String fieldName, boolean derived) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setDerived(derived);
-        if(derived){
+        if (derived) {
             setOptionalField(fieldName, true);
-            setDefaultFieldValue(fieldName, "");
+            if (!fieldMap.containsKey(fieldName) ||
+                    StringUtils.isBlank(fieldMap.get(fieldName).getCsvToFieldInfo().getDefaultMethod())) {
+                setDefaultFieldValue(fieldName, "");
+            }
         }
     }
 
-    public void setLookupName(String fieldName, String lookupName){
+    public void setLookupName(String fieldName, String lookupName) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setLookupName(lookupName);
     }
 
-    public void setValidator(String fieldName, ValidatorConfig validatorConfig){
+    public void setValidator(String fieldName, ValidatorConfig validatorConfig) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldValidator(validatorConfig);
     }
 
-    public void setNullWriteValue(String fieldName, String nullValue){
+    public void setNullWriteValue(String fieldName, String nullValue) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setNullWriteValue(nullValue);
     }
 
-    public void buildModel(){
+    public void buildModel() {
         pruneInvalidFields();
         fieldMap.values().forEach(FieldModel::buildFieldModel);
     }
 
-    private void pruneInvalidFields(){
+    private void pruneInvalidFields() {
         fieldMap.values().removeIf(FieldModel::nonMarshallField);
     }
 
     @Override
-    public String getFqn(){
+    public String getFqn() {
         return getPackageName() + "." + getMarshallerClassName();
     }
 
     @Override
-    public List<CsvToFieldInfoModel> fieldInfoList(){
+    public List<CsvToFieldInfoModel> fieldInfoList() {
         List<CsvToFieldInfoModel> csvToFieldInfoModelList = fieldMap.values().stream()
                 .map(FieldModel::getCsvToFieldInfo)
                 .map(CsvToFieldInfoModel.class::cast)
@@ -145,10 +148,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
             public int compare(CsvToFieldInfoModel o1, CsvToFieldInfoModel o2) {
                 boolean derived1 = o1.isDerived();
                 boolean derived2 = o2.isDerived();
-                if(derived1 && derived2 || !derived1 &&!derived2){
+                if (derived1 && derived2 || !derived1 && !derived2) {
                     return 0;
                 }
-                if(derived1){
+                if (derived1) {
                     return 1;
                 }
                 return -1;
@@ -157,7 +160,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
         return csvToFieldInfoModelList;
     }
 
-    public List<FieldToCsvInfo> outputFieldInfoList(){
+    public List<FieldToCsvInfo> outputFieldInfoList() {
         return fieldMap.values().stream()
                 .map(FieldModel::getFieldToCsvInfoInfo)
 //                .map(CsvToFieldInfoModel.class::cast)
@@ -178,7 +181,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
             return getterMethod == null || setterMethod == null;
         }
 
-        public void buildFieldModel(){
+        public void buildFieldModel() {
             csvToFieldInfo = new CsvToFieldInfo();
             csvToFieldInfo.setSourceFieldName(name);
             csvToFieldInfo.setTarget(getterMethod, setterMethod, false, type, "target");
@@ -188,23 +191,23 @@ public class CsvMetaModel implements CodeGeneratorModel {
             fieldToCsvInfoInfo.setSourceType(type);
         }
 
-        public void setColumnName(String columnName){
+        public void setColumnName(String columnName) {
             csvToFieldInfo.setSourceFieldName(columnName);
         }
 
-        public void setDefaultFieldName(String defaultValue){
+        public void setDefaultFieldName(String defaultValue) {
             csvToFieldInfo.setDefaultValue(defaultValue);
         }
 
-        public void setOptionalField(boolean optionalField){
+        public void setOptionalField(boolean optionalField) {
             csvToFieldInfo.setMandatory(!optionalField);
         }
 
-        public void setTrimField(boolean trimField){
+        public void setTrimField(boolean trimField) {
             csvToFieldInfo.setTrim(trimField);
         }
 
-        public void setColumnIndex(int columnIndex){
+        public void setColumnIndex(int columnIndex) {
             csvToFieldInfo.setSourceColIndex(columnIndex);
         }
 
@@ -213,15 +216,15 @@ public class CsvMetaModel implements CodeGeneratorModel {
             fieldToCsvInfoInfo.setConverterId(csvToFieldInfo.getConverterInstanceId());
         }
 
-        public void setFieldValidator(ValidatorConfig validatorConfig){
+        public void setFieldValidator(ValidatorConfig validatorConfig) {
             csvToFieldInfo.setValidatorConfig(validatorConfig);
         }
 
-        public void setNullWriteValue(String nullValue){
+        public void setNullWriteValue(String nullValue) {
             fieldToCsvInfoInfo.setNullValue(nullValue);
         }
 
-        public void setLookupName(String lookupName){
+        public void setLookupName(String lookupName) {
             csvToFieldInfo.setLookupKey(lookupName);
         }
 

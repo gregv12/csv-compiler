@@ -188,7 +188,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         } else {
             switch (targetArgType) {
                 case "String":
-                    conversion += ".toString()";
+                    conversion = "(" + defaultMethodCalc + ").toString()";
                     addConversion = false;
                     break;
                 case "CharSequence":

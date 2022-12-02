@@ -42,6 +42,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 import java.io.Writer;
 import java.util.Collections;
@@ -118,6 +119,7 @@ public class CsvMarshallerGenerator implements Processor {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             Name variableName = e.getSimpleName();
             if (columnMapping != null) {
+                validateFieldName(csvMetaModel, variableName.toString());
                 if (!StringUtils.isBlank(columnMapping.columnName())) {
                     csvMetaModel.setColumnName(variableName.toString(), columnMapping.columnName());
                 }
@@ -143,6 +145,7 @@ public class CsvMarshallerGenerator implements Processor {
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
             if (dataMapping != null) {
+                validateFieldName(csvMetaModel, variableName.toString());
                 List<? extends TypeMirror> types = getTypeMirrorFromAnnotationValue(dataMapping::converter);
                 TypeMirror typeMirror = types.get(0);
                 Types TypeUtils = this.processingEnv.getTypeUtils();
@@ -169,6 +172,7 @@ public class CsvMarshallerGenerator implements Processor {
 
             Validator validator = e.getAnnotation((Validator.class));
             if (validator != null && (!StringUtils.isBlank(validator.validationLambda()) || !StringUtils.isBlank(validator.validationMethod()))) {
+                validateFieldName(csvMetaModel, variableName.toString());
                 csvMetaModel.setValidator(variableName.toString(), ValidatorConfig.fromAnnotation(validator, targetType));
             }
         });
@@ -176,6 +180,13 @@ public class CsvMarshallerGenerator implements Processor {
         return csvMetaModel;
     }
 
+    @SneakyThrows
+    private void validateFieldName(CsvMetaModel csvMetaModel, String fieldName){
+        if(csvMetaModel.getFieldMap().get(fieldName) == null){
+            processingEnv.getMessager().printMessage(Kind.ERROR, "missing getter/setter for field: " + fieldName);
+            throw new NoSuchMethodException(String.format("get%1$s set%1$s", StringUtils.capitalize(fieldName)));
+        }
+    }
 
     @FunctionalInterface
     public interface GetClassValue {

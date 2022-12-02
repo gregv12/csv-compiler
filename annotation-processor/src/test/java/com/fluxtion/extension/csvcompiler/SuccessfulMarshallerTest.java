@@ -23,6 +23,7 @@ import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationPr
 import com.fluxtion.extension.csvcompiler.beans.AllNativeMarshallerTypes;
 import com.fluxtion.extension.csvcompiler.beans.Person;
 import com.fluxtion.extension.csvcompiler.beans.Person.EscapedIndexFields;
+import com.fluxtion.extension.csvcompiler.beans.Person.LookupDefaultValue;
 import com.fluxtion.extension.csvcompiler.beans.Person.MultipleHeaderLines;
 import com.fluxtion.extension.csvcompiler.processor.Util;
 import org.junit.jupiter.api.Assertions;
@@ -219,6 +220,28 @@ public class SuccessfulMarshallerTest {
                 .mapToInt(Person::getAge)
                 .sum();
         Assertions.assertEquals(80, sum);
+    }
+
+    @Test
+    public void lookupDefaultFieldTest(){
+        //LookupDefaultValue
+        String input = "name,age\n" +
+                ",32\n" +
+                "lisa,44\n";
+        int count = RowMarshaller.load(Person.LookupDefaultValue.class)
+                .addLookup(LookupDefaultValue.NAME_LOOKUP, s -> {
+                    if(s.toString().equalsIgnoreCase("tom")){
+                        return "FOUND";
+                    }
+                    return s;
+                })
+                .stream(new StringReader(input))
+                .map(Person::getName)
+                .filter("FOUND"::equals)
+                .mapToInt(s -> 1)
+                .sum()
+        ;
+        Assertions.assertEquals(1, count);
     }
 
     @Test

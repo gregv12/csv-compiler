@@ -19,7 +19,7 @@ public class CsvProcessingConfig {
     private Map<String, ColumnMapping> derivedColumns = new HashMap<>();
     private Map<String, ConversionFunction> conversionFunctions = new HashMap<>();
     private Map<String, ValidationFunction> validationFunctions = new HashMap<>();
-
+    private Map<String, Map<String, String>>  lookupTables = new HashMap<>();
     public String getName() {
         return name;
     }
@@ -138,5 +138,13 @@ public class CsvProcessingConfig {
 
     public void setValidationFunctions(Map<String, ValidationFunction> validationFunctions) {
         this.validationFunctions = validationFunctions;
+    }
+
+    public Map<String, Map<String, String>> getLookupTables() {
+        return lookupTables;
+    }
+
+    public void setLookupTables(Map<String, Map<String, String>>  lookupTables) {
+        this.lookupTables = lookupTables;
     }
 }
