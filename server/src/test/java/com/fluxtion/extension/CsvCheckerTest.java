@@ -9,11 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 
-public class ProcessorTest {
+public class CsvCheckerTest {
 
     @Test
-    @Disabled
+//    @Disabled
     public void loadTest() throws IOException {
         CsvProcessingConfig csvProcessingConfig = new CsvProcessingConfig();
         csvProcessingConfig.setName("Royalty");
@@ -35,8 +36,8 @@ public class ProcessorTest {
         columnMapping.setTrimOverride(true);
         csvProcessingConfig.getColumns().put("registered", columnMapping);
         //generate
-        Processor processor = new Processor(csvProcessingConfig);
-        RowMarshaller<FieldAccessor> rowMarshaller = processor.load();
+        CsvChecker csvChecker = new CsvChecker(csvProcessingConfig);
+        RowMarshaller<FieldAccessor> rowMarshaller = csvChecker.load();
 
         String data = """
                 age,name,registered
@@ -63,8 +64,6 @@ public class ProcessorTest {
                 154       ,Rip Van Winkle, unregistered  ,true    ,Toy town
                 36        ,jack dempsey  , xsoihf        ,true    ,Chicago
                 """;
-
-
         String csvConfig = """
                 name: Royalty
                 trim: true
@@ -85,6 +84,7 @@ public class ProcessorTest {
                   nameAndTown:
                     type: string
                     converterCode: return name + "->" + town;
+                  dataFile: {type: String, lookupTable: meta, defaultValue: dataFile}
                  
                 conversionFunctions:
                   toLowerCase:
@@ -119,10 +119,14 @@ public class ProcessorTest {
                     default: 5
                 """;
 
-        RowMarshaller<FieldAccessor> rowMarshaller = Processor.fromYaml(csvConfig);
+        RowMarshaller<FieldAccessor> rowMarshaller = CsvChecker.fromYaml(csvConfig);
         StringWriter successWriter = new StringWriter();
         rowMarshaller.writeHeaders(successWriter);
+        var metaMap = new HashMap<String, String>();
+        metaMap.put("dataFile", "inMemoryData");
+        metaMap.put("configFile", "inMemoryConfig");
         var summaryStats = rowMarshaller
+                .addLookup("meta", metaMap::get)
                 .stream(data)
                 .filter(r -> r.getField("resident"))
 //                .peek(System.out::println)

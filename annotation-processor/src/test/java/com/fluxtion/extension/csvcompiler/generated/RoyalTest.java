@@ -6,7 +6,12 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 public class RoyalTest {
-//    @Test
+    @Test
+    public void testDefaultOptionalLookup(){
+        RowMarshaller.load(DefaultLookupOptional.class);
+    }
+
+    @Test
     public void replay(){
 
         Map<String, String> registeredIdMap = Map.of(

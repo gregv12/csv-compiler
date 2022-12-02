@@ -275,6 +275,17 @@ public class Person {
     }
 
     @CsvMarshaller(formatSource = true)
+    public static class LookupDefaultValue extends Person {
+
+        public static final String NAME_LOOKUP = "name";
+
+        @ColumnMapping(defaultValue = "tom")
+        @DataMapping(lookupName = NAME_LOOKUP, derivedColumn = true)
+        private String name;
+    }
+
+
+    @CsvMarshaller(formatSource = true)
     public static class Validation extends Person {
 
         @Validator(validationLambda = "(int age) -> age > 0", errorMessage = "age must be greater 0", exitOnFailure = false)

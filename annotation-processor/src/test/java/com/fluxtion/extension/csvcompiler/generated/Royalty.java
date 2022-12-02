@@ -95,6 +95,10 @@ public final class Royalty implements FieldAccessor {
     )
     private String nameAndTown;
 
+    @DataMapping(lookupName = "meta")
+    @ColumnMapping(optionalField = true)//, defaultValue = "dataFile")
+    private String dataFile;
+
     public String toLowerCase(CharSequence input) {
         String myString = input.toString();
         return myString.toLowerCase();
@@ -171,6 +175,14 @@ public final class Royalty implements FieldAccessor {
 
     public String convert_NameAndTown(CharSequence input) {
         return name + "->" + town;
+    }
+
+    public String getDataFile() {
+        return dataFile;
+    }
+
+    public void setDataFile(String dataFile) {
+        this.dataFile = dataFile;
     }
 
     @Override

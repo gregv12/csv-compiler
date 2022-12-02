@@ -1,9 +1,5 @@
-package com.fluxtion.extension;
+package com.fluxtion.extension.csvcompiler;
 
-import com.fluxtion.extension.csvcompiler.ColumnMapping;
-import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
-import com.fluxtion.extension.csvcompiler.FieldAccessor;
-import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.Validator;
@@ -31,18 +27,18 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 
-public class Processor {
+public class CsvChecker {
 
     public static final String PACKAGE_NAME = "com.fluxtion.extension.csvcompilere.generated";
 
     @SneakyThrows
     public static RowMarshaller<FieldAccessor> fromYaml(String csvProcessingConfig) {
-        return new Processor(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
+        return new CsvChecker(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
     }
 
     @SneakyThrows
     public static RowMarshaller<FieldAccessor> fromYaml(Reader reader) {
-        return new Processor(new Yaml().loadAs(reader, CsvProcessingConfig.class)).load();
+        return new CsvChecker(new Yaml().loadAs(reader, CsvProcessingConfig.class)).load();
     }
     private static Map<String, String> classShortNameMap = Map.of(
             "String", String.class.getCanonicalName(),
@@ -57,7 +53,7 @@ public class Processor {
     private String previousFieldName = null;
 
 
-    public Processor(CsvProcessingConfig processingConfig) {
+    public CsvChecker(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
         processingConfig.getDerivedColumns().forEach((k, v) -> {
             v.setDerived(true);
