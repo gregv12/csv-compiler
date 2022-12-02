@@ -1,8 +1,5 @@
-package com.fluxtion.extension;
+package com.fluxtion.extension.csvcompiler;
 
-import com.fluxtion.extension.csvcompiler.ColumnMapping;
-import com.fluxtion.extension.csvcompiler.CsvProcessingConfig;
-import com.fluxtion.extension.csvcompiler.RowMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.Validator;
@@ -23,15 +20,26 @@ import org.yaml.snakeyaml.Yaml;
 
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 
-public class Processor {
+public class CsvChecker {
 
     public static final String PACKAGE_NAME = "com.fluxtion.extension.csvcompilere.generated";
+
+    @SneakyThrows
+    public static RowMarshaller<FieldAccessor> fromYaml(String csvProcessingConfig) {
+        return new CsvChecker(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
+    }
+
+    @SneakyThrows
+    public static RowMarshaller<FieldAccessor> fromYaml(Reader reader) {
+        return new CsvChecker(new Yaml().loadAs(reader, CsvProcessingConfig.class)).load();
+    }
     private static Map<String, String> classShortNameMap = Map.of(
             "String", String.class.getCanonicalName(),
             "string", String.class.getCanonicalName(),
@@ -45,7 +53,7 @@ public class Processor {
     private String previousFieldName = null;
 
 
-    public Processor(CsvProcessingConfig processingConfig) {
+    public CsvChecker(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
         processingConfig.getDerivedColumns().forEach((k, v) -> {
             v.setDerived(true);
@@ -68,11 +76,6 @@ public class Processor {
                 .returns(TypeVariableName.get("T"));
 //        Yaml yaml = new Yaml();
 //        System.out.println("myconfig:\n" + yaml.dump(processingConfig));
-    }
-
-    @SneakyThrows
-    public static RowMarshaller<FieldAccessor> fromYaml(String csvProcessingConfig) {
-        return new Processor(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
     }
 
     @SneakyThrows
@@ -121,12 +124,31 @@ public class Processor {
 
         StringWriter stringWriter = new StringWriter();
         javaFile.writeTo(stringWriter);
-//        System.out.println("compiling:\n" + stringWriter.toString());
         String fqn = PACKAGE_NAME + "." + beanCsvClass.name;
         String marshallerFqn = fqn + "CsvMarshaller";
         Object instance = Util.compileInstance(fqn, stringWriter.toString());
         Class<?> aClass = instance.getClass().getClassLoader().loadClass(marshallerFqn);
-        return (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
+        RowMarshaller<FieldAccessor> rowMarshaller = (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
+        addLookupTables(rowMarshaller);
+//        System.out.println("compiling:\n" + stringWriter.toString());
+        return rowMarshaller;
+    }
+
+    private void addLookupTables(RowMarshaller<FieldAccessor> rowMarshaller) {
+        Map<String, Map<String, String>>  lookupTables = processingConfig.getLookupTables();
+        lookupTables.forEach((k, t) ->{
+            try {
+                rowMarshaller.addLookup(k, l -> {
+                    Object value = t.get(l);
+                    if(value == null){
+                        value = t.getOrDefault("default", "");
+                    }
+                    return value.toString();
+                });
+            }catch(Exception e){
+                System.out.println("problem adding the lookup:" + k + " error:" + e);
+            }
+        });
     }
 
     private void addValidationFunctions() {
@@ -242,6 +264,11 @@ public class Processor {
             addedAnnotation = true;
             annotationBuilder.addMember("derivedColumn", "$L", true);
         }
+        if (!StringUtils.isBlank(columnMapping.getLookupTable())) {
+            addedAnnotation = true;
+            annotationBuilder.addMember("lookupName", "$S", columnMapping.getLookupTable());
+        }
+        //lookupName
         if (addedAnnotation) {
             fieldBuilder.addAnnotation(annotationBuilder.build());
         }

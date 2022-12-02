@@ -1,6 +1,5 @@
 package com.fluxtion.extension.csvcompiler;
 
-import com.fluxtion.extension.Processor;
 import com.squareup.javapoet.TypeName;
 import lombok.SneakyThrows;
 
@@ -16,7 +15,7 @@ public class ColumnMapping {
     private String converterFunction = "";
     private String validationFunction = "";
     private boolean derived = false;
-
+    private String lookupTable;
     public String getName() {
         return name;
     }
@@ -105,8 +104,16 @@ public class ColumnMapping {
         this.derived = derived;
     }
 
+    public String getLookupTable() {
+        return lookupTable;
+    }
+
+    public void setLookupTable(String lookupTable) {
+        this.lookupTable = lookupTable;
+    }
+
     @SneakyThrows
     public TypeName asTypeName(){
-        return Processor.asTypeName(getType());
+        return CsvChecker.asTypeName(getType());
     }
 }
