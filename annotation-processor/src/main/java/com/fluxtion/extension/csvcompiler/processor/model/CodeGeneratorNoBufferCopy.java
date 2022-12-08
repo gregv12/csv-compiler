@@ -340,7 +340,7 @@ public class CodeGeneratorNoBufferCopy {
             options += "        target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
         }
         if (codeGeneratorModel.isAcceptPartials()) {
-            options += "        int maxFieldIndex = fieldIndex;\n";
+            options += "        maxFieldIndex = fieldIndex;\n";
         }
         options += "        try{\n" +
                 "            updateFieldIndex();\n";
@@ -388,6 +388,7 @@ public class CodeGeneratorNoBufferCopy {
                             String out;
                             if (acceptPartials) {
                                 out = String.format("            if (maxFieldIndex >= %s){\n", fieldIdentifier);
+                                out += String.format("               fieldIndex = %s;\n", fieldIdentifier);
                             } else {
                                 out = String.format("            fieldIndex = %s;\n", fieldIdentifier);
                             }

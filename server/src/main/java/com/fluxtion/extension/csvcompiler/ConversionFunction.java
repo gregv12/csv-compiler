@@ -4,6 +4,7 @@ public class ConversionFunction {
     private String name;
     private String code;
     private String convertsTo;
+    private String configuration;
 
     public String getName() {
         return name;
@@ -27,5 +28,13 @@ public class ConversionFunction {
 
     public void setConvertsTo(String convertsTo) {
         this.convertsTo = convertsTo;
+    }
+
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
     }
 }

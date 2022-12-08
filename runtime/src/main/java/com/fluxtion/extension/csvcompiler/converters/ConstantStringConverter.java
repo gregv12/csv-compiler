@@ -20,14 +20,22 @@
 package com.fluxtion.extension.csvcompiler.converters;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
+import com.google.auto.service.AutoService;
 
+@AutoService(FieldConverter.class)
 public class ConstantStringConverter implements FieldConverter<String> {
 
+    public static final String IDENTIFIER = "converter.ConstantString";
     private String constantString;
 
     @Override
     public void setConversionConfiguration(String conversionConfiguration) {
         this.constantString = conversionConfiguration;
+    }
+
+    @Override
+    public String getId() {
+        return IDENTIFIER;
     }
 
     @Override

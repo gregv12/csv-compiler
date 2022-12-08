@@ -3,6 +3,7 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.Validator;
+import com.fluxtion.extension.csvcompiler.converters.LibraryConverter;
 import com.fluxtion.extension.csvcompiler.processor.Util;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -19,10 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.lang.model.element.Modifier;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -30,28 +32,21 @@ import java.util.function.BiConsumer;
 public class CsvChecker {
 
     public static final String PACKAGE_NAME = "com.fluxtion.extension.csvcompilere.generated";
-
-    @SneakyThrows
-    public static RowMarshaller<FieldAccessor> fromYaml(String csvProcessingConfig) {
-        return new CsvChecker(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
-    }
-
-    @SneakyThrows
-    public static RowMarshaller<FieldAccessor> fromYaml(Reader reader) {
-        return new CsvChecker(new Yaml().loadAs(reader, CsvProcessingConfig.class)).load();
-    }
     private static Map<String, String> classShortNameMap = Map.of(
             "String", String.class.getCanonicalName(),
             "string", String.class.getCanonicalName(),
-            "date", Date.class.getCanonicalName(),
-            "Date", Date.class.getCanonicalName()
+            "dateTime", LocalDateTime.class.getCanonicalName(),
+            "DateTime", LocalDateTime.class.getCanonicalName(),
+            "time", LocalTime.class.getCanonicalName(),
+            "Time", LocalTime.class.getCanonicalName(),
+            "date", LocalDate.class.getCanonicalName(),
+            "Date", LocalDate.class.getCanonicalName()
     );
     private final CsvProcessingConfig processingConfig;
     private final Builder csvBeanClassBuilder;
     private final MethodSpec.Builder toStringBuilder;
     private final MethodSpec.Builder accessByNameBuilder;
     private String previousFieldName = null;
-
 
     public CsvChecker(CsvProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
@@ -74,12 +69,27 @@ public class CsvChecker {
                 .addParameter(String.class, "fieldName")
                 .beginControlFlow("switch(fieldName)")
                 .returns(TypeVariableName.get("T"));
-//        Yaml yaml = new Yaml();
-//        System.out.println("myconfig:\n" + yaml.dump(processingConfig));
+        if(processingConfig.isDumpYaml()){
+            Yaml yaml = new Yaml();
+            System.out.println("myconfig:\n" + yaml.dump(processingConfig));
+        }
+    }
+
+    @SneakyThrows
+    public static RowMarshaller<FieldAccessor> fromYaml(String csvProcessingConfig) {
+        return new CsvChecker(new Yaml().loadAs(csvProcessingConfig, CsvProcessingConfig.class)).load();
+    }
+
+    @SneakyThrows
+    public static RowMarshaller<FieldAccessor> fromYaml(Reader reader) {
+        return new CsvChecker(new Yaml().loadAs(reader, CsvProcessingConfig.class)).load();
     }
 
     @SneakyThrows
     public static TypeName asTypeName(String typeNameString) {
+        if (StringUtils.isBlank(typeNameString)) {
+            return ClassName.get(CharSequence.class);
+        }
         TypeName typeName;
         switch (typeNameString) {
             case "int":
@@ -111,7 +121,7 @@ public class CsvChecker {
     }
 
     @SneakyThrows
-    public RowMarshaller<FieldAccessor> load() throws IOException {
+    public RowMarshaller<FieldAccessor> load() {
         addClassAnnotations();
         addConversionFunctions();
         addValidationFunctions();
@@ -126,26 +136,29 @@ public class CsvChecker {
         javaFile.writeTo(stringWriter);
         String fqn = PACKAGE_NAME + "." + beanCsvClass.name;
         String marshallerFqn = fqn + "CsvMarshaller";
+        if(processingConfig.isDumpGeneratedJava()){
+            System.out.println("compiling:\n" + stringWriter.toString());
+        }
         Object instance = Util.compileInstance(fqn, stringWriter.toString());
         Class<?> aClass = instance.getClass().getClassLoader().loadClass(marshallerFqn);
         RowMarshaller<FieldAccessor> rowMarshaller = (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
         addLookupTables(rowMarshaller);
-//        System.out.println("compiling:\n" + stringWriter.toString());
+
         return rowMarshaller;
     }
 
     private void addLookupTables(RowMarshaller<FieldAccessor> rowMarshaller) {
-        Map<String, Map<String, String>>  lookupTables = processingConfig.getLookupTables();
-        lookupTables.forEach((k, t) ->{
+        Map<String, Map<String, String>> lookupTables = processingConfig.getLookupTables();
+        lookupTables.forEach((k, t) -> {
             try {
                 rowMarshaller.addLookup(k, l -> {
                     Object value = t.get(l);
-                    if(value == null){
+                    if (value == null) {
                         value = t.getOrDefault("default", "");
                     }
                     return value.toString();
                 });
-            }catch(Exception e){
+            } catch (Exception e) {
                 System.out.println("problem adding the lookup:" + k + " error:" + e);
             }
         });
@@ -259,6 +272,10 @@ public class CsvChecker {
         } else if (!StringUtils.isBlank(columnMapping.getConverterFunction())) {
             addedAnnotation = true;
             annotationBuilder.addMember("conversionMethod", "$S", columnMapping.getConverterFunction());
+        } else if(!StringUtils.isBlank(columnMapping.getConverter())){
+            addedAnnotation = true;
+            annotationBuilder.addMember("converter", "$T.class", LibraryConverter.getConverter(columnMapping.getConverter()));
+            annotationBuilder.addMember("configuration", "$S", columnMapping.getConverterConfiguration());
         }
         if (columnMapping.isDerived()) {
             addedAnnotation = true;

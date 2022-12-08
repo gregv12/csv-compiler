@@ -53,6 +53,7 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
     protected boolean emptyRow = true;
     protected char previousChar = '\0';
     protected boolean firstCharOfField = true;
+    protected int maxFieldIndex = 0;
 
     protected BiConsumer<T, FailedRowValidationProcessor> validator;
     protected Function<String, String> headerTransformer = Function.identity();

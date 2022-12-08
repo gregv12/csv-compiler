@@ -1,6 +1,7 @@
 package com.fluxtion.extension.csvcompiler;
 
 import lombok.SneakyThrows;
+import org.yaml.snakeyaml.Yaml;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -313,10 +314,34 @@ public class Main implements Runnable {
     }
 
     private void printSampleFull() {
+
+        CsvProcessingConfig csvProcessingConfig = new CsvProcessingConfig();
+        csvProcessingConfig.setName("Royalty");
+        csvProcessingConfig.setAcceptPartials(true);
+        //columns
+        ColumnMapping columnMapping = new ColumnMapping();
+        columnMapping.setCsvColumnName("age");
+        columnMapping.setType("int");
+        columnMapping.setOptional(true);
+        csvProcessingConfig.getColumns().put("ageInYears", columnMapping);
+        //
+        columnMapping = new ColumnMapping();
+        columnMapping.setType("java.lang.String");
+        columnMapping.setDefaultValue("testing");
+        csvProcessingConfig.getColumns().put("name", columnMapping);
+        //
+        columnMapping = new ColumnMapping();
+        columnMapping.setType("int");
+        columnMapping.setTrimOverride(true);
+        csvProcessingConfig.getColumns().put("registered", columnMapping);
+
+        Yaml yaml = new Yaml();
+        yaml.dumpAsMap(csvProcessingConfig);
+
         System.out.println("""
                 sample yaml, showing all fields:
                 -----------------------------------
-                """ + FULL_SAMPLE_CONFIG);
+                """ + yaml.dumpAsMap(csvProcessingConfig));
     }
 
     private void printSampleData() {

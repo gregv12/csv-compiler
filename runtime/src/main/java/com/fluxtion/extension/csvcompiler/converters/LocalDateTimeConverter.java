@@ -20,21 +20,28 @@
 package com.fluxtion.extension.csvcompiler.converters;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
+import com.google.auto.service.AutoService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@AutoService(FieldConverter.class)
 public class LocalDateTimeConverter implements FieldConverter<LocalDateTime> {
 
-    private DateTimeFormatter timeFormatter  = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
     public LocalDateTime fromCharSequence(CharSequence charSequence) {
-        return  LocalDateTime.parse(charSequence, timeFormatter);
+        return LocalDateTime.parse(charSequence, timeFormatter);
     }
 
     @Override
     public void setConversionConfiguration(String conversionConfiguration) {
         timeFormatter = DateTimeFormatter.ofPattern(conversionConfiguration);
+    }
+
+    @Override
+    public String getId() {
+        return "converter.ToDateTime";
     }
 }
