@@ -22,11 +22,13 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.processor.Util;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class CsvMarshallerGeneratorAnnotationTest {
     @Test
     @SneakyThrows
+//    @Disabled
     public void booleanCompileTest() {
 
         Object runner = Util.compileInstance("com.fluxtion.extension.csvcompiler.MyBooleanTest",
@@ -41,6 +43,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
                         "\n" +
                         "        @ColumnMapping(optionalField = true)\n" +
                         "        boolean name;\n" +
+                        "        String name2;\n" +
                         "\n" +
                         "        public boolean isName(){\n" +
                         "            return name;\n" +

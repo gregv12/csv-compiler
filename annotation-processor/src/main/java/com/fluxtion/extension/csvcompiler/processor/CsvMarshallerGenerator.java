@@ -109,10 +109,10 @@ public class CsvMarshallerGenerator implements Processor {
         final String targetType = StringUtils.remove(typeElement.getQualifiedName().toString(), packageName + ".");
         final String className = targetType.replace(".", "_");//typeElement.getSimpleName().toString();
         CsvMetaModel csvMetaModel = new CsvMetaModel(targetType, className, packageName);
+        setMarshallerOptions(csvMetaModel, typeElement);
         registerGetters(csvMetaModel, typeElement);
         registerSetters(csvMetaModel, typeElement);
         potProcessMethod(csvMetaModel, typeElement);
-        setMarshallerOptions(csvMetaModel, typeElement);
         csvMetaModel.buildModel();
         //apply field customisations
         processingEnv.getElementUtils().getAllMembers(typeElement).forEach(e -> {
@@ -155,7 +155,7 @@ public class CsvMarshallerGenerator implements Processor {
                     String format = dataMapping.configuration();
                     String converterMethod = dataMapping.conversionMethod();
                     csvMetaModel.setFieldConverter(variableName.toString(), typeElement1.getQualifiedName().toString(), converterMethod, format);
-                }else if(!StringUtils.isBlank(dataMapping.conversionMethod())){
+                } else if (!StringUtils.isBlank(dataMapping.conversionMethod())) {
                     //local converter method
                     csvMetaModel.setFieldConverter(variableName.toString(), null, dataMapping.conversionMethod(), "");
                 }
@@ -181,8 +181,8 @@ public class CsvMarshallerGenerator implements Processor {
     }
 
     @SneakyThrows
-    private void validateFieldName(CsvMetaModel csvMetaModel, String fieldName){
-        if(csvMetaModel.getFieldMap().get(fieldName) == null){
+    private void validateFieldName(CsvMetaModel csvMetaModel, String fieldName) {
+        if (csvMetaModel.getFieldMap().get(fieldName) == null) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "missing getter/setter for field: " + fieldName);
             throw new NoSuchMethodException(String.format("get%1$s set%1$s", StringUtils.capitalize(fieldName)));
         }
@@ -212,36 +212,68 @@ public class CsvMarshallerGenerator implements Processor {
     }
 
     private void registerGetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
-        MoreElements.getLocalAndInheritedMethods(
-                        typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
-                .stream()
-                .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
-                .filter(el -> el.getParameters().size() == 0)
-                .filter(el -> el.getReturnType().getKind() != TypeKind.NULL)
-                .filter(el -> el.getSimpleName().toString().startsWith("get") || el.getSimpleName().toString().startsWith("is"))
-                .map(el -> {
-                    String type = el.getReturnType().toString();
-                    Element element = processingEnv.getTypeUtils().asElement(el.getReturnType());
-                    if (element != null) {
-                        type = element.getSimpleName().toString();
-                    }
-                    String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
-                    String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), prefix));
-                    csvMetaModel.registerFieldType(fieldName, type);
-                    return el.getSimpleName().toString();
-                })
-                .forEach(csvMetaModel::registerGetMethod);
+        CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
+        if (annotation.requireGetSetInSourceCode()) {
+            MoreElements.getLocalAndInheritedMethods(
+                            typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
+                    .stream()
+                    .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
+                    .filter(el -> el.getParameters().size() == 0)
+                    .filter(el -> el.getReturnType().getKind() != TypeKind.NULL)
+                    .filter(el -> el.getSimpleName().toString().startsWith("get") || el.getSimpleName().toString().startsWith("is"))
+                    .map(el -> {
+                        String type = el.getReturnType().toString();
+                        Element element = processingEnv.getTypeUtils().asElement(el.getReturnType());
+                        if (element != null) {
+                            type = element.getSimpleName().toString();
+                        }
+                        String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
+                        String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), prefix));
+                        csvMetaModel.registerFieldType(fieldName, type);
+                        return el.getSimpleName().toString();
+                    })
+                    .forEach(csvMetaModel::registerGetMethod);
+        } else {
+            typeElement
+                    .getEnclosedElements().stream()
+                    .filter(e -> e.getKind().isField())
+                    .forEach(e -> {
+                        String type = e.asType().toString();
+                        Element element = processingEnv.getTypeUtils().asElement(e.asType());
+                        if (element != null) {
+                            type = element.getSimpleName().toString();
+                        }
+                        String fieldName = e.getSimpleName().toString();
+                        String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
+                        String methodName = prefix + StringUtils.capitalize(fieldName);
+                        csvMetaModel.registerFieldType(fieldName, type);
+                        csvMetaModel.registerGetMethod(methodName);
+                    });
+        }
     }
 
     private void registerSetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
-        MoreElements.getLocalAndInheritedMethods(
-                        typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
-                .stream()
-                .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
-                .filter(el -> el.getParameters().size() == 1)
-                .map(el -> el.getSimpleName().toString())
-                .filter(name -> name.startsWith("set"))
-                .forEach(csvMetaModel::registerSetMethod);
+        CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
+        if (annotation.requireGetSetInSourceCode()) {
+            MoreElements.getLocalAndInheritedMethods(
+                            typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
+                    .stream()
+                    .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
+                    .filter(el -> el.getParameters().size() == 1)
+                    .map(el -> el.getSimpleName().toString())
+                    .filter(name -> name.startsWith("set"))
+                    .forEach(csvMetaModel::registerSetMethod);
+        }else{
+            typeElement
+                    .getEnclosedElements().stream()
+                    .filter(e -> e.getKind().isField())
+                    .forEach(e -> {
+                        String fieldName = e.getSimpleName().toString();
+                        String prefix = "set";
+                        String methodName = prefix + StringUtils.capitalize(fieldName);
+                        csvMetaModel.registerSetMethod(methodName);
+                    });
+        }
     }
 
     private void setMarshallerOptions(CsvMetaModel csvMetaModel, TypeElement typeElement) {
