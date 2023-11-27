@@ -62,6 +62,12 @@ public @interface CsvMarshaller {
     boolean skipCommentLines() default true;
 
     /**
+     * controls validation checking for the presence of get/set methods in the source code. If false the mutators will
+     * be assumed to added to the class even if not in the source file
+     */
+    boolean requireGetSetInSourceCode() default true;
+
+    /**
      * process escape sequences, slows the parser down. Makes the parser RFC4180 compliant
      *
      * @see <a href="https://tools.ietf.org/html/rfc4180">RC4180</a>
