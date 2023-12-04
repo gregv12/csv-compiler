@@ -4,7 +4,8 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.Data;
 
 @Data
-@CsvMarshaller(requireGetSetInSourceCode = false)
+@CsvMarshaller
+//@CsvMarshaller(requireGetSetInSourceCode = false)
 public class LombokBean {
 
     private String name;

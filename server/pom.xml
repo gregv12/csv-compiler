@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>0.1.9-SNAPSHOT</version>
+        <version>0.1.10-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -24,6 +24,8 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
+                    <finalName>csvChecker</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
                             <mainClass>com.fluxtion.extension.csvcompiler.Main</mainClass>
