@@ -36,10 +36,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.MirroredTypesException;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.*;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
@@ -213,7 +210,16 @@ public class CsvMarshallerGenerator implements Processor {
 
     private void registerGetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
-        if (annotation.requireGetSetInSourceCode()) {
+        boolean lombokPresent = false;
+        for (AnnotationMirror annotationMirror : typeElement.getAnnotationMirrors()) {
+            DeclaredType dt = annotationMirror.getAnnotationType();
+            String fqn = dt.asElement().toString();
+            lombokPresent |= fqn.contains("lombok.Data") | fqn.contains("lombok.Getter");
+        }
+        if(lombokPresent){
+//            processingEnv.getMessager().printMessage(Kind.NOTE, "lombokPresent:" + lombokPresent + " type:" + typeElement.toString());
+        }
+        if (annotation.requireGetSetInSourceCode() & !lombokPresent) {
             MoreElements.getLocalAndInheritedMethods(
                             typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
                     .stream()
@@ -254,7 +260,16 @@ public class CsvMarshallerGenerator implements Processor {
 
     private void registerSetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
-        if (annotation.requireGetSetInSourceCode()) {
+        boolean lombokPresent = false;
+        for (AnnotationMirror annotationMirror : typeElement.getAnnotationMirrors()) {
+            DeclaredType dt = annotationMirror.getAnnotationType();
+            String fqn = dt.asElement().toString();
+            lombokPresent |= fqn.contains("lombok.Data") | fqn.contains("lombok.Setter");
+        }
+        if(lombokPresent){
+//            processingEnv.getMessager().printMessage(Kind.NOTE, "lombokPresent:" + lombokPresent + " type:" + typeElement.toString());
+        }
+        if (annotation.requireGetSetInSourceCode() & !lombokPresent) {
             MoreElements.getLocalAndInheritedMethods(
                             typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
                     .stream()
