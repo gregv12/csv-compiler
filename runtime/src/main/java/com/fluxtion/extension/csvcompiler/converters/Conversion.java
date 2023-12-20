@@ -22,6 +22,7 @@ package com.fluxtion.extension.csvcompiler.converters;
 import java.util.IllegalFormatConversionException;
 
 import static java.beans.Introspector.decapitalize;
+import java.util.function.Function;
 
 /**
  * Standard conversion functions from CharSequence to primitive types.
@@ -71,6 +72,54 @@ public interface Conversion {
 //            }
 //        }
 //        return decapitalize(sb.toString()).trim();
+    }
+
+    static Function<String, String> uncapitalizeHeader(String delimiter){
+        return new HeaderUncapitalize(delimiter)::process;
+    }
+
+    static String uncapitalizeHeader(final String header, String delimieter){
+        String ret = "";
+        for(String s : header.split(delimieter)){
+            ret += uncapitalize(s) + ",";
+        }
+        return ret.substring(0, ret.length()-1);
+    }
+
+    static String uncapitalize(final String str) {
+        final int strLen = str == null ? 0 : str.length();
+        if (strLen == 0) {
+            return str;
+        }
+
+        final int firstCodepoint = str.codePointAt(0);
+        final int newCodePoint = Character.toLowerCase(firstCodepoint);
+        if (firstCodepoint == newCodePoint) {
+            // already capitalized
+            return str;
+        }
+
+        final int[] newCodePoints = new int[strLen]; // cannot be longer than the char array
+        int outOffset = 0;
+        newCodePoints[outOffset++] = newCodePoint; // copy the first codepoint
+        for (int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
+            final int codepoint = str.codePointAt(inOffset);
+            newCodePoints[outOffset++] = codepoint; // copy the remaining ones
+            inOffset += Character.charCount(codepoint);
+        }
+        return new String(newCodePoints, 0, outOffset);
+    }
+
+    class HeaderUncapitalize{
+        private final String delimiter;
+
+        public HeaderUncapitalize(String delimiter) {
+            this.delimiter = delimiter;
+        }
+
+        public String process(String header){
+            return uncapitalizeHeader(header, delimiter);
+        }
     }
 
 }
