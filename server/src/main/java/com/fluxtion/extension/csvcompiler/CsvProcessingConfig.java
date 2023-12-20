@@ -26,4 +26,8 @@ public class CsvProcessingConfig {
     private Map<String, Map<String, String>>  lookupTables = new LinkedHashMap<>();
     private boolean dumpYaml = false;
     private boolean dumpGeneratedJava = false;
+
+    public void addColumnMapping(ColumnMapping columnMapping){
+        columns.put(columnMapping.getName(), columnMapping);
+    }
 }
