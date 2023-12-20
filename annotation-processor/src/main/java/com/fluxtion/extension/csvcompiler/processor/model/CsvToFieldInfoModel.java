@@ -30,7 +30,9 @@ public interface CsvToFieldInfoModel {
 
     int getFieldIndex();
 
-    String getFieldName();
+    String getSourceFieldName();
+
+    String getOutFieldName();
 
     boolean isMandatory();
 

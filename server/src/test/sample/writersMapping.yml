@@ -1,0 +1,27 @@
+name: writersRoyalty
+trim: true
+dumpGeneratedJava: true
+#headerLines
+#mappingRow
+#skipCommentLines
+fieldSeparator: "\t"
+#acceptPartials:
+#skipEmptyLines
+#ignoreQuotes
+#failOnFirstError
+processEscapeSequences: true
+columns:
+  iSRC:
+    csvColumnName: "MLC Song Code"
+    type: String
+  saleTypeSource:
+    csvColumnName: "Use Type"
+  dataFile: {type: String, lookupTable: meta, defaultValue: dataFile, optional: true}
+#lookupTables:
+#  registeredId:
+#    registered: 1
+#    unregistered: 2
+#    waiting: 3
+#    unknown: 4
+#    default: 5
+

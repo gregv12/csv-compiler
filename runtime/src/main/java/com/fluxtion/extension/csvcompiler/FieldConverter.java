@@ -28,4 +28,6 @@ public interface FieldConverter<T> {
     default void toCharSequence(T field, Appendable target){}
 
     default void setConversionConfiguration(String conversionConfiguration){}
+
+    String getId();
 }

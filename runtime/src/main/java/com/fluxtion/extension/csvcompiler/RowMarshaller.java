@@ -89,7 +89,7 @@ public interface RowMarshaller<T> {
      * @return this {@link RowMarshaller} instance
      */
     default RowMarshaller<T> addLookup(String lookupName, Function<CharSequence, CharSequence> lookup) {
-        throw new IllegalArgumentException("cannot find lookup with name:" + lookup);
+        return this;
     }
 
     /**
@@ -145,9 +145,13 @@ public interface RowMarshaller<T> {
 
     void writeHeaders(StringBuilder builder);
 
+    void writeInputHeaders(StringBuilder builder);
+
     void writeRow(T target, StringBuilder builder);
 
     void writeRow(T target, Writer write) throws IOException;
 
     void writeHeaders(Writer write) throws IOException;
+
+    void writeInputHeaders(Writer write) throws IOException;
 }
