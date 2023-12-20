@@ -3,6 +3,7 @@ package com.fluxtion.extension.csvcompiler;
 import lombok.Data;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
@@ -18,9 +19,15 @@ public class CsvProcessingConfig {
     boolean failOnFirstError = false;
     boolean trim = false;
     boolean processEscapeSequences = false;
-    private Map<String, ColumnMapping> columns = new HashMap<>();
-    private Map<String, ColumnMapping> derivedColumns = new HashMap<>();
-    private Map<String, ConversionFunction> conversionFunctions = new HashMap<>();
-    private Map<String, ValidationFunction> validationFunctions = new HashMap<>();
-    private Map<String, Map<String, String>> lookupTables = new HashMap<>();
+    private Map<String, ColumnMapping> columns = new LinkedHashMap<>();
+    private Map<String, ColumnMapping> derivedColumns = new LinkedHashMap<>();
+    private Map<String, ConversionFunction> conversionFunctions = new LinkedHashMap<>();
+    private Map<String, ValidationFunction> validationFunctions = new LinkedHashMap<>();
+    private Map<String, Map<String, String>>  lookupTables = new LinkedHashMap<>();
+    private boolean dumpYaml = false;
+    private boolean dumpGeneratedJava = false;
+
+    public void addColumnMapping(ColumnMapping columnMapping){
+        columns.put(columnMapping.getName(), columnMapping);
+    }
 }

@@ -118,7 +118,7 @@ public class CsvMarshallerGenerator implements Processor {
             if (columnMapping != null) {
                 validateFieldName(csvMetaModel, variableName.toString());
                 if (!StringUtils.isBlank(columnMapping.columnName())) {
-                    csvMetaModel.setColumnName(variableName.toString(), columnMapping.columnName());
+                    csvMetaModel.setInputColumnName(variableName.toString(), columnMapping.columnName());
                 }
                 if (!StringUtils.isBlank(columnMapping.defaultValue())) {
                     csvMetaModel.setDefaultFieldValue(variableName.toString(), columnMapping.defaultValue());

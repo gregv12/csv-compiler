@@ -2,9 +2,9 @@ package com.fluxtion.extension;
 
 
 import com.fluxtion.extension.csvcompiler.*;
+import com.fluxtion.extension.csvcompiler.converters.ConstantStringConverter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -14,11 +14,56 @@ import java.util.HashMap;
 public class CsvCheckerTest {
 
     @Test
+    public void libraryConverterTest(){
+        CsvProcessingConfig csvProcessingConfig = new CsvProcessingConfig();
+        csvProcessingConfig.setName("Royalty");
+//        csvProcessingConfig.setAcceptPartials(true);
+        csvProcessingConfig.setTrim(true);
+        //columns
+        ColumnMapping columnMapping = new ColumnMapping();
+        columnMapping.setCsvColumnName("age");
+        columnMapping.setType("int");
+        columnMapping.setOptional(true);
+//        columnMapping.setTrimOverride(true);
+        csvProcessingConfig.getColumns().put("ageInYears", columnMapping);
+        //
+        columnMapping = new ColumnMapping();
+        columnMapping.setType("java.lang.String");
+        columnMapping.setConverter(ConstantStringConverter.ID);
+        columnMapping.setConverterConfiguration("TEST");
+        csvProcessingConfig.getColumns().put("name", columnMapping);
+        //debug
+        csvProcessingConfig.setDumpYaml(true);
+        csvProcessingConfig.setDumpGeneratedJava(true);
+        //generate
+        CsvChecker csvChecker = new CsvChecker(csvProcessingConfig);
+        RowMarshaller<FieldAccessor> rowMarshaller = csvChecker.load();
+
+        String data = """
+                age,name
+                52 ,greg
+                48,tim
+                """;
+
+        int ageSum = rowMarshaller.stream(data)
+                .peek(System.out::println)
+                .filter(r -> r.getField("name").toString().equals("TEST"))
+                .map(r -> r.getField("ageInYears"))
+                .mapToInt(Integer.class::cast)
+                .sum();
+
+        Assertions.assertEquals(100, ageSum);
+        System.out.println("ageSum:" + ageSum);
+
+    }
+
+    @Test
 //    @Disabled
     public void loadTest() throws IOException {
         CsvProcessingConfig csvProcessingConfig = new CsvProcessingConfig();
         csvProcessingConfig.setName("Royalty");
         csvProcessingConfig.setAcceptPartials(true);
+//        csvProcessingConfig.setTrim(true);
         //columns
         ColumnMapping columnMapping = new ColumnMapping();
         columnMapping.setCsvColumnName("age");
@@ -67,6 +112,7 @@ public class CsvCheckerTest {
         String csvConfig = """
                 name: Royalty
                 trim: true
+                #dumpGeneratedJava: true
                                 
                 columns:
                   ageInYears: {type: int, csvColumnName: 'latest age', optional: true, defaultValue: 50, validationFunction: checkAge}
@@ -129,7 +175,7 @@ public class CsvCheckerTest {
                 .addLookup("meta", metaMap::get)
                 .stream(data)
                 .filter(r -> r.getField("resident"))
-//                .peek(System.out::println)
+                .peek(System.out::println)
                 .peek(r -> {
                     try {
                         rowMarshaller.writeRow(r, successWriter);

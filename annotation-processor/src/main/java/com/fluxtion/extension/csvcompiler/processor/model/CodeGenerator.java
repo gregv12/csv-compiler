@@ -117,7 +117,8 @@ public class CodeGenerator {
                             .collect(Collectors.joining("\n", "", "\n"));
 
             options += "         default:\n" +
-                    "                throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+                    "                //throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+                    "                System.out.println(\"cannot find lookup with name:\" + lookupName);\n" +
                     "        }\n" +
                     "        return this;" +
                     "    }";
@@ -134,6 +135,7 @@ public class CodeGenerator {
         options += buildLookup(codeGeneratorModel);
         options += mapHeaderMethod(codeGeneratorModel);
         options += writeHeadersMethod(codeGeneratorModel);
+        options += writeInputHeadersMethod(codeGeneratorModel);
         options += writeRowMethod(codeGeneratorModel);
         return options;
     }
@@ -375,11 +377,11 @@ public class CodeGenerator {
                 .filter(f -> !f.isIndexField())
                 .map(s -> {
                             String out = String.format("%1$s = headers.indexOf(\"%2$s\");\n" +
-                                    "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetSetMethodName());
+                                    "fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getSourceFieldName(), s.getTargetSetMethodName());
                             if (s.isMandatory()) {
                                 out += String.format("    if (%s < 0) {\n" +
                                         "        logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +
-                                        "    }\n", s.getFieldIdentifier(), s.getFieldName());
+                                        "    }\n", s.getFieldIdentifier(), s.getSourceFieldName());
                             }
                             return out;
                         }
@@ -392,7 +394,20 @@ public class CodeGenerator {
         String options = "    public void writeHeaders( StringBuilder builder){\n";//
         options += codeGeneratorModel.fieldInfoList().stream()
                 .filter(f -> !f.isIndexField())
-                .map(s -> "builder.append(\"" + s.getFieldName() + "\");")
+                .map(s -> "builder.append(\"" + s.getOutFieldName() + "\");")
+                .collect(Collectors.joining(
+                        "\nbuilder.append(',');\n",
+                        "",
+                        "builder.append('\\n');\n}"));
+        return options;
+    }
+
+    public static String writeInputHeadersMethod(CodeGeneratorModel codeGeneratorModel) {
+        String options = "    public void writeInputHeaders( StringBuilder builder){\n";//
+        options += codeGeneratorModel.fieldInfoList().stream()
+                .filter(f -> !f.isIndexField())
+                .filter(f -> !f.isDerived())
+                .map(s -> "builder.append(\"" + s.getSourceFieldName() + "\");")
                 .collect(Collectors.joining(
                         "\nbuilder.append(',');\n",
                         "",

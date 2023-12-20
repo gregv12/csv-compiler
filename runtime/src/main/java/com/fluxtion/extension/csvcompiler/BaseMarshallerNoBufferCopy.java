@@ -53,6 +53,7 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
     protected boolean emptyRow = true;
     protected char previousChar = '\0';
     protected boolean firstCharOfField = true;
+    protected int maxFieldIndex = 0;
 
     protected BiConsumer<T, FailedRowValidationProcessor> validator;
     protected Function<String, String> headerTransformer = Function.identity();
@@ -351,6 +352,12 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
     public void writeHeaders(Writer write) throws IOException {
         builder.setLength(0);
         writeHeaders(builder);
+        write.append(builder);
+    }
+
+    public void writeInputHeaders(Writer write) throws IOException {
+        builder.setLength(0);
+        writeInputHeaders(builder);
         write.append(builder);
     }
 

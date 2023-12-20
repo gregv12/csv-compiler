@@ -7,4 +7,5 @@ public class ConversionFunction {
     private String name;
     private String code;
     private String convertsTo;
+    private String configuration;
 }

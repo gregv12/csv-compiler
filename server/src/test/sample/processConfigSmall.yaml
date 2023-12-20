@@ -1,0 +1,52 @@
+name: Royalty
+trim: true
+dumpGeneratedJava: true
+
+columns:
+  ageInYears: {type: int, csvColumnName: 'latest age', optional: true}
+#  name:
+#    defaultValue: testing
+#    type: string
+#    converterCode:  |
+#      String myString = input.toString();
+#      return myString.toUpperCase();
+#  registered: {type: int, lookupTable: registeredId, defaultValue: unknown}
+#  resident: {type: boolean}
+#  town: {type: string, converterFunction: toLowerCase}
+#  name: {type: String, lookupTable: registeredId, defaultValue: dataFile, optional: true}
+#  dataFile: {type: String, lookupTable: metaX, defaultValue: dataFile, optional: true}
+
+
+#conversionFunctions:
+#  toLowerCase:
+#    convertsTo: string
+#    code:  |
+#      String myString = input.toString();
+#      return myString.toLowerCase();
+#
+#validationFunctions:
+#  checkAge:
+#    code: |
+#      if(ageInYears > 100){
+#        validationLog.accept(ageInYears +  " way too old!!", false);
+#        return false;
+#      }
+#      return true;
+#
+#  checkRegistered:
+#    code: |
+#      if(registered > 4){
+#        validationLog.accept("Unsupported registration description", false);
+#        return false;
+#      }
+#      return true;
+
+#lookupTables:
+#  registeredId:
+#    registered: 1
+#    unregistered: 2
+#    waiting: 3
+#    unknown: 4
+#    default: 5
+#  metaX:
+#    default: unknown

@@ -19,10 +19,18 @@
 
 package com.fluxtion.extension.csvcompiler.converters;
 
-public class JavaDoubleParserConverter implements com.fluxtion.extension.csvcompiler.FieldConverter<Double>{
+import com.fluxtion.extension.csvcompiler.FieldConverter;
+import com.google.auto.service.AutoService;
+
+@AutoService(FieldConverter.class)
+public class JavaDoubleParserConverter implements FieldConverter<Double> {
     @Override
     public Double fromCharSequence(CharSequence charSequence) {
         return Double.parseDouble(charSequence.toString());
     }
 
+    @Override
+    public String getId() {
+        return "converter.ToDouble";
+    }
 }

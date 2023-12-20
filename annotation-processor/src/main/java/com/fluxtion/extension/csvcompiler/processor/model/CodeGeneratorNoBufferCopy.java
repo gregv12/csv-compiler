@@ -141,7 +141,8 @@ public class CodeGeneratorNoBufferCopy {
                             .collect(Collectors.joining("\n", "", "\n"));
 
             options += "             default:\n" +
-                    "                throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookupName);\n" +
+                    "                //throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+                    "                System.out.println(\"cannot find lookup with name:\" + lookupName);\n" +
                     "        }\n" +
                     "        return this;\n" +
                     "    }";
@@ -158,6 +159,7 @@ public class CodeGeneratorNoBufferCopy {
         options += buildLookup(codeGeneratorModel);
         options += mapHeaderMethod(codeGeneratorModel);
         options += writeHeadersMethod(codeGeneratorModel);
+        options += writeInputHeadersMethod(codeGeneratorModel);
         options += writeRowMethod(codeGeneratorModel);
         return options;
     }
@@ -340,7 +342,7 @@ public class CodeGeneratorNoBufferCopy {
             options += "        target = new " + codeGeneratorModel.getTargetClassName() + "();\n";
         }
         if (codeGeneratorModel.isAcceptPartials()) {
-            options += "        int maxFieldIndex = fieldIndex;\n";
+            options += "        maxFieldIndex = fieldIndex;\n";
         }
         options += "        try{\n" +
                 "            updateFieldIndex();\n";
@@ -388,6 +390,7 @@ public class CodeGeneratorNoBufferCopy {
                             String out;
                             if (acceptPartials) {
                                 out = String.format("            if (maxFieldIndex >= %s){\n", fieldIdentifier);
+                                out += String.format("               fieldIndex = %s;\n", fieldIdentifier);
                             } else {
                                 out = String.format("            fieldIndex = %s;\n", fieldIdentifier);
                             }
@@ -449,11 +452,11 @@ public class CodeGeneratorNoBufferCopy {
                 .filter(f -> !f.isIndexField())
                 .map(s -> {
                             String out = String.format("        %1$s = headers.indexOf(\"%2$s\");\n" +
-                                    "        fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getFieldName(), s.getTargetSetMethodName());
+                                    "        fieldMap.put(%1$s, \"%3$s\");\n", s.getFieldIdentifier(), s.getSourceFieldName(), s.getTargetSetMethodName());
                             if (s.isMandatory()) {
                                 out += String.format("        if (%s < 0) {\n" +
                                         "            logHeaderProblem(\"problem mapping field:'%s' missing column header, index row:\", true, null);\n" +
-                                        "        }\n", s.getFieldIdentifier(), s.getFieldName());
+                                        "        }\n", s.getFieldIdentifier(), s.getSourceFieldName());
                             }
                             return out;
                         }
@@ -466,7 +469,20 @@ public class CodeGeneratorNoBufferCopy {
         String options = "\n    public void writeHeaders(StringBuilder builder) {\n";//
         options += codeGeneratorModel.fieldInfoList().stream()
                 .filter(f -> !f.isIndexField())
-                .map(s -> "        builder.append(\"" + s.getFieldName() + "\");")
+                .map(s -> "        builder.append(\"" + s.getOutFieldName() + "\");")
+                .collect(Collectors.joining(
+                        "\n        builder.append(',');\n",
+                        "",
+                        "\n        builder.append('\\n');\n    }\n"));
+        return options;
+    }
+
+    public static String writeInputHeadersMethod(CodeGeneratorModel codeGeneratorModel) {
+        String options = "\n    public void writeInputHeaders(StringBuilder builder) {\n";//
+        options += codeGeneratorModel.fieldInfoList().stream()
+                .filter(f -> !f.isIndexField())
+                .filter(f -> !f.isDerived())
+                .map(s -> "        builder.append(\"" + s.getSourceFieldName() + "\");")
                 .collect(Collectors.joining(
                         "\n        builder.append(',');\n",
                         "",
