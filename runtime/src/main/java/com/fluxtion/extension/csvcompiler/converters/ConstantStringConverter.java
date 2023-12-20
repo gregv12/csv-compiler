@@ -25,7 +25,7 @@ import com.google.auto.service.AutoService;
 @AutoService(FieldConverter.class)
 public class ConstantStringConverter implements FieldConverter<String> {
 
-    public static final String IDENTIFIER = "converter.ConstantString";
+    public static final String ID = "converter.ConstantString";
     private String constantString;
 
     @Override
@@ -35,7 +35,7 @@ public class ConstantStringConverter implements FieldConverter<String> {
 
     @Override
     public String getId() {
-        return IDENTIFIER;
+        return ID;
     }
 
     @Override

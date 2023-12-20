@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 @AutoService(FieldConverter.class)
 public class LocalTimeConverter implements FieldConverter<LocalTime> {
 
+    public static final String ID = "converter.ToTime";
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME;
 
     @Override
@@ -42,6 +43,6 @@ public class LocalTimeConverter implements FieldConverter<LocalTime> {
 
     @Override
     public String getId() {
-        return "converter.ToTime";
+        return ID;
     }
 }

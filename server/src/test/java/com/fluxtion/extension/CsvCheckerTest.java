@@ -5,7 +5,6 @@ import com.fluxtion.extension.csvcompiler.*;
 import com.fluxtion.extension.csvcompiler.converters.ConstantStringConverter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -30,7 +29,7 @@ public class CsvCheckerTest {
         //
         columnMapping = new ColumnMapping();
         columnMapping.setType("java.lang.String");
-        columnMapping.setConverter(ConstantStringConverter.IDENTIFIER);
+        columnMapping.setConverter(ConstantStringConverter.ID);
         columnMapping.setConverterConfiguration("TEST");
         csvProcessingConfig.getColumns().put("name", columnMapping);
         //debug
