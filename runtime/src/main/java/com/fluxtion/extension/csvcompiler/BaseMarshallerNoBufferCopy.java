@@ -355,6 +355,12 @@ public abstract class BaseMarshallerNoBufferCopy<T> implements RowMarshaller<T> 
         write.append(builder);
     }
 
+    public void writeInputHeaders(Writer write) throws IOException {
+        builder.setLength(0);
+        writeInputHeaders(builder);
+        write.append(builder);
+    }
+
     protected abstract boolean processRow();
 
     protected final boolean passedValidation() {

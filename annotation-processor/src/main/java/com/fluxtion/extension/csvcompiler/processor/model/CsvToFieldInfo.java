@@ -30,7 +30,8 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     //Source
     private int fieldIndex;
-    private String fieldName;
+    private String sourceFieldName;
+    private String outFieldName;
     private boolean duplicateField = false;
     private boolean fixedWidth = false;
     private boolean mandatory = true;
@@ -73,7 +74,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     }
 
     public void setSourceFieldName(String fieldName) {
-        this.fieldName = fieldName;
+        this.sourceFieldName = fieldName;
         this.fieldIndex = -1;
         indexField = false;
     }
@@ -155,7 +156,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     }
 
     public String getLookupField() {
-        return "lookup_" + getFieldName();
+        return "lookup_" + this.getSourceFieldName();
     }
 
     public void setDefaultValue(String defaultValue) {
@@ -240,11 +241,11 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public String getFieldIdentifier() {
         if (indexField) {
-            fieldIdentifier = "fieldIndex_" + getFieldName().replace(" ", "_");
+            fieldIdentifier = "fieldIndex_" + this.getSourceFieldName().replace(" ", "_");
         } else if (fixedWidth) {
             fieldIdentifier = "fixedStart_" + getFieldIndex();
         } else {
-            fieldIdentifier = "fieldName_" + getFieldName().replace(" ", "_");
+            fieldIdentifier = "fieldName_" + this.getSourceFieldName().replace(" ", "_");
         }
         return fieldIdentifier;
     }

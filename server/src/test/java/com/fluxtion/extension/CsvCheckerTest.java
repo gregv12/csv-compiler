@@ -113,6 +113,7 @@ public class CsvCheckerTest {
         String csvConfig = """
                 name: Royalty
                 trim: true
+                #dumpGeneratedJava: true
                                 
                 columns:
                   ageInYears: {type: int, csvColumnName: 'latest age', optional: true, defaultValue: 50, validationFunction: checkAge}

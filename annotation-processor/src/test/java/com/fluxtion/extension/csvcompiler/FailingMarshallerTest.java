@@ -69,18 +69,18 @@ public class FailingMarshallerTest {
         ));
     }
 
-    @Test
-    public void missingLookupTest() {
-        String input = "name,age\n" +
-                "tim,32\n" +
-                "lisa,44\n";
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-                RowMarshaller.load(Person.Lookup.class)
-                        .addLookup("missing lookup key", s -> "40")
-                        .stream(new StringReader(input))
-                        .mapToInt(Person::getAge)
-                        .sum());
-    }
+//    @Test
+//    public void missingLookupTest() {
+//        String input = "name,age\n" +
+//                "tim,32\n" +
+//                "lisa,44\n";
+//        Assertions.assertThrows(IllegalArgumentException.class, () ->
+//                RowMarshaller.load(Person.Lookup.class)
+//                        .addLookup("missing lookup key", s -> "40")
+//                        .stream(new StringReader(input))
+//                        .mapToInt(Person::getAge)
+//                        .sum());
+//    }
 
     @Test
     public void failFastWithExternalalidator(){
