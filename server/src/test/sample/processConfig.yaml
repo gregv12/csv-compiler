@@ -2,6 +2,7 @@ name: Royalty
 trim: true
 
 columns:
+#  dataFile: {type: String, lookupTable: meta, defaultValue: dataFile, optional: true}
   ageInYears: {type: int, csvColumnName: 'latest age', optional: true, defaultValue: 50, validationFunction: checkAge}
   name:
     defaultValue: testing
@@ -12,7 +13,6 @@ columns:
   registered: {type: int, lookupTable: registeredId, defaultValue: unknown, validationFunction: checkRegistered}
   resident: {type: boolean}
   town: {type: string, converterFunction: toLowerCase}
-  dataFile: {type: String, lookupTable: meta, defaultValue: dataFile, optional: true}
 
 derivedColumns:
   nameAndTown:

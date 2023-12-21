@@ -92,6 +92,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setTrimField(trimField);
     }
 
+    public void setEscapeFiledOutput(String fieldName, boolean escapeOutputField) {
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setEscapeOutputField(escapeOutputField);
+    }
+
     public void setColumnIndex(String fieldName, int columnIndex) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setColumnIndex(columnIndex);
     }
@@ -189,6 +193,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
             fieldToCsvInfoInfo = new FieldToCsvInfo();
             fieldToCsvInfoInfo.setSourceMethod(getterMethod);
             fieldToCsvInfoInfo.setEnumField(false);
+            fieldToCsvInfoInfo.setEscapeOutputField(false);
             fieldToCsvInfoInfo.setSourceType(type);
         }
 
@@ -206,6 +211,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setTrimField(boolean trimField) {
             csvToFieldInfo.setTrim(trimField);
+        }
+
+        public void setEscapeOutputField(boolean escapeOutputField) {
+            fieldToCsvInfoInfo.setEscapeOutputField(escapeOutputField);
         }
 
         public void setColumnIndex(int columnIndex) {

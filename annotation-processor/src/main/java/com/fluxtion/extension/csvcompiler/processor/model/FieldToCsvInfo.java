@@ -32,6 +32,7 @@ public class FieldToCsvInfo {
     private String converterId;
     private String sourceType;
     private boolean enumField;
+    private boolean escapeOutputField;
     private static final Set<String> primitiveTypeSet = new HashSet<>();
     static{
         primitiveTypeSet.add("int");
@@ -56,6 +57,9 @@ public class FieldToCsvInfo {
             writeStatement = "if(target." + sourceMethod + "() != null) {"
                     + writeStatement
                     + "}";
+        }
+        if(escapeOutputField){
+            writeStatement = "builder.append(\"\\\"\");\n\t\t" + writeStatement  + "\n\t\tbuilder.append(\"\\\"\");";
         }
         return writeStatement;
     }
