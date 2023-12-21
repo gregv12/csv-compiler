@@ -17,10 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.fluxtion.extension.csvcompiler.Version.VERSION;
-// some exports omitted for the sake of brevity
 
 @Command(name = "csvCheck", version = VERSION, mixinStandardHelpOptions = true)
 public class Main implements Runnable {
@@ -224,9 +224,9 @@ public class Main implements Runnable {
     @Parameters(paramLabel = "<check config>", defaultValue = "processConfig.yaml", index = "0",
             description = "Configuration of csv check logic")
     private File configFile;
-    @Parameters(paramLabel = "<csv data>", defaultValue = "data.csv", index = "1",
-            description = "csv data file")
-    private File dataFile;
+    @Parameters(paramLabel = "<input data>", defaultValue = "data.csv", description = "input data file list", index = "1..*")
+    private List<File> dataFiles;
+    private String currentDataFile = "";
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new Main()).execute(args);
@@ -250,7 +250,6 @@ public class Main implements Runnable {
     @SneakyThrows
     private void process() {
         System.out.println("config: " + configFile.getAbsolutePath());
-        System.out.println("data  : " + dataFile.getAbsolutePath());
 
         Path resultsDir = Paths.get("results");
         if (!Files.exists(resultsDir)) {
@@ -265,7 +264,6 @@ public class Main implements Runnable {
         LongAdder invalidCount = new LongAdder();
         LongAdder validCount = new LongAdder();
         var metaMap = new HashMap<String, String>();
-        metaMap.put("dataFile", dataFile.getName());
         metaMap.put("configFile", configFile.getName());
 
         RowMarshaller<FieldAccessor> rowMarshaller = CsvChecker.fromYaml(new FileReader(configFile));
@@ -276,16 +274,30 @@ public class Main implements Runnable {
                     @Override
                     public void logFatal(CsvProcessingException csvProcessingException) {
                         invalidCount.increment();
-                        Main.this.write(writerInvalid, csvProcessingException.getMessage());
+                        Main.this.write(writerInvalid,csvProcessingException.getMessage());
                     }
 
                     @Override
                     public void logWarning(CsvProcessingException csvProcessingException) {
                         invalidCount.increment();
-                        Main.this.write(writerInvalid, csvProcessingException.getMessage());
+                        Main.this.write(writerInvalid,csvProcessingException.getMessage());
                     }
-                })
-                .stream(new FileReader(dataFile))
+                });
+        for (File file : dataFiles) {
+            metaMap.put("dataFile", file.getName());
+            processFile(rowMarshaller, file, writer, validCount);
+        }
+        writer.flush();
+        writerInvalid.flush();
+        System.out.println("Valid count  : " + validCount.intValue());
+        System.out.println("Invalid count: " + invalidCount.intValue());
+    }
+
+    @SneakyThrows
+    private void processFile(RowMarshaller<FieldAccessor> rowMarshaller, File dataFile, Writer writer, LongAdder validCount ){
+        currentDataFile = dataFile.getAbsolutePath();
+        System.out.println("data  : " + currentDataFile);
+        rowMarshaller.stream(new FileReader(dataFile))
                 .forEach(r -> {
                     try {
                         validCount.increment();
@@ -294,15 +306,13 @@ public class Main implements Runnable {
                         throw new RuntimeException(e);
                     }
                 });
-        writer.flush();
-        writerInvalid.flush();
-        System.out.println("Valid count  : " + validCount.intValue());
-        System.out.println("Invalid count: " + invalidCount.intValue());
     }
 
     @SneakyThrows
     private void write(Writer writer, String message) {
         writer.write(message);
+        writer.write('\n');
+        writer.write("file:" + currentDataFile);
         writer.write('\n');
     }
 
