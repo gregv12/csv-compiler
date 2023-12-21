@@ -19,6 +19,7 @@
 
 package com.fluxtion.extension.csvcompiler.annotations;
 
+import java.io.Writer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -67,4 +68,13 @@ public @interface ColumnMapping {
      * @return flag controlling field trimming override.
      */
     boolean trimOverride() default false;
+
+    /**
+     * Flag controlling output escaping when writing a value to a row with
+     * {@link com.fluxtion.extension.csvcompiler.RowMarshaller#writeRow(Object, Writer)}. If true the value will be
+     * surrounded by quotes
+     *
+     * @return flag controlling quote escaping when writing values to rows.
+     */
+    boolean escapeOutput() default false;
 }

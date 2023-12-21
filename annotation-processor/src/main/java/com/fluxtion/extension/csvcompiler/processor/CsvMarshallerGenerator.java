@@ -138,6 +138,7 @@ public class CsvMarshallerGenerator implements Processor {
                     }
                 }
                 csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
+                csvMetaModel.setEscapeFiledOutput(variableName.toString(), columnMapping.escapeOutput());
             }
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
