@@ -21,7 +21,7 @@ public class CsvCheckerTest {
         csvProcessingConfig.setTrim(true);
         //columns
         ColumnMapping columnMapping = new ColumnMapping();
-        columnMapping.setCsvColumnName("age");
+        columnMapping.setSourceColumnName("age");
         columnMapping.setType("int");
         columnMapping.setOptional(true);
 //        columnMapping.setTrimOverride(true);
@@ -66,7 +66,7 @@ public class CsvCheckerTest {
 //        csvProcessingConfig.setTrim(true);
         //columns
         ColumnMapping columnMapping = new ColumnMapping();
-        columnMapping.setCsvColumnName("age");
+        columnMapping.setSourceColumnName("age");
         columnMapping.setType("int");
         columnMapping.setOptional(true);
         csvProcessingConfig.getColumns().put("ageInYears", columnMapping);
@@ -115,7 +115,7 @@ public class CsvCheckerTest {
                 #dumpGeneratedJava: true
                                 
                 columns:
-                  ageInYears: {type: int, csvColumnName: 'latest age', optional: true, defaultValue: 50, validationFunction: checkAge}
+                  ageInYears: {type: int, sourceColumnName: 'latest age', optional: true, defaultValue: 50, validationFunction: checkAge}
                   name:
                     defaultValue: testing
                     type: string

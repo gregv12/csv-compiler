@@ -104,6 +104,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldConverter(converterClass, convertConfiguration, converterMethod);
     }
 
+    public void setFieldConverter(String fieldName, String converterClass) {
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setFieldConverter(converterClass, "", "");
+    }
+
     public void setDerivedFlag(String fieldName, boolean derived) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setDerived(derived);
         if (derived) {

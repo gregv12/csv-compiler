@@ -330,7 +330,7 @@ public class Main implements Runnable {
         csvProcessingConfig.setAcceptPartials(true);
         //columns
         ColumnMapping columnMapping = new ColumnMapping();
-        columnMapping.setCsvColumnName("age");
+        columnMapping.setSourceColumnName("age");
         columnMapping.setType("int");
         columnMapping.setOptional(true);
         csvProcessingConfig.getColumns().put("ageInYears", columnMapping);

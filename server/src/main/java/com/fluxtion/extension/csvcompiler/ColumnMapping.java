@@ -3,14 +3,13 @@ package com.fluxtion.extension.csvcompiler;
 import com.squareup.javapoet.TypeName;
 import lombok.Data;
 import lombok.SneakyThrows;
-import lombok.ToString;
 
 @Data
 public class ColumnMapping {
     private String name;
-    private String type = CharSequence.class.getCanonicalName();
-    private String csvColumnName = "";
-    private int csvIndex = -1;
+    private String type = String.class.getCanonicalName();
+    private String sourceColumnName = "";
+    private int sourceColumnIndex = -1;
     private boolean optional = false;
     private boolean trimOverride = false;
     private String defaultValue = "";
