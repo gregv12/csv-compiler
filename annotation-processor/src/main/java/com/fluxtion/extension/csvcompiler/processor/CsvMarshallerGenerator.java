@@ -117,6 +117,7 @@ public class CsvMarshallerGenerator implements Processor {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             Name variableName = e.getSimpleName();
             checkArrayConversion(e, csvMetaModel);
+            checkList(e, csvMetaModel);
             if (columnMapping != null) {
                 validateFieldName(csvMetaModel, variableName.toString());
                 if (!StringUtils.isBlank(columnMapping.columnName())) {
@@ -185,7 +186,7 @@ public class CsvMarshallerGenerator implements Processor {
             Name variableName = e.getSimpleName();
             String fqn = e.asType().toString();
             csvMetaModel.setProcessEscapeSequence(true);
-            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "array type:" + fqn);
+//            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "array type:" + fqn);
             switch (fqn) {
                 case "byte[]":
                     csvMetaModel.setFieldConverter(variableName.toString(), ArrayByteConverter.class.getCanonicalName());
@@ -207,6 +208,39 @@ public class CsvMarshallerGenerator implements Processor {
                     break;
                 case "java.lang.String[]":
                     csvMetaModel.setFieldConverter(variableName.toString(), ArrayStringConverter.class.getCanonicalName());
+                    break;
+                default:
+            }
+        }
+    }
+
+    private void checkList(Element e, CsvMetaModel csvMetaModel) {
+        if (e.asType().getKind() == TypeKind.DECLARED && e.getKind() == ElementKind.FIELD) {
+            Name variableName = e.getSimpleName();
+            String fqn = e.asType().toString();
+            csvMetaModel.setProcessEscapeSequence(true);
+//            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "list type:" + fqn);
+            switch (fqn) {
+                case "java.util.List<java.lang.Byte>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListByteConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Double>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListDoubleConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Float>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListFloatConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Long>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListLongConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Integer>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListIntegerConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Short>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListShortConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.String>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListStringConverter.class.getCanonicalName());
                     break;
                 default:
             }
