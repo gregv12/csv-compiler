@@ -116,8 +116,9 @@ public class CodeGenerator {
                             .map(s -> "    case  \"" + s.getLookupKey() + "\":\n\t" + s.getLookupField() + " = lookup;\nbreak;")
                             .collect(Collectors.joining("\n", "", "\n"));
 
-            options += "         default:\n" +
-                    "                //throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+            options +=
+                    "         default:\n" +
+                    "                if(!lookupName.equals(\"meta\"))\n" +
                     "                System.out.println(\"cannot find lookup with name:\" + lookupName);\n" +
                     "        }\n" +
                     "        return this;" +
@@ -394,7 +395,8 @@ public class CodeGenerator {
         String options = "    public void writeHeaders( StringBuilder builder){\n";//
         options += codeGeneratorModel.fieldInfoList().stream()
                 .filter(f -> !f.isIndexField())
-                .map(s -> "builder.append(\"" + s.getOutFieldName() + "\");")
+                .filter(CsvToFieldInfoModel::isWriteFieldToOutput)
+                .map(s -> "builder.append(\"" + s.getOutFieldName() + s.isWriteFieldToOutput() +"\");")
                 .collect(Collectors.joining(
                         "\nbuilder.append(',');\n",
                         "",
@@ -420,6 +422,7 @@ public class CodeGenerator {
                 "    public void writeRow(%s target, StringBuilder builder){\n", codeGeneratorModel.getTargetClassName());
 
         options += codeGeneratorModel.outputFieldInfoList().stream()
+                .filter(FieldToCsvInfo::isWriteFieldToOutput)
                 .map(FieldToCsvInfo::getWriteStatement)
 //                .map(s -> "builder.append(target." + s.getTargetGetMethodName() + "());")
                 .collect(Collectors.joining(

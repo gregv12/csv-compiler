@@ -3,7 +3,10 @@ trim: true
 dumpGeneratedJava: true
 
 columns:
-  ageInYears: {type: int, csvColumnName: 'latest age', optional: true}
+  ageInYears: {type: 'int[]', sourceColumnName: 'latest age', optional: true}
+  name: {type: string, lookupTable: firstname, optional: true}
+#  registered: {type: string}
+  registered: {type: string, outputField: false}
 #  name:
 #    defaultValue: testing
 #    type: string
