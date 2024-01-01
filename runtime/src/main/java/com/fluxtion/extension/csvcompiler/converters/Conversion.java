@@ -21,7 +21,6 @@ package com.fluxtion.extension.csvcompiler.converters;
 
 import java.util.IllegalFormatConversionException;
 
-import static java.beans.Introspector.decapitalize;
 import java.util.function.Function;
 
 /**
@@ -30,6 +29,7 @@ import java.util.function.Function;
  */
 public interface Conversion {
 
+    String ARRAY_DELIMITER = "|";
     static double atod(CharSequence charSequence) {
         return FastDoubleParser.parseDouble(charSequence);
     }

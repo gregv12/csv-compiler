@@ -5,16 +5,8 @@ import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.Validator;
 import com.fluxtion.extension.csvcompiler.converters.LibraryConverter;
 import com.fluxtion.extension.csvcompiler.processor.Util;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import com.squareup.javapoet.TypeSpec.Builder;
-import com.squareup.javapoet.TypeVariableName;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -25,6 +17,7 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -95,14 +88,42 @@ public class CsvChecker {
             case "int":
                 typeName = TypeName.INT;
                 break;
+            case "int[]":
+                typeName = ArrayTypeName.of(TypeName.INT);
+                break;
+            case "List<int>":
+            case "List<Integer>":
+                typeName = ParameterizedTypeName.get(List.class, Integer.class);
+                break;
             case "double":
                 typeName = TypeName.DOUBLE;
+                break;
+            case "double[]":
+                typeName = ArrayTypeName.of(TypeName.INT);
+                break;
+            case "List<double>":
+            case "List<Double>":
+                typeName = ParameterizedTypeName.get(List.class, Double.class);
                 break;
             case "short":
                 typeName = TypeName.SHORT;
                 break;
+            case "short[]":
+                typeName = ArrayTypeName.of(TypeName.SHORT);
+                break;
+            case "List<short>":
+            case "List<Short>":
+                typeName = ParameterizedTypeName.get(List.class, Short.class);
+                break;
             case "long":
                 typeName = TypeName.LONG;
+                break;
+            case "long[]":
+                typeName = ArrayTypeName.of(TypeName.LONG);
+                break;
+            case "List<long>":
+            case "List<Long>":
+                typeName = ParameterizedTypeName.get(List.class, Long.class);
                 break;
             case "char":
                 typeName = TypeName.CHAR;
@@ -110,12 +131,23 @@ public class CsvChecker {
             case "float":
                 typeName = TypeName.FLOAT;
                 break;
+            case "float[]":
+                typeName = ArrayTypeName.of(TypeName.FLOAT);
+                break;
+            case "List<float>":
+            case "List<Float>":
+                typeName = ParameterizedTypeName.get(List.class, Float.class);
+                break;
             case "boolean":
                 typeName = TypeName.BOOLEAN;
                 break;
             default:
                 String lookupName = classShortNameMap.getOrDefault(typeNameString, typeNameString);
-                typeName = TypeName.get(Class.forName(lookupName));
+                if(typeNameString.contains("[]")){
+                    typeName = ArrayTypeName.get(Class.forName(lookupName));
+                }else{
+                    typeName = TypeName.get(Class.forName(lookupName));
+                }
         }
         return typeName;
     }
@@ -216,12 +248,13 @@ public class CsvChecker {
                 .addModifiers(Modifier.PRIVATE)
                 .addAnnotation(
                         AnnotationSpec.builder(com.fluxtion.extension.csvcompiler.annotations.ColumnMapping.class)
-                                .addMember("columnName", "$S", columnMapping.getCsvColumnName())
-                                .addMember("columnIndex", "$L", columnMapping.getCsvIndex())
+                                .addMember("columnName", "$S", columnMapping.getSourceColumnName())
+                                .addMember("columnIndex", "$L", columnMapping.getSourceColumnIndex())
                                 .addMember("trimOverride", "$L", columnMapping.isTrimOverride())
                                 .addMember("escapeOutput", "$L", columnMapping.isEscapeOutput())
                                 .addMember("optionalField", "$L", columnMapping.isOptional())
                                 .addMember("defaultValue", "$S", columnMapping.getDefaultValue())
+                                .addMember("outputField", "$L", columnMapping.isOutputField())
                                 .build()
                 );
 

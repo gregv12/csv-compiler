@@ -1,5 +1,5 @@
 latest age,name          ,registered     ,resident,town
-48        ,greg higgins  , registered    ,true    ,London
+48        ,greg          , registered    ,true    ,London
           ,bilbo         , registered    ,true    ,New york
 54        ,tim higgins   ,               ,false   ,Sheffield
 154       ,Rip Van Winkle, unregistered  ,true    ,Toy town

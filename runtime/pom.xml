@@ -27,5 +27,9 @@
             <artifactId>auto-service-annotations</artifactId>
             <version>1.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
     </dependencies>
 </project>
