@@ -1,1 +1,0 @@
-jpackage -n csvChecker -i ../target --main-jar csvChecker.jar
