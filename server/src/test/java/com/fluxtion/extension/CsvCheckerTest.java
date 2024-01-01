@@ -58,6 +58,34 @@ public class CsvCheckerTest {
     }
 
     @Test
+    public void arrayTest(){
+        String data = """
+                ageInYears,resident
+                48|34|56        ,true
+                          ,true
+                54        ,false
+                154       ,true
+                36        ,true
+                """;
+        String csvConfig = """
+                name: Royalty
+                trim: true
+                dumpGeneratedJava: true
+                                
+                columns:
+                  #ageInYears: {type: "int[]"}
+                  ageInYearsList: {type: "List<int>", sourceColumnName: ageInYears}
+                  resident: {type: boolean}
+                """;
+        StringBuilder sb = new StringBuilder();
+        RowMarshaller<FieldAccessor> rowMarshaller = CsvChecker.fromYaml(csvConfig);
+        rowMarshaller.writeHeaders(sb);
+        rowMarshaller.stream(data).forEach(r -> rowMarshaller.writeRow(r, sb));
+        System.out.println(sb);
+    }
+
+
+    @Test
 //    @Disabled
     public void loadTest() throws IOException {
         CsvProcessingConfig csvProcessingConfig = new CsvProcessingConfig();

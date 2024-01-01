@@ -17,6 +17,7 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -90,11 +91,19 @@ public class CsvChecker {
             case "int[]":
                 typeName = ArrayTypeName.of(TypeName.INT);
                 break;
+            case "List<int>":
+            case "List<Integer>":
+                typeName = ParameterizedTypeName.get(List.class, Integer.class);
+                break;
             case "double":
                 typeName = TypeName.DOUBLE;
                 break;
             case "double[]":
                 typeName = ArrayTypeName.of(TypeName.INT);
+                break;
+            case "List<double>":
+            case "List<Double>":
+                typeName = ParameterizedTypeName.get(List.class, Double.class);
                 break;
             case "short":
                 typeName = TypeName.SHORT;
@@ -102,11 +111,19 @@ public class CsvChecker {
             case "short[]":
                 typeName = ArrayTypeName.of(TypeName.SHORT);
                 break;
+            case "List<short>":
+            case "List<Short>":
+                typeName = ParameterizedTypeName.get(List.class, Short.class);
+                break;
             case "long":
                 typeName = TypeName.LONG;
                 break;
             case "long[]":
                 typeName = ArrayTypeName.of(TypeName.LONG);
+                break;
+            case "List<long>":
+            case "List<Long>":
+                typeName = ParameterizedTypeName.get(List.class, Long.class);
                 break;
             case "char":
                 typeName = TypeName.CHAR;
@@ -116,6 +133,10 @@ public class CsvChecker {
                 break;
             case "float[]":
                 typeName = ArrayTypeName.of(TypeName.FLOAT);
+                break;
+            case "List<float>":
+            case "List<Float>":
+                typeName = ParameterizedTypeName.get(List.class, Float.class);
                 break;
             case "boolean":
                 typeName = TypeName.BOOLEAN;
@@ -233,6 +254,7 @@ public class CsvChecker {
                                 .addMember("escapeOutput", "$L", columnMapping.isEscapeOutput())
                                 .addMember("optionalField", "$L", columnMapping.isOptional())
                                 .addMember("defaultValue", "$S", columnMapping.getDefaultValue())
+                                .addMember("outputField", "$L", columnMapping.isOutputField())
                                 .build()
                 );
 

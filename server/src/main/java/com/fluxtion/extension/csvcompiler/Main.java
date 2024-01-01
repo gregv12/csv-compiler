@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.fluxtion.extension.csvcompiler.Version.VERSION;
@@ -221,10 +222,13 @@ public class Main implements Runnable {
     boolean printSampleFull;
     @Option(names = {"-d", "--sampleData"}, description = "prints data for sample config", arity = "0")
     boolean printSampleData;
+
+    @Option(names = {"-l", "--lookupFile"}, description = "lookup csv file use multiple times top specify more than one lookup file")
+    List<String> lookupFiles;
     @Parameters(paramLabel = "<check config>", defaultValue = "processConfig.yaml", index = "0",
             description = "Configuration of csv check logic")
     private File configFile;
-    @Parameters(paramLabel = "<input data>", defaultValue = "data.csv", description = "input data file list", index = "1..*")
+    @Parameters(paramLabel = "<input data>", defaultValue = "data.csv", description = "input data file list as space separated list", index = "1..*")
     private List<File> dataFiles;
     private String currentDataFile = "";
 
@@ -236,6 +240,7 @@ public class Main implements Runnable {
     @SneakyThrows
     @Override
     public void run() {
+        System.out.println("lookup:" + lookupFiles);
         if (printSample) {
             printSample();
         } else if (printSampleFull) {
@@ -283,6 +288,7 @@ public class Main implements Runnable {
                         Main.this.write(writerInvalid,csvProcessingException.getMessage());
                     }
                 });
+        loadLookup(rowMarshaller);
         for (File file : dataFiles) {
             metaMap.put("dataFile", file.getName());
             processFile(rowMarshaller, file, writer, validCount);
@@ -291,6 +297,23 @@ public class Main implements Runnable {
         writerInvalid.flush();
         System.out.println("Valid count  : " + validCount.intValue());
         System.out.println("Invalid count: " + invalidCount.intValue());
+    }
+
+    @SneakyThrows
+    private void loadLookup(RowMarshaller<FieldAccessor> rowMarshaller) {
+        Map<String, Map<String, String>> lookupMultiMap = new HashMap<>();
+        for (String lookupFile : lookupFiles) {
+            try(FileReader fileReader = new FileReader(lookupFile)){
+                RowMarshaller.load(LookupTable.class)
+                        .stream(fileReader)
+                        .forEach(l ->{
+                            lookupMultiMap.computeIfAbsent(l.getTable(), s -> new HashMap<>()).put(l.getKey(), l.getValue());
+                        });
+            }
+        }
+        lookupMultiMap.forEach((t, m) ->{
+            rowMarshaller.addLookup(t, m::get);
+        });
     }
 
     @SneakyThrows

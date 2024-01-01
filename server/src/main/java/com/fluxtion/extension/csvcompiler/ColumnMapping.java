@@ -20,6 +20,7 @@ public class ColumnMapping {
     private String validationFunction = "";
     private boolean derived = false;
     private boolean escapeOutput = false;
+    private boolean outputField = true;
     private String lookupTable;
 
     @SneakyThrows

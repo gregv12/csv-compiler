@@ -77,4 +77,13 @@ public @interface ColumnMapping {
      * @return flag controlling quote escaping when writing values to rows.
      */
     boolean escapeOutput() default false;
+
+    /**
+     * Flag controlling output of field value when written with
+     * {@link com.fluxtion.extension.csvcompiler.RowMarshaller#writeRow(Object, Writer)}. If true the value will be
+     * written otherwise neither the value nor the output header will be written
+     *
+     * @return flag controlling field writing to output from a RowMarshaller
+     */
+    boolean outputField() default true;
 }
