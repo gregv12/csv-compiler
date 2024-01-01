@@ -8,9 +8,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>csv-compiler-server</artifactId>
+    <artifactId>csv-compiler-checker</artifactId>
 
-    <name>csv-compiler :: compiler-server</name>
+    <name>csv-compiler :: compiler-checker</name>
     <description>Server process for processing csv files from a command line interface</description>
 
     <properties>

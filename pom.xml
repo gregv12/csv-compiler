@@ -43,7 +43,7 @@
         <module>parent-pom</module>
         <module>annotation-processor</module>
         <module>runtime</module>
-        <module>server</module>
+        <module>checker</module>
         <!--        <module>example</module>-->
 <!--        <module>jmh</module>-->
     </modules>
