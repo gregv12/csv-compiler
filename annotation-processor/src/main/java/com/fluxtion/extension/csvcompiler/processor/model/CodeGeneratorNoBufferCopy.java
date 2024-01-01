@@ -141,7 +141,7 @@ public class CodeGeneratorNoBufferCopy {
                             .collect(Collectors.joining("\n", "", "\n"));
 
             options += "             default:\n" +
-                    "                //throw new IllegalArgumentException(\"cannot find lookup with name:\" + lookup);\n" +
+                    "                if(!lookupName.equals(\"meta\"))\n" +
                     "                System.out.println(\"cannot find lookup with name:\" + lookupName);\n" +
                     "        }\n" +
                     "        return this;\n" +
@@ -469,6 +469,7 @@ public class CodeGeneratorNoBufferCopy {
         String options = "\n    public void writeHeaders(StringBuilder builder) {\n";//
         options += codeGeneratorModel.fieldInfoList().stream()
                 .filter(f -> !f.isIndexField())
+                .filter(CsvToFieldInfoModel::isWriteFieldToOutput)
                 .map(s -> "        builder.append(\"" + s.getOutFieldName() + "\");")
                 .collect(Collectors.joining(
                         "\n        builder.append(',');\n",
@@ -495,6 +496,7 @@ public class CodeGeneratorNoBufferCopy {
                 "\n    public void writeRow(%s target, StringBuilder builder) {\n", codeGeneratorModel.getTargetClassName());
 
         options += codeGeneratorModel.outputFieldInfoList().stream()
+                .filter(FieldToCsvInfo::isWriteFieldToOutput)
                 .map(FieldToCsvInfo::getWriteStatement)
                 .collect(Collectors.joining(
                         "\n        builder.append(',');\n        ",

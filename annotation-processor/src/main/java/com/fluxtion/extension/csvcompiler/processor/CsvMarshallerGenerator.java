@@ -21,6 +21,7 @@ package com.fluxtion.extension.csvcompiler.processor;
 
 import com.fluxtion.extension.csvcompiler.FieldConverter;
 import com.fluxtion.extension.csvcompiler.annotations.*;
+import com.fluxtion.extension.csvcompiler.converters.*;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGenerator;
 import com.fluxtion.extension.csvcompiler.processor.model.CodeGeneratorNoBufferCopy;
 import com.fluxtion.extension.csvcompiler.processor.model.CsvMetaModel;
@@ -115,6 +116,8 @@ public class CsvMarshallerGenerator implements Processor {
         processingEnv.getElementUtils().getAllMembers(typeElement).forEach(e -> {
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             Name variableName = e.getSimpleName();
+            checkArrayConversion(e, csvMetaModel);
+            checkList(e, csvMetaModel);
             if (columnMapping != null) {
                 validateFieldName(csvMetaModel, variableName.toString());
                 if (!StringUtils.isBlank(columnMapping.columnName())) {
@@ -138,7 +141,8 @@ public class CsvMarshallerGenerator implements Processor {
                     }
                 }
                 csvMetaModel.setTrimField(variableName.toString(), columnMapping.trimOverride());
-                csvMetaModel.setEscapeFiledOutput(variableName.toString(), columnMapping.escapeOutput());
+                csvMetaModel.setEscapeFieldOutput(variableName.toString(), columnMapping.escapeOutput());
+                csvMetaModel.setWriteFieldToOutput(variableName.toString(), columnMapping.outputField());
             }
 
             DataMapping dataMapping = e.getAnnotation(DataMapping.class);
@@ -176,6 +180,72 @@ public class CsvMarshallerGenerator implements Processor {
         });
 
         return csvMetaModel;
+    }
+
+    private void checkArrayConversion(Element e, CsvMetaModel csvMetaModel) {
+        if (e.asType().getKind() == TypeKind.ARRAY) {
+            Name variableName = e.getSimpleName();
+            String fqn = e.asType().toString();
+            csvMetaModel.setProcessEscapeSequence(true);
+//            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "array type:" + fqn);
+            switch (fqn) {
+                case "byte[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayByteConverter.class.getCanonicalName());
+                    break;
+                case "double[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayDoubleConverter.class.getCanonicalName());
+                    break;
+                case "float[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayFloatConverter.class.getCanonicalName());
+                    break;
+                case "long[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayLongConverter.class.getCanonicalName());
+                    break;
+                case "int[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayIntConverter.class.getCanonicalName());
+                    break;
+                case "short[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayShortConverter.class.getCanonicalName());
+                    break;
+                case "java.lang.String[]":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ArrayStringConverter.class.getCanonicalName());
+                    break;
+                default:
+            }
+        }
+    }
+
+    private void checkList(Element e, CsvMetaModel csvMetaModel) {
+        if (e.asType().getKind() == TypeKind.DECLARED && e.getKind() == ElementKind.FIELD) {
+            Name variableName = e.getSimpleName();
+            String fqn = e.asType().toString();
+            csvMetaModel.setProcessEscapeSequence(true);
+//            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "list type:" + fqn);
+            switch (fqn) {
+                case "java.util.List<java.lang.Byte>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListByteConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Double>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListDoubleConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Float>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListFloatConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Long>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListLongConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Integer>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListIntegerConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.Short>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListShortConverter.class.getCanonicalName());
+                    break;
+                case "java.util.List<java.lang.String>":
+                    csvMetaModel.setFieldConverter(variableName.toString(), ListStringConverter.class.getCanonicalName());
+                    break;
+                default:
+            }
+        }
     }
 
     @SneakyThrows
@@ -217,7 +287,7 @@ public class CsvMarshallerGenerator implements Processor {
             String fqn = dt.asElement().toString();
             lombokPresent |= fqn.contains("lombok.Data") | fqn.contains("lombok.Getter");
         }
-        if(lombokPresent){
+        if (lombokPresent) {
 //            processingEnv.getMessager().printMessage(Kind.NOTE, "lombokPresent:" + lombokPresent + " type:" + typeElement.toString());
         }
         if (annotation.requireGetSetInSourceCode() & !lombokPresent) {
@@ -267,7 +337,7 @@ public class CsvMarshallerGenerator implements Processor {
             String fqn = dt.asElement().toString();
             lombokPresent |= fqn.contains("lombok.Data") | fqn.contains("lombok.Setter");
         }
-        if(lombokPresent){
+        if (lombokPresent) {
 //            processingEnv.getMessager().printMessage(Kind.NOTE, "lombokPresent:" + lombokPresent + " type:" + typeElement.toString());
         }
         if (annotation.requireGetSetInSourceCode() & !lombokPresent) {
@@ -279,7 +349,7 @@ public class CsvMarshallerGenerator implements Processor {
                     .map(el -> el.getSimpleName().toString())
                     .filter(name -> name.startsWith("set"))
                     .forEach(csvMetaModel::registerSetMethod);
-        }else{
+        } else {
             typeElement
                     .getEnclosedElements().stream()
                     .filter(e -> e.getKind().isField())

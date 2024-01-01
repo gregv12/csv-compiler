@@ -82,7 +82,7 @@ public class TypeAnalyser {
         csvProcessingConfig.setMappingRow(0);
         for (int i = 0; i < MAX_COLUMNS_TO_ANALYSE; i++) {
             ColumnMapping columnMapping = new ColumnMapping();
-            columnMapping.setCsvIndex(i);
+            columnMapping.setSourceColumnIndex(i);
             csvProcessingConfig.getColumns().put("column_" + i, columnMapping);
         }
         //generate

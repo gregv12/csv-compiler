@@ -38,6 +38,8 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
     private int fixedStart;
     private int fixedLen;
     private int fixedEnd;
+    //output control
+    private boolean writeFieldToOutput = true;
     //Target
     private boolean targetIsEnum;
     private String targetArgType;

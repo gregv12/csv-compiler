@@ -33,6 +33,7 @@ public class FieldToCsvInfo {
     private String sourceType;
     private boolean enumField;
     private boolean escapeOutputField;
+    private boolean writeFieldToOutput;
     private static final Set<String> primitiveTypeSet = new HashSet<>();
     static{
         primitiveTypeSet.add("int");
@@ -46,6 +47,9 @@ public class FieldToCsvInfo {
     }
 
     public String getWriteStatement() {
+        if(!writeFieldToOutput){
+            return "";
+        }
         String writeStatement;
         if (converterId == null) {
             writeStatement = "builder.append(target." + sourceMethod + "());";
