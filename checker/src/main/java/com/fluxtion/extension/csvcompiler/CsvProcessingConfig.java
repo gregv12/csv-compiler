@@ -24,6 +24,7 @@ public class CsvProcessingConfig {
     private Map<String, ConversionFunction> conversionFunctions = new LinkedHashMap<>();
     private Map<String, ValidationFunction> validationFunctions = new LinkedHashMap<>();
     private Map<String, Map<String, String>>  lookupTables = new LinkedHashMap<>();
+    private Map<String, AggregateField> aggregateFields = new LinkedHashMap<>();
     private boolean dumpYaml = false;
     private boolean dumpGeneratedJava = false;
 

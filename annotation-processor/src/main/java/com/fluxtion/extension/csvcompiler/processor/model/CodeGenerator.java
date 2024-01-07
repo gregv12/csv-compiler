@@ -35,6 +35,7 @@ public class CodeGenerator {
             "%2$s\n" +
             "\n" +
             "@AutoService(RowMarshaller.class)\n" +
+            "@SuppressWarnings(\"rawtypes\")\n" +
             "public final class %3$s extends BaseMarshaller<%4$s>{\n" +
             "\n" +
             "%5$s\n" +

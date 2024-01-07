@@ -4,6 +4,7 @@ import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import com.fluxtion.extension.csvcompiler.annotations.DataMapping;
 import com.fluxtion.extension.csvcompiler.annotations.Validator;
 import com.fluxtion.extension.csvcompiler.converters.LibraryConverter;
+import com.fluxtion.extension.csvcompiler.process.ProcessInput;
 import com.fluxtion.extension.csvcompiler.processor.Util;
 import com.squareup.javapoet.*;
 import com.squareup.javapoet.TypeSpec.Builder;
@@ -17,8 +18,7 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 
@@ -62,7 +62,7 @@ public class CsvChecker {
                 .addParameter(String.class, "fieldName")
                 .beginControlFlow("switch(fieldName)")
                 .returns(TypeVariableName.get("T"));
-        if(processingConfig.isDumpYaml()){
+        if (processingConfig.isDumpYaml()) {
             Yaml yaml = new Yaml();
             System.out.println("myconfig:\n" + yaml.dump(processingConfig));
         }
@@ -143,9 +143,9 @@ public class CsvChecker {
                 break;
             default:
                 String lookupName = classShortNameMap.getOrDefault(typeNameString, typeNameString);
-                if(typeNameString.contains("[]")){
+                if (typeNameString.contains("[]")) {
                     typeName = ArrayTypeName.get(Class.forName(lookupName));
-                }else{
+                } else {
                     typeName = TypeName.get(Class.forName(lookupName));
                 }
         }
@@ -155,8 +155,10 @@ public class CsvChecker {
     @SneakyThrows
     public RowMarshaller<FieldAccessor> load() {
         addClassAnnotations();
+        addMainMethod();
         addConversionFunctions();
         addValidationFunctions();
+        addAggregates();
         processingConfig.getColumns().forEach((k, v) -> v.setName(k));
         processingConfig.getColumns().values().forEach(this::addFields);
         addGetField();
@@ -168,15 +170,27 @@ public class CsvChecker {
         javaFile.writeTo(stringWriter);
         String fqn = PACKAGE_NAME + "." + beanCsvClass.name;
         String marshallerFqn = fqn + "CsvMarshaller";
-        if(processingConfig.isDumpGeneratedJava()){
+        if (processingConfig.isDumpGeneratedJava()) {
             System.out.println("compiling:\n" + stringWriter.toString());
         }
-        Object instance = Util.compileInstance(fqn, stringWriter.toString());
+        Object instance = Util.compileInstance(fqn, stringWriter.toString(), "./results/classes/");
         Class<?> aClass = instance.getClass().getClassLoader().loadClass(marshallerFqn);
         RowMarshaller<FieldAccessor> rowMarshaller = (RowMarshaller<FieldAccessor>) aClass.getConstructor().newInstance();
         addLookupTables(rowMarshaller);
 
         return rowMarshaller;
+    }
+
+    private void addMainMethod() {
+        MethodSpec main = MethodSpec.methodBuilder("main")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(void.class)
+                .addParameter(String[].class, "args")
+                .addException(Exception.class)
+                .addStatement("$T<?> marshaller = ((RowMarshaller<?>) Class.forName($S).getDeclaredConstructor().newInstance())", RowMarshaller.class, PACKAGE_NAME + "." + processingConfig.getName() + "CsvMarshaller")
+                .addStatement("$T.run(marshaller)", ProcessInput.class)
+                .build();
+        csvBeanClassBuilder.addMethod(main);
     }
 
     private void addLookupTables(RowMarshaller<FieldAccessor> rowMarshaller) {
@@ -238,6 +252,38 @@ public class CsvChecker {
         toStringBuilder.addStatement("toString += $S", "}");
         toStringBuilder.addStatement("return toString");
         csvBeanClassBuilder.addMethod(toStringBuilder.build());
+    }
+
+    private void addAggregates() {
+        processingConfig.getAggregateFields().forEach((k, v) -> v.setName(k));
+        processingConfig.getAggregateFields().values().forEach(a -> {
+            switch (a.getType()){
+                case "map":
+                    a.setType(HashMap.class.getCanonicalName());
+                    a.setConstructor("new HashMap()");
+                    break;
+                case "list":
+                    a.setType(ArrayList.class.getCanonicalName());
+                    a.setConstructor("new ArrayList()");
+                    break;
+                case "set":
+                    a.setType(HashSet.class.getCanonicalName());
+                    a.setConstructor("new HashSet()");
+                    break;
+                default:
+
+            }
+            TypeName typeName = CsvChecker.asTypeName(a.getType());
+            String fieldName = a.getName();
+            String constructor = a.getConstructor();
+            FieldSpec.Builder fieldBuilder = FieldSpec.builder(typeName, fieldName)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC);
+            if (!constructor.isBlank()) {
+                fieldBuilder.initializer("$L", constructor);
+            }
+            //build and add
+            csvBeanClassBuilder.addField(fieldBuilder.build());
+        });
     }
 
     @lombok.SneakyThrows
@@ -306,7 +352,7 @@ public class CsvChecker {
         } else if (!StringUtils.isBlank(columnMapping.getConverterFunction())) {
             addedAnnotation = true;
             annotationBuilder.addMember("conversionMethod", "$S", columnMapping.getConverterFunction());
-        } else if(!StringUtils.isBlank(columnMapping.getConverter())){
+        } else if (!StringUtils.isBlank(columnMapping.getConverter())) {
             addedAnnotation = true;
             annotationBuilder.addMember("converter", "$T.class", LibraryConverter.getConverter(columnMapping.getConverter()));
             annotationBuilder.addMember("configuration", "$S", columnMapping.getConverterConfiguration());

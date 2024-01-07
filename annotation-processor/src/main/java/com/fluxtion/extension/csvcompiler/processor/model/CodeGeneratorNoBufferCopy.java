@@ -37,6 +37,7 @@ public class CodeGeneratorNoBufferCopy {
             "%2$s\n" +
             "\n" +
             "@AutoService(RowMarshaller.class)\n" +
+            "@SuppressWarnings(\"rawtypes\")\n" +
             "public final class %3$s extends BaseMarshallerNoBufferCopy<%4$s> {\n" +
             "\n" +
             "%5$s\n" +
@@ -374,6 +375,7 @@ public class CodeGeneratorNoBufferCopy {
         final boolean acceptPartials = codeGeneratorModel.isAcceptPartials();
         final boolean trim = codeGeneratorModel.isTrim();
         Stream<String> assignmentStringStream = codeGeneratorModel.fieldInfoList().stream()
+//                .filter(f -> !f.isDerived() || f.isLookupApplied())
                 .map(s -> {
                             String fieldIdentifier = s.getFieldIdentifier();
                             String readField = s.getTargetSetMethodName() + ".subSequenceNoOffset(delimiterIndex["

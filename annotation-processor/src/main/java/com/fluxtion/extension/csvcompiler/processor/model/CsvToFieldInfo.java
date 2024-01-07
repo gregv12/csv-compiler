@@ -104,7 +104,7 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
 
     public void setValidatorConfig(ValidatorConfig validatorConfig) {
         this.validatorId = getFieldIdentifier() + "Validator";
-        if(!StringUtils.isBlank(validatorConfig.getMethod())) {
+        if (!StringUtils.isBlank(validatorConfig.getMethod())) {
             validatorInvocation = "validateField(" + getValidatorId() + ");\n";
             String enclosingTargetType = validatorConfig.getClassName();
             validatorDeclaration = "private final BiPredicate<" + enclosingTargetType + ", BiConsumer<String, Boolean>> "
@@ -131,8 +131,8 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
         }
         validatorDeclaration = predicate + validatorId + " = " + validatorLambda + ";";
         //invocation
-        validatorInvocation =  "validate(target." + targetGetMethodName + "()" +
-                "," + getValidatorId()  +
+        validatorInvocation = "validate(target." + targetGetMethodName + "()" +
+                "," + getValidatorId() +
                 ", \"" + validatorConfig.getErrorMessage() + "\"" +
                 ", " + validatorConfig.isExitOnFailure() +
                 ");\n";
@@ -147,9 +147,9 @@ public class CsvToFieldInfo implements CsvToFieldInfoModel {
             this.converterMethod = "target." + converterMethod;
         } else {
             this.converterInstanceId = getFieldIdentifier() + "Converter";
-            if(converterMethod==null || converterMethod.isEmpty()){
+            if (converterMethod == null || converterMethod.isEmpty()) {
                 this.converterMethod = converterInstanceId + ".fromCharSequence";
-            }else{
+            } else {
                 this.converterMethod = converterInstanceId + "." + converterMethod;
             }
             this.converterClassName = converterClass;

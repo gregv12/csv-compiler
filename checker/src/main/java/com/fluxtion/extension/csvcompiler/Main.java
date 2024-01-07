@@ -1,5 +1,6 @@
 package com.fluxtion.extension.csvcompiler;
 
+import com.fluxtion.extension.csvcompiler.process.LookupTable;
 import lombok.SneakyThrows;
 import org.yaml.snakeyaml.Yaml;
 import picocli.CommandLine;

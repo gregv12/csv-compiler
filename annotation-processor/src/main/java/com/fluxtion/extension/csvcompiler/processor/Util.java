@@ -32,12 +32,19 @@ public class Util {
 
     @SneakyThrows
     public static <T> @NotNull T compileInstance(String fqn, String content) {
+        return compileInstance(fqn, content, null);
+    }
+
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public static <T> @NotNull T compileInstance(String fqn, String content, String pathString) {
         Objects.requireNonNull(fqn);
         Objects.requireNonNull(content);
 
         Class<T> classT = Reflect.compile(
                         fqn, content,
-                        new CompileOptions()
+                        new CompileOptions().saveClassesTo(pathString)
                                 .processors(new CsvMarshallerGenerator())
                                 .options("-source", "11")
                                 .options("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")

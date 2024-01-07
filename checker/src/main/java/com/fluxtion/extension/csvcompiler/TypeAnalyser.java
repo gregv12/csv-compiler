@@ -2,6 +2,7 @@ package com.fluxtion.extension.csvcompiler;
 
 //import com.fluxtion.extension.csvcompiler.TypeAnalyser.CandidateConverter.MyValidationLogger;
 import com.fluxtion.extension.csvcompiler.converters.Conversion;
+import com.fluxtion.extension.csvcompiler.process.DefaultValue;
 import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;

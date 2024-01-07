@@ -2,11 +2,22 @@ name: Royalty
 trim: true
 dumpGeneratedJava: true
 
+aggregateFields:
+  cumulativeCount: {type: int}
+  nameMap2: {type: map}
+  myLocale: {type: java.util.Locale, constructor: "Locale.FRANCE"}
+  dateFormatter: {type: java.text.DateFormat, constructor: "DateFormat.getDateInstance(DateFormat.LONG, myLocale)"}
+
 columns:
   ageInYears: {type: 'int[]', sourceColumnName: 'latest age', optional: true}
   name: {type: string, lookupTable: firstname, optional: true}
 #  registered: {type: string}
   registered: {type: string, outputField: false}
+
+#derivedColumns:
+#  count: {type: int, converterCode: return ++cumulativeCount;}
+#  count2: {type: int, converterCode: return 0;}
+#  count2: {type: int}
 #  name:
 #    defaultValue: testing
 #    type: string

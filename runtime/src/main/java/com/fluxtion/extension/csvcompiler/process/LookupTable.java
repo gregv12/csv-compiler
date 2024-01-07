@@ -1,4 +1,4 @@
-package com.fluxtion.extension.csvcompiler;
+package com.fluxtion.extension.csvcompiler.process;
 
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.Data;
