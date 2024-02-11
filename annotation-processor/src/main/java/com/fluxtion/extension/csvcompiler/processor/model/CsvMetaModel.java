@@ -62,13 +62,19 @@ public class CsvMetaModel implements CodeGeneratorModel {
     }
 
     public void registerSetMethod(String methodName) {
-        String fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, "set"));
+        String fieldName = methodName;
+        if(methodName.startsWith("set")){
+            fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, "set"));
+        }
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setSetterMethod(methodName);
     }
 
     public void registerGetMethod(String methodName) {
-        String prefix = methodName.startsWith("is") ? "is" : "get";
-        String fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, prefix));
+        String fieldName = methodName;
+        if(methodName.startsWith("get") || methodName.startsWith("is")){
+            String prefix = methodName.startsWith("is") ? "is" : "get";
+            fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, prefix));
+        }
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setGetterMethod(methodName);
     }
 
