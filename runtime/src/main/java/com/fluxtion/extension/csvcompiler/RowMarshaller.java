@@ -20,16 +20,20 @@
 package com.fluxtion.extension.csvcompiler;
 
 import com.fluxtion.extension.csvcompiler.ValidationLogger.FailedRowValidationProcessor;
+import lombok.SneakyThrows;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
@@ -135,12 +139,34 @@ public interface RowMarshaller<T> {
      */
     @SuppressWarnings("unchecked")
     static <T> RowMarshaller<T> load(Class<T> clazz) {
-        for (RowMarshaller<T> rowMarshaller: ServiceLoader.load(RowMarshaller.class)) {
-            if(rowMarshaller.targetClass().equals(clazz)){
+        for (RowMarshaller<T> rowMarshaller : ServiceLoader.load(RowMarshaller.class)) {
+            if (rowMarshaller.targetClass().equals(clazz)) {
                 return rowMarshaller;
             }
         }
         throw new RuntimeException("unable to find RowMarshaller registered with ServiceLoader, class:" + clazz);
+    }
+
+    @SneakyThrows
+    static <T> void transform(
+            Class<T> dataClass,
+            Path readerPath,
+            Path writerPath,
+            UnaryOperator<Stream<T>> transformer) {
+        RowMarshaller<T> rowMarshaller = RowMarshaller.load(dataClass);
+        try (Writer writer = Files.newBufferedWriter(writerPath)) {
+            try (Reader reader = Files.newBufferedReader(readerPath)) {
+                rowMarshaller.writeHeaders(writer);
+                Stream<T> stream = transformer.apply(rowMarshaller.stream(reader));
+                stream.forEach(r -> {
+                    try {
+                        rowMarshaller.writeRow(r, writer);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        }
     }
 
     void writeHeaders(StringBuilder builder);
