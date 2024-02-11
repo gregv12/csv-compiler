@@ -4,7 +4,7 @@
 
     <groupId>com.fluxtion.extension</groupId>
     <artifactId>csv-compiler-master</artifactId>
-    <version>0.1.13-SNAPSHOT</version>
+    <version>0.1.14-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>csv-compiler :: master</name>
 
@@ -43,7 +43,7 @@
         <module>parent-pom</module>
         <module>annotation-processor</module>
         <module>runtime</module>
-        <module>server</module>
+        <module>checker</module>
         <!--        <module>example</module>-->
 <!--        <module>jmh</module>-->
     </modules>

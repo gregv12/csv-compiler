@@ -282,6 +282,7 @@ public class CsvMarshallerGenerator implements Processor {
     private void registerGetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
         boolean lombokPresent = false;
+        boolean fluent = annotation.fluent();
         for (AnnotationMirror annotationMirror : typeElement.getAnnotationMirrors()) {
             DeclaredType dt = annotationMirror.getAnnotationType();
             String fqn = dt.asElement().toString();
@@ -297,14 +298,14 @@ public class CsvMarshallerGenerator implements Processor {
                     .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
                     .filter(el -> el.getParameters().size() == 0)
                     .filter(el -> el.getReturnType().getKind() != TypeKind.NULL)
-                    .filter(el -> el.getSimpleName().toString().startsWith("get") || el.getSimpleName().toString().startsWith("is"))
+                    .filter(el -> fluent || el.getSimpleName().toString().startsWith("get") || el.getSimpleName().toString().startsWith("is"))
                     .map(el -> {
                         String type = el.getReturnType().toString();
                         Element element = processingEnv.getTypeUtils().asElement(el.getReturnType());
                         if (element != null) {
                             type = element.getSimpleName().toString();
                         }
-                        String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
+                        String prefix = fluent ? "" : type.equalsIgnoreCase("boolean") ? "is" : "get";
                         String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), prefix));
                         csvMetaModel.registerFieldType(fieldName, type);
                         return el.getSimpleName().toString();
@@ -322,7 +323,7 @@ public class CsvMarshallerGenerator implements Processor {
                         }
                         String fieldName = e.getSimpleName().toString();
                         String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
-                        String methodName = prefix + StringUtils.capitalize(fieldName);
+                        String methodName = fluent ? fieldName : prefix + StringUtils.capitalize(fieldName);
                         csvMetaModel.registerFieldType(fieldName, type);
                         csvMetaModel.registerGetMethod(methodName);
                     });
@@ -332,6 +333,7 @@ public class CsvMarshallerGenerator implements Processor {
     private void registerSetters(CsvMetaModel csvMetaModel, TypeElement typeElement) {
         CsvMarshaller annotation = typeElement.getAnnotation(CsvMarshaller.class);
         boolean lombokPresent = false;
+        boolean fluent = annotation.fluent();
         for (AnnotationMirror annotationMirror : typeElement.getAnnotationMirrors()) {
             DeclaredType dt = annotationMirror.getAnnotationType();
             String fqn = dt.asElement().toString();
@@ -347,7 +349,7 @@ public class CsvMarshallerGenerator implements Processor {
                     .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
                     .filter(el -> el.getParameters().size() == 1)
                     .map(el -> el.getSimpleName().toString())
-                    .filter(name -> name.startsWith("set"))
+                    .filter(name -> fluent || name.startsWith("set"))
                     .forEach(csvMetaModel::registerSetMethod);
         } else {
             typeElement
@@ -356,7 +358,7 @@ public class CsvMarshallerGenerator implements Processor {
                     .forEach(e -> {
                         String fieldName = e.getSimpleName().toString();
                         String prefix = "set";
-                        String methodName = prefix + StringUtils.capitalize(fieldName);
+                        String methodName = fluent ? fieldName : prefix + StringUtils.capitalize(fieldName);
                         csvMetaModel.registerSetMethod(methodName);
                     });
         }

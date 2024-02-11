@@ -25,11 +25,12 @@ The processConfig.yaml defines:
     - csvChecker.jar - the tool
     - data.csv - sample data
     - processConfig.yaml - sample configuration to drive the csvChecker
-- install java 11 or above
-- validate installed ok execute java -jar ./csvChecker.jar -h
+- install java 17 or above
+- **unix validate install** in a terminal run ```./csvChecker.jar -h```
+- **windows validate install** in a command window run ```java -jar ./csvChecker.jar -h```
 
 ```
-java -jar ./csvChecker.jar -h
+./csvChecker.jar -h
 Usage: csvCheck [-dfhsV] <check config> <csv data>
       <check config>   Configuration of csv check logic
       <csv data>       csv data file

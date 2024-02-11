@@ -3,14 +3,14 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>0.1.13-SNAPSHOT</version>
+        <version>0.1.14-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>csv-compiler-server</artifactId>
+    <artifactId>csv-compiler-checker</artifactId>
 
-    <name>csv-compiler :: compiler-server</name>
+    <name>csv-compiler :: compiler-checker</name>
     <description>Server process for processing csv files from a command line interface</description>
 
     <properties>
@@ -25,6 +25,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <finalName>csvChecker</finalName>
+                    <outputDirectory>${project.basedir}/dist</outputDirectory>
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
@@ -54,6 +55,28 @@
                         <id>filtering-java-templates</id>
                         <goals>
                             <goal>filter-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.skife.maven</groupId>
+                <artifactId>really-executable-jar-maven-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <!-- (optional) flags to be interpolated into the java invocation -->
+                    <!-- as "java $flags -jar ..." -->
+<!--                    <flags>-Xmx1G</flags>-->
+
+                    <!-- (optional) input file name: only this specific file will be made executable -->
+                    <inputFile>${project.basedir}/dist/csvChecker.jar</inputFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-executable-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>really-executable-jar</goal>
                         </goals>
                     </execution>
                 </executions>
