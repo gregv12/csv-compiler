@@ -61,6 +61,40 @@ public class CsvMarshallerGeneratorAnnotationTest {
                         "    }\n");
     }
 
+    @Test
+    @SneakyThrows
+    public void fluentCapitalNames(){
+        String code = "package com.fluxtion.extension.csvcompiler;\n" +
+                "\n" +
+                "import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                "@CsvMarshaller(fluent = true, requireGetSetInSourceCode = false)\n" +
+                "public class FluentBean {\n" +
+                "\n" +
+                "    private String name;\n" +
+                "    private String AGE;\n" +
+                "\n" +
+                "    public String name() {\n" +
+                "        return name;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void name(String name) {\n" +
+                "        this.name = name;\n" +
+                "    }\n" +
+                "\n" +
+                "    public String AGE() {\n" +
+                "        return AGE;\n" +
+                "    }\n" +
+                "\n" +
+                "    public void AGE(String AGE) {\n" +
+                "        this.AGE = AGE;\n" +
+                "    }\n" +
+                "}";
+
+        Object runner = Util.compileInstance(
+                "com.fluxtion.extension.csvcompiler.FluentBean",
+                code);
+//        System.out.println(runner);
+    }
 
     @Test
     @SneakyThrows

@@ -1,5 +1,6 @@
 package com.fluxtion.extension.csvcompiler.beans;
 
+import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -11,4 +12,8 @@ public class LombokFluentBean {
 
     private String name;
     private int age;
+    @ColumnMapping(optionalField = true)
+    private String adfs;
+    @ColumnMapping(optionalField = true)
+    private String MY_NAME;
 }

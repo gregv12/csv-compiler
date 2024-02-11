@@ -291,7 +291,7 @@ public class CsvMarshallerGenerator implements Processor {
         if (lombokPresent) {
 //            processingEnv.getMessager().printMessage(Kind.NOTE, "lombokPresent:" + lombokPresent + " type:" + typeElement.toString());
         }
-        if (annotation.requireGetSetInSourceCode() & !lombokPresent) {
+        if (annotation.requireGetSetInSourceCode() & !lombokPresent & !fluent) {
             MoreElements.getLocalAndInheritedMethods(
                             typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
                     .stream()
@@ -305,10 +305,11 @@ public class CsvMarshallerGenerator implements Processor {
                         if (element != null) {
                             type = element.getSimpleName().toString();
                         }
-                        String prefix = fluent ? "" : type.equalsIgnoreCase("boolean") ? "is" : "get";
-                        String fieldName = StringUtils.uncapitalize(StringUtils.remove(el.getSimpleName().toString(), prefix));
+                        String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
+                        String getMethodName = el.getSimpleName().toString();
+                        String fieldName = StringUtils.uncapitalize(StringUtils.remove(getMethodName, prefix));
                         csvMetaModel.registerFieldType(fieldName, type);
-                        return el.getSimpleName().toString();
+                        return getMethodName;
                     })
                     .forEach(csvMetaModel::registerGetMethod);
         } else {
@@ -342,14 +343,14 @@ public class CsvMarshallerGenerator implements Processor {
         if (lombokPresent) {
 //            processingEnv.getMessager().printMessage(Kind.NOTE, "lombokPresent:" + lombokPresent + " type:" + typeElement.toString());
         }
-        if (annotation.requireGetSetInSourceCode() & !lombokPresent) {
+        if (annotation.requireGetSetInSourceCode() & !lombokPresent & !fluent) {
             MoreElements.getLocalAndInheritedMethods(
                             typeElement, processingEnv.getTypeUtils(), processingEnv.getElementUtils())
                     .stream()
                     .filter(el -> MoreElements.hasModifiers(Modifier.PUBLIC).apply(el))
                     .filter(el -> el.getParameters().size() == 1)
                     .map(el -> el.getSimpleName().toString())
-                    .filter(name -> fluent || name.startsWith("set"))
+                    .filter(name -> name.startsWith("set"))
                     .forEach(csvMetaModel::registerSetMethod);
         } else {
             typeElement
