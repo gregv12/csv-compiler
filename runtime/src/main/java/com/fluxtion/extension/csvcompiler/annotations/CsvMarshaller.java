@@ -68,6 +68,11 @@ public @interface CsvMarshaller {
     boolean requireGetSetInSourceCode() default true;
 
     /**
+     * Fluent style mutators and accessors, no get or set
+     */
+    boolean fluent() default false;
+
+    /**
      * process escape sequences, slows the parser down. Makes the parser RFC4180 compliant
      *
      * @see <a href="https://tools.ietf.org/html/rfc4180">RC4180</a>
