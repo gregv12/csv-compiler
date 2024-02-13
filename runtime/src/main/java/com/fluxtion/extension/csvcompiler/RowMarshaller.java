@@ -147,26 +147,68 @@ public interface RowMarshaller<T> {
         throw new RuntimeException("unable to find RowMarshaller registered with ServiceLoader, class:" + clazz);
     }
 
+    /**
+     * Transforms a masrshalled bean using an injected {@link Stream} operation. The input is read from reader path
+     * and written to the writer path, The internal reader and writer are close when this operation terminates.
+     *
+     * @param readerPath The path to read input data from
+     * @param writerPath The path to write the transformed data to
+     * @param transformer user supplied stream operation
+     */
     @SneakyThrows
-    static <T> void transform(
-            Class<T> dataClass,
-            Path readerPath,
-            Path writerPath,
-            UnaryOperator<Stream<T>> transformer) {
-        RowMarshaller<T> rowMarshaller = RowMarshaller.load(dataClass);
+    default void transform(Path readerPath, Path writerPath, UnaryOperator<Stream<T>> transformer) {
         try (Writer writer = Files.newBufferedWriter(writerPath)) {
             try (Reader reader = Files.newBufferedReader(readerPath)) {
-                rowMarshaller.writeHeaders(writer);
-                Stream<T> stream = transformer.apply(rowMarshaller.stream(reader));
+                writeHeaders(writer);
+                Stream<T> stream = transformer.apply(stream(reader));
                 stream.forEach(r -> {
                     try {
-                        rowMarshaller.writeRow(r, writer);
+                        writeRow(r, writer);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
             }
         }
+    }
+
+    /**
+     * Transforms a masrshalled bean using an injected {@link Stream} operation. The input is read from reader
+     * and written to the writer, Client code is responsible for closing the reader and writer.
+     *
+     * @param reader Input reader source
+     * @param writer Output writer
+     * @param transformer user supplied stream operation
+     */
+    @SneakyThrows
+    default void transform(Reader reader, Writer writer, UnaryOperator<Stream<T>> transformer) {
+        writeHeaders(writer);
+        Stream<T> stream = transformer.apply(stream(reader));
+        stream.forEach(r -> {
+            try {
+                writeRow(r, writer);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @SneakyThrows
+    static <T> void transform(
+            Class<T> dataClass,
+            Path readerPath,
+            Path writerPath,
+            UnaryOperator<Stream<T>> transformer) {
+        RowMarshaller.load(dataClass).transform(readerPath, writerPath, transformer);
+    }
+
+    @SneakyThrows
+    static <T> void transform(
+            Class<T> dataClass,
+            Reader reader,
+            Writer writer,
+            UnaryOperator<Stream<T>> transformer) {
+        RowMarshaller.load(dataClass).transform(reader, writer, transformer);
     }
 
     void writeHeaders(StringBuilder builder);
