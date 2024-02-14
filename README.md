@@ -149,7 +149,8 @@ public class AimesHousingCsvPipeline {
 }
 ```
 
-## Load CSV and process with java.util.stream.Stream
+
+## CSV to stream of bean instances
 
 This example converts csv -> bean -> process each bean record in a java stream. The example is
 available [here](example/src/main/java/com/fluxtion/extension/csvcompiler/example/MainTest.java)
