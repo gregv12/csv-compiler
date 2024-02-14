@@ -114,7 +114,7 @@ public class HouseSaleRecord {
 ### CSV data pipeline
 
 The  [AimesHousingCsvPipeline](example/src/main/java/com/fluxtion/extension/csvcompiler/example/MainTest.java)  creates
-a csv data pipeline using the utility function from the ```RowMarshaller#transform``` class
+a csv data pipeline using the utility function from the [```RowMarshaller#transform```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159) class
 
 ```java
 public class AimesHousingCsvPipeline {
