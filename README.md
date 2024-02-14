@@ -65,7 +65,7 @@ This example loads a CSV file transforms it and writes the results to another CS
 - The output is written to a new file excluding the input only columns
 
 Solving this problem requires two steps; firstly annotate a POJO's fields with ```@ColumnMapping```, secondly use the
-utility method ```RowMarshaller#transform``` to load the input file, transform/filter records with a
+utility method [```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159) to load the input file, transform/filter records with a
 java.util.stream.Stream
 and then finally write to an output file
 
