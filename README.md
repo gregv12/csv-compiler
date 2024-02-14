@@ -1,24 +1,36 @@
 # CSV Compiler
 
-A highly optimised and simple to use java csv marshalling library driven by annotations. Converts a csv source into a
+A simple to use efficient java csv marshalling library driven by annotations. Converts a csv source into a
 stream of java beans for processing within an application, equivalent to a handwritten marshaller in performance.
-Executes as an annotation processor generating CSV marshallers at build time for any classes annotated
-with ```@CsvMarshaller```.
+The annotation processor generates CSV marshallers at build time for classes annotated with ```@CsvMarshaller```, 
+supported features:
 
-- Compiles AOT, zero startup cost
-- Zero GC field marshaller
-- No external runtime dependencies
 - Simple to use annotations
+- CSV data pipeline transformations
+- Fully compliant csv parser for reading and writing
+- Integrates with lombok to reduce boilerplate code
+- Configurable mappings for headers and columns
+- Index or named column support for input files
+- Fields can be optional, default value substituted when absent and auto trimmed 
+- Full escaping support for quoted style fields, configurable
+- Missing column support allows partial evaluation
+- Comments ignored, configurable
+- Empty lines ignored, configurable
+- Pluggable custom serializers framework
+- Pluggable validation framework
+- Pluggable lookup support to convert field values
+- Error handling and reporting
+- Designed to integrate with java.util.stream.Stream
+- Compiles AOT, zero startup cost
+- Zero GC field serializers for primitive types provided
+- No external runtime dependencies
 - No runtime byte code generation
-
-
-
 
 # Dependencies
 
-- CSV compiler annotation processor: executes at build time generating custom marshallers. Not required in runtime
-  operation, use provided scope
-- CSV compiler runtime: small library that provides zerogc utilities and interface definitions
+- CSV compiler annotation processor: executes at build time to generate a marshaller. **Not required at runtime**, 
+use provided scope
+- CSV compiler runtime: runtime library providing zerogc utilities and interface definitions
 
 ```xml
 
@@ -37,32 +49,32 @@ with ```@CsvMarshaller```.
 
 # Examples
 
-## Extract Transform Write CSV
-This example loads a CSV file transforms it and writes the results to another CSV file. The transform demonstrates:
+## CSV data pipeline
+This example loads a CSV file transforms it and writes the results to another CSV file. The pipeline demonstrates:
+- Extracting a subset of columns from the source data
 - Replaces missing values with default values
-- Columns are one of, input only, inout/output or derived output only
+- Columns are one of, input only, input/output or derived output only
 - Header names have spaces
 - Rows are filtered from output if they do not meet criteria
-- Derived values are transformed from textual values to numerical representation
+- Derived value transforms a textual field to numerical representation
+- Derived value transforms a numerical value by an operation
+- The output is written to a new file excluding the input only columns 
 
-Solving this problem requires two steps; firstly annotate a POJO's fields with ```@ColumnMapping``` then use the 
-utility method ```RowMarshaller#transform``` to load the input file, transform/filter records with a Stream and write 
-to an output file
+Solving this problem requires two steps; firstly annotate a POJO's fields with ```@ColumnMapping```, secondly use the 
+utility method ```RowMarshaller#transform``` to load the input file, transform/filter records with a java.util.stream.Stream 
+and then finally write to an output file
 
 ### Csv record file
+The HousingData class represents the mapping of input, output and derived fields using annotations. The ```@CsvMarshaller```
+annotation is used in conjunction with lombok to generate a POJO that has fluent accessors, removing the need for
+boilerplate code. 
 
-The CsvMarshaller is used in conjunction with lombok to generate a POJO that has fluent accessors, removing the need for
-boilerplate code. This file is used to define the input and output CSV record schema. 
--  Input only fields are annotated with ```@ColumnMapping(outputField = false)```
--  Column names and default values are marked with:
-``` @ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```. Output only field 
-annotation is: ```@ColumnMapping(optionalField = true)```
 
 ```java
 @Data
 @CsvMarshaller(fluent = true)
 @Accessors(fluent = true)
-public class HousingData {
+public class HouseSaleRecord {
     //input only
     @ColumnMapping(outputField = false)
     private int Order;
@@ -76,7 +88,7 @@ public class HousingData {
     @ColumnMapping(columnName = "MS SubClass")
     private int MS_SubClass;
 
-    //derived no inputs
+    //derived no input field
     @ColumnMapping(optionalField = true)
     private int Lot_Frontage_Squared;
     @ColumnMapping(optionalField = true)
@@ -84,6 +96,48 @@ public class HousingData {
 }
 ```
 
+- Input only fields are annotated with ```@ColumnMapping(outputField = false)```
+- Output only derived fields are annotated with ```@ColumnMapping(optionalField = true)```
+- Column names are mapped with ```@ColumnMapping(columnName = "MS SubClass")```
+- Default values are marked with ``` @ColumnMapping(defaultValue = "-1")```
+- Annotations can be combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```
+
+### CSV data pipeline
+
+The main method creates a csv data pipeline using the utility function from the ```RowMarshaller#transform``` class
+
+```java
+public class AimesHousingCsvPipeline {
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        RowMarshaller.load(HouseSaleRecord.class).transform(
+                Path.of("data/AmesHousing.csv"),
+                Path.of("data/PostProcess.csv"),
+                s -> s.filter(record -> record.Lot_Frontage() > 0)
+                        .map(MainTest::squareLotFrontage)
+                        .map(MainTest::ms_zone_to_category)
+                        .filter(record -> record.ms_zone_category() > 0));
+    }
+
+    public static HouseSaleRecord squareLotFrontage(HouseSaleRecord houseSaleRecord) {
+        int lotFrontage = houseSaleRecord.Lot_Frontage();
+        houseSaleRecord.Lot_Frontage_Squared(lotFrontage * lotFrontage);
+        return houseSaleRecord;
+    }
+
+    public static HouseSaleRecord ms_zone_to_category(HouseSaleRecord houseSaleRecord) {
+        switch (houseSaleRecord.MS_Zoning()) {
+            case "A" -> houseSaleRecord.ms_zone_category(1);
+            case "FV" -> houseSaleRecord.ms_zone_category(2);
+            case "RL" -> houseSaleRecord.ms_zone_category(3);
+            case "RM" -> houseSaleRecord.ms_zone_category(4);
+            default -> houseSaleRecord.ms_zone_category(-1);
+        }
+        return houseSaleRecord;
+    }
+}
+```
 
 ## Load CSV and process each record with java.util.stream.Stream
 
