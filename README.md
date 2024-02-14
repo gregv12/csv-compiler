@@ -7,7 +7,7 @@ The annotation processor generates a CSV marshaller at build time for any class 
 Supported features:
 
 - Simple to use annotations, automatically map CSV to POJO fields
-- Fully compliant csv parser for reading and writing csv
+- Fully [RC4180](https://tools.ietf.org/html/rfc4180) compliant csv parser for reading and writing csv
 - CSV data pipeline transformations
 - Integrates with lombok to reduce boilerplate code
 - Override header to property mapping
