@@ -2,17 +2,18 @@
 
 A simple to use efficient java csv marshalling library driven by annotations. Converts a csv source into a
 stream of java beans for processing within an application, equivalent to a handwritten marshaller in performance.
-The annotation processor generates CSV marshallers at build time for classes annotated with ```@CsvMarshaller```, 
-supported features:
+The annotation processor generates a CSV marshaller at build time for any class annotated with ```@CsvMarshaller```.
 
-- Simple to use annotations
+Supported features:
+
+- Simple to use annotations, automatically map CSV to POJO fields
+- Fully compliant csv parser for reading and writing csv
 - CSV data pipeline transformations
-- Fully compliant csv parser for reading and writing
 - Integrates with lombok to reduce boilerplate code
-- Configurable mappings for headers and columns
+- Override header to property mapping
 - Index or named column support for input files
-- Fields can be optional, default value substituted when absent and auto trimmed 
-- Full escaping support for quoted style fields, configurable
+- Optional field support with default value injection
+- Full escaping support for quoted fields
 - Missing column support allows partial evaluation
 - Comments ignored, configurable
 - Empty lines ignored, configurable
@@ -28,8 +29,8 @@ supported features:
 
 # Dependencies
 
-- CSV compiler annotation processor: executes at build time to generate a marshaller. **Not required at runtime**, 
-use provided scope
+- CSV compiler annotation processor: executes at build time to generate a marshaller. **Not required at runtime**,
+  use provided scope
 - CSV compiler runtime: runtime library providing zerogc utilities and interface definitions
 
 ```xml
@@ -40,17 +41,19 @@ use provided scope
     <version>1.0-SNAPSHOT</version>
 </dependency>
 <dependency>
-    <groupId>com.fluxtion.csv-compiler</groupId>
-    <artifactId>csv-compiler-processor</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <scope>provided</scope>
+<groupId>com.fluxtion.csv-compiler</groupId>
+<artifactId>csv-compiler-processor</artifactId>
+<version>1.0-SNAPSHOT</version>
+<scope>provided</scope>
 </dependency>
 ```
 
 # Examples
 
 ## CSV data pipeline
+
 This example loads a CSV file transforms it and writes the results to another CSV file. The pipeline demonstrates:
+
 - Extracting a subset of columns from the source data
 - Replaces missing values with default values
 - Columns are one of, input only, input/output or derived output only
@@ -58,19 +61,23 @@ This example loads a CSV file transforms it and writes the results to another CS
 - Rows are filtered from output if they do not meet criteria
 - Derived value transforms a textual field to numerical representation
 - Derived value transforms a numerical value by an operation
-- The output is written to a new file excluding the input only columns 
+- The output is written to a new file excluding the input only columns
 
-Solving this problem requires two steps; firstly annotate a POJO's fields with ```@ColumnMapping```, secondly use the 
-utility method ```RowMarshaller#transform``` to load the input file, transform/filter records with a java.util.stream.Stream 
+Solving this problem requires two steps; firstly annotate a POJO's fields with ```@ColumnMapping```, secondly use the
+utility method ```RowMarshaller#transform``` to load the input file, transform/filter records with a
+java.util.stream.Stream
 and then finally write to an output file
 
 ### Csv record file
-The HousingData class represents the mapping of input, output and derived fields using annotations. The ```@CsvMarshaller```
-annotation is used in conjunction with lombok to generate a POJO that has fluent accessors, removing the need for
-boilerplate code. 
 
+The [HousingData](example/src/main/java/com/fluxtion/extension/csvcompiler/example/HousingData.java) class represents
+the mapping of input, output and derived fields using annotations.
+The [`````@CsvMarshaller`````](src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java)
+annotation is used in conjunction with lombok to generate a POJO that has fluent accessors, removing the need for
+boilerplate code.
 
 ```java
+
 @Data
 @CsvMarshaller(fluent = true)
 @Accessors(fluent = true)
@@ -100,11 +107,13 @@ public class HouseSaleRecord {
 - Output only derived fields are annotated with ```@ColumnMapping(optionalField = true)```
 - Column names are mapped with ```@ColumnMapping(columnName = "MS SubClass")```
 - Default values are marked with ``` @ColumnMapping(defaultValue = "-1")```
-- Annotations can be combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```
+- Annotations can be
+  combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```
 
 ### CSV data pipeline
 
-The main method creates a csv data pipeline using the utility function from the ```RowMarshaller#transform``` class
+The  [AimesHousingCsvPipeline](example/src/main/java/com/fluxtion/extension/csvcompiler/example/MainTest.java)  creates
+a csv data pipeline using the utility function from the ```RowMarshaller#transform``` class
 
 ```java
 public class AimesHousingCsvPipeline {
@@ -139,13 +148,14 @@ public class AimesHousingCsvPipeline {
 }
 ```
 
-## Load CSV and process each record with java.util.stream.Stream
+## Load CSV and process with java.util.stream.Stream
 
-This example converts csv -> bean -> process each bean record in a java stream. The example is available [here]()
+This example converts csv -> bean -> process each bean record in a java stream. The example is
+available [here](example/src/main/java/com/fluxtion/extension/csvcompiler/example/MainTest.java)
 
 ### Code
 
-Mark a java bean with annotation ```@CSVMarshaller``` use lombok ```@Data``` to remove the boilerplate getter/setter 
+Mark a java bean with annotation ```@CSVMarshaller``` use lombok ```@Data``` to remove the boilerplate getter/setter
 methods
 
 ```java
