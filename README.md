@@ -34,17 +34,18 @@ Supported features:
 - CSV compiler runtime: runtime library providing zerogc utilities and interface definitions
 
 ```xml
-
 <dependency>
-    <groupId>com.fluxtion.csv-compiler</groupId>
-    <artifactId>csv-compiler</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
-<dependency>
-<groupId>com.fluxtion.csv-compiler</groupId>
-<artifactId>csv-compiler-processor</artifactId>
-<version>1.0-SNAPSHOT</version>
-<scope>provided</scope>
+    <dependency>
+        <groupId>com.fluxtion.csv-compiler</groupId>
+        <artifactId>csv-compiler</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fluxtion.csv-compiler</groupId>
+        <artifactId>csv-compiler-processor</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>provided</scope>
+    </dependency>
 </dependency>
 ```
 
@@ -72,7 +73,7 @@ and then finally write to an output file
 
 The [HousingData](example/src/main/java/com/fluxtion/extension/csvcompiler/example/HousingData.java) class represents
 the mapping of input, output and derived fields using annotations.
-The [`````@CsvMarshaller`````](src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java)
+The [```@CsvMarshaller```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java)
 annotation is used in conjunction with lombok to generate a POJO that has fluent accessors, removing the need for
 boilerplate code.
 
