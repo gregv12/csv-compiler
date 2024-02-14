@@ -109,12 +109,12 @@ public class HouseSaleRecord {
 - Column names are mapped with ```@ColumnMapping(columnName = "MS SubClass")```
 - Default values are marked with ``` @ColumnMapping(defaultValue = "-1")```
 - Annotations can be
-  combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```
+  combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")``` 
 
 ### CSV data pipeline
 
 The  [AimesHousingCsvPipeline](example/src/main/java/com/fluxtion/extension/csvcompiler/example/MainTest.java)  creates
-a csv data pipeline using the utility function from the [```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java) class
+a csv data pipeline using the utility function from the [```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159) class
 
 ```java
 public class AimesHousingCsvPipeline {
