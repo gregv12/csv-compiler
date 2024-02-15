@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 @Data
 @CsvMarshaller(fluent = true)
 @Accessors(fluent = true)
-public class HousingData {
+public class HouseSaleRecord {
     //input only
     @ColumnMapping(outputField = false)
     private int Order;
