@@ -36,7 +36,7 @@ Supported features:
 
 - **csv-compiler-processor** an annotation processor that executes at build time to generate a [RowMarshaller](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java). 
 Not required at runtime, with maven use provided scope or explicitly load as an annotation processor.
-- **csv-compiler** a runtime library providing utility function, zerogc utilities and interface definitions
+- **csv-compiler** a runtime library providing utility functions, zerogc utilities and interface definitions
 
 ```xml
 
@@ -54,6 +54,25 @@ Not required at runtime, with maven use provided scope or explicitly load as an 
     </dependency>
 </dependency>
 ```
+
+# Steps to process a CSV source
+Required steps to set up a successful processing pipeline:
+
+1. Add CVS compiler dependencies to you project.
+2. Create a java bean with getters and setter for persistent properties
+3. Add a `@CSVMarshaller` annotation to the java bean source file
+4. Load marshaller using `RowMarshaller.load([Bean.class])`
+5. Stream from a reader or a String into the loaded RowMarshaller, add stream logic to process marshalled instances
+   `.stream([Reader|String])`
+
+Behaviour can optionally be injected into the processing chain:
+
+1. Register a validation logger to record marshalling errors. `RowMarshaller.setValidationLogger`
+2. Register a row validator with `RowMarshaller.setRowValidator`
+3. Register a fatal exception handler for parse errors with `RowMarshaller.setFatalExceptionHandler`
+4. Register a header transformer with `RowMarshaller.setHeaderTransformer`
+5. Register a lookup function with `RowMarshaller.addLookup`
+
 
 # Examples
 
@@ -265,24 +284,6 @@ Main.Person(name=Soren Miller, age=33)
 Person problem pushing 'not a number' from row:'4' fieldIndex:'1' targetMethod:'Person#setAge' error:'java.lang.NumberFormatException: For input string: "not a number"'
 Max age:43
 ```
-
-# Steps to process a CSV source
-Required steps to set up a successful processing pipeline:
-
-1. Add CVS compiler dependencies to you project.
-2. Create a java bean with getters and setter for persistent properties
-3. Add a `@CSVMarshaller` annotation to the java bean source file
-4. Load marshaller using `RowMarshaller.load([Bean.class])`
-5. Stream from a reader or a String into the loaded RowMarshaller, add stream logic to process marshalled instances
-   `.stream([Reader|String])`
-
-Behaviour can optionally be injected into the processing chain:
-
-1. Register a validation logger to record marshalling errors. `RowMarshaller.setValidationLogger`
-2. Register a row validator with `RowMarshaller.setRowValidator`
-3. Register a fatal exception handler for parse errors with `RowMarshaller.setFatalExceptionHandler`
-4. Register a header transformer with `RowMarshaller.setHeaderTransformer`
-5. Register a lookup function with `RowMarshaller.addLookup`
 
 # Performance
 
