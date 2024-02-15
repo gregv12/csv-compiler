@@ -40,12 +40,12 @@ Supported features:
     <dependency>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler</artifactId>
-        <version>0.1.17</version>
+        <version>0.1.18</version>
     </dependency>
     <dependency>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-processor</artifactId>
-        <version>0.1.17</version>
+        <version>0.1.18</version>
     </dependency>
 </dependency>
 ```
@@ -67,10 +67,9 @@ This example loads a CSV file transforms it and writes the results to another CS
 
 ### Data sets
 
-We use the [ames housing from kaggle](https://www.kaggle.com/datasets/godofprogramming/ameshousing) as an input source,
-the source has 82 columns, spaces in headers, some field values are missing. The goal is to clean and transform this
-data
-set so it can be used in a machine learning model.
+We use the [ames housing from kaggle](https://www.kaggle.com/datasets/godofprogramming/ameshousing) as an input source. The goal is to clean and transform this data set, so 
+it can be used in a machine learning model. The source has 82 columns we want to reduce this to a CSV file with a subset 
+of columns that only contains valid records.
 
 A sample from the input data set:
 
