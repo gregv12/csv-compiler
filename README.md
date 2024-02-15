@@ -30,9 +30,9 @@ Supported features:
 
 # Dependencies
 
-- CSV compiler annotation processor: executes at build time to generate a marshaller. **Not required at runtime**,
-  use provided scope
-- CSV compiler runtime: runtime library providing zerogc utilities and interface definitions
+- **csv-compiler-processor** an annotation processor that executes at build time to generate a [RowMarshaller](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java). 
+Not required at runtime, with maven use provided scope or explicitly load as an annotation processor.
+- **csv-compiler** a runtime library providing utility function, zerogc utilities and interface definitions
 
 ```xml
 
@@ -46,6 +46,7 @@ Supported features:
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-processor</artifactId>
         <version>0.1.18</version>
+        <scope>provided</scope>
     </dependency>
 </dependency>
 ```
