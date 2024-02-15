@@ -2,7 +2,8 @@
 
 A simple to use efficient java csv marshalling library driven by annotations. Converts a csv source into a
 stream of java beans for processing within an application, equivalent to a handwritten marshaller in performance.
-The annotation processor generates a CSV marshaller at build time for any class annotated with ```@CsvMarshaller```.
+The annotation processor generates a CSV marshaller at build time for any class annotated with 
+[`@CsvMarshaller`](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java).
 
 Supported features:
 
@@ -114,21 +115,22 @@ A sample output that should be generated
 | 527163010 | 60           | 5625                   | 3                  |
 
 Solving this problem requires two steps; firstly annotate a POJO's fields
-with [```@CsvMarshaller```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java),
+with [`@CsvMarshaller`](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java),
 secondly use the utility
-method [```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159).
+method [`RowMarshaller.transform()`](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159).
 
-The transform function performs the folllowing operations, loads the input file from the supplied path, transforms/filters records with a
+The transform function performs the following operations, loads the input file from the supplied path, transforms/filters records with a
 java.util.stream.Stream provided by the user and then finally writes records to an output file from the supplied path.
 
 ### Csv record file
 
-The [HousingData](example/src/main/java/com/fluxtion/extension/csvcompiler/example/HouseSaleRecord.java) class
+The [HouseSaleRecord.java](example/src/main/java/com/fluxtion/extension/csvcompiler/example/HouseSaleRecord.java) class
 represents
 the mapping of input, output and derived fields using annotations.
-The [```@CsvMarshaller```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java)
+The [`@CsvMarshaller`](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java)
 annotation is used in conjunction with lombok to generate a POJO that has fluent accessors, removing the need for
-boilerplate code.
+boilerplate code. The [RowMarshaller](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java) for
+HouseSaleRecord is generated at compile time by the csv-compiler annotation processor.
 
 ```java
 
@@ -167,9 +169,9 @@ public class HouseSaleRecord {
 
 ### CSV data pipeline
 
-The  [AmesHousingCsvPipeline](example/src/main/java/com/fluxtion/extension/csvcompiler/example/AmesHousingCsvPipeline.java)
+The  [AmesHousingCsvPipeline.java](example/src/main/java/com/fluxtion/extension/csvcompiler/example/AmesHousingCsvPipeline.java)
 creates a csv data pipeline using the utility function from the 
-[```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159) class
+[`RowMarshaller.transform()`](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159) class
 
 ```java
 public class AmesHousingCsvPipeline {
@@ -206,13 +208,14 @@ public class AmesHousingCsvPipeline {
 
 ## CSV to stream of bean instances
 
-This example converts csv -> bean -> process each bean record in a java stream. The example is
-available [here](example/src/main/java/com/fluxtion/extension/csvcompiler/example/MainTest.java)
+This example converts String -> csv -> bean -> java.util.stream.Stream for processing, any validation errors are printed to 
+console. The example is here [StreamBeans.java](example/src/main/java/com/fluxtion/extension/csvcompiler/example1/StreamBeans.java)
 
-### Code
+### StreamBeans code
 
-Mark a java bean with annotation ```@CSVMarshaller``` use lombok ```@Data``` to remove the boilerplate getter/setter
-methods
+Mark a java bean with annotation `@CSVMarshaller` use lombok `@Data` to remove the boilerplate getter/setter
+methods. The [RowMarshaller](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java) is generated 
+at compile time by the csv-compiler annotation processor.
 
 ```java
 
@@ -224,14 +227,17 @@ public class Person {
 }
 ```
 
-Load CSV marshaller for the bean, set error listener, stream from a reader or String and push records to a consumer.
+The `RowMarshaller.load(Person.class)` loads the RowMarshaller for the Person javabean. To set the validation logger 
+use `.setValidationLogger(ValidationLogger.CONSOLE)`, in this case directs validation messages  to the console. 
+A string is supplied as  input to the marshaller to create a stream of Person instances, this is set 
+with `.stream("name,age\n" + ....`, which returns a java.util.stream.Stream. Processing logic is added to the returned 
+stream as per standard java `.peek(System.out::println) ....`
 
 ```java
-public class Main {
-
+public class StreamBeans {
     public static void main(String[] args) {
         RowMarshaller.load(Person.class)
-                .setErrorLog(ValidationLogger.CONSOLE)
+                .setValidationLogger(ValidationLogger.CONSOLE)
                 .stream("name,age\n" +
                         "Linda Smith,43\n" +
                         "Soren Miller,33\n" +
@@ -239,7 +245,7 @@ public class Main {
                 .peek(System.out::println)
                 .mapToInt(Person::getAge)
                 .max()
-                .ifPresent(i -> System.out.println("Max age:" + i));
+                .ifPresent(i -> System.out.println("\nRESULT - Max age:" + i));
     }
 }
 ```
