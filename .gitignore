@@ -10,3 +10,4 @@
 /checker/target/
 /checker/dist/
 /checker/src/test/sample/results/
+/example/data/PostProcess.csv

@@ -4,7 +4,7 @@
 
     <groupId>com.fluxtion.csv-compiler</groupId>
     <artifactId>csv-compiler-parentpom</artifactId>
-    <version>0.1.17-SNAPSHOT</version>
+    <version>0.1.18-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>csv-compiler :: parent pom</name>
 
@@ -178,7 +178,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.24</version>
+                <version>1.18.28</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>

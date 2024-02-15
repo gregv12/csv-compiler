@@ -4,7 +4,7 @@
 
     <groupId>com.fluxtion.extension</groupId>
     <artifactId>csv-compiler-master</artifactId>
-    <version>0.1.17-SNAPSHOT</version>
+    <version>0.1.18-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>csv-compiler :: master</name>
 
@@ -36,15 +36,15 @@
         <connection>scm:git:https://github.com/gregv12/csv-compiler.git</connection>
         <developerConnection>scm:git:https://github.com/gregv12/csv-compiler.git</developerConnection>
         <url>https://github.com/gregv12/csv-compiler</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <modules>
         <module>parent-pom</module>
         <module>annotation-processor</module>
         <module>runtime</module>
         <module>checker</module>
-        <!--        <module>example</module>-->
-<!--        <module>jmh</module>-->
+        <module>example</module>
+        <!--        <module>jmh</module>-->
     </modules>
 </project>

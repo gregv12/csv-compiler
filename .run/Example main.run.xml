@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Example main" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.fluxtion.extension.csvcompiler.example.AmesHousingCsvPipeline" />
+    <module name="csv-compiler-example" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/example" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.fluxtion.extension.csvcompiler.example.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
