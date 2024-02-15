@@ -227,11 +227,14 @@ public class Person {
 }
 ```
 
-The `RowMarshaller.load(Person.class)` loads the RowMarshaller for the Person javabean. To set the validation logger 
-use `.setValidationLogger(ValidationLogger.CONSOLE)`, in this case directs validation messages  to the console. 
-A string is supplied as  input to the marshaller to create a stream of Person instances, this is set 
-with `.stream("name,age\n" + ....`, which returns a java.util.stream.Stream. Processing logic is added to the returned 
-stream as per standard java `.peek(System.out::println) ....`
+The `RowMarshaller.load(Person.class)` loads the RowMarshaller for the Person javabean. 
+
+To set the validation logger use `.setValidationLogger(ValidationLogger.CONSOLE)`, in this case directs validation messages  to the console. 
+
+A string is supplied as input to the marshaller to create a stream of Person instances with 
+`.stream("name,age\n" + ....`. The stream method returns a java.util.stream.Stream for downstream processing. 
+
+Processing logic is added to the returned stream as per standard java `.peek(System.out::println) ....`
 
 ```java
 public class StreamBeans {
