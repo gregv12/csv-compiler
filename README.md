@@ -11,8 +11,9 @@ Supported features:
 - Fully [RC4180](https://tools.ietf.org/html/rfc4180) compliant csv parser for reading and writing csv
 - CSV data pipeline transformations
 - Integrates with lombok to reduce boilerplate code
-- Override header to property mapping
+- Override header to property name mapping
 - Index or named column support for input files
+- JavaBean and fluent accessors/mutators style supported
 - Optional field support with default value injection
 - Full escaping support for quoted fields
 - Missing column support allows partial evaluation
@@ -24,7 +25,10 @@ Supported features:
 - Error handling and reporting
 - Designed to integrate with java.util.stream.Stream
 - Compiles AOT, zero startup cost
-- Zero GC field serializers for primitive types provided
+- Zero GC field serializers for primitive types and CharSequence
+- Array and List support for primitives and Strings 
+- Serializers for LocalTime, LocalDate, LocalDateTime
+- Re-use marshalled instance or new instance per record
 - No external runtime dependencies
 - No runtime byte code generation
 
@@ -227,7 +231,7 @@ public class Person {
 }
 ```
 
-The `RowMarshaller.load(Person.class)` loads the RowMarshaller for the Person javabean. 
+The `RowMarshaller.load(Person.class)` loads the RowMarshaller for the Person javaBean. 
 
 To set the validation logger use `.setValidationLogger(ValidationLogger.CONSOLE)`, in this case directs validation messages  to the console. 
 
@@ -268,9 +272,9 @@ steps to process a CSV source:
 2. Create a java bean with getters and setter for persistent properties
 3. Add a ```@CSVMarshaller``` annotation to the java bean source file
 4. Load marshaller using ```RowMarshaller.load([Bean.class])```
-5. Optionally supply an error listener to handle any marshalling errors. ```.setErrorLog(ValidationLogger.CONSOLE)```
-6. Stream from a reader or a String to the marshaller add a consumer that will process marshalled instances
-   ```.stream(Consumer<[Bean.class]>, [Reader])```
+5. Optionally register a validation logger to record marshalling errors. ```.setValidationLogger(ValidationLogger.CONSOLE)```
+6. Stream from a reader or a String into the loaded RowMarshaller, add stream logic to process marshalled instances
+   ```.stream([Reader|String])```
 
 # Performance
 
