@@ -185,7 +185,7 @@ public class HouseSaleRecord {
 - Input only fields are annotated with ```@ColumnMapping(outputField = false)```
 - Input column names are mapped with ```@ColumnMapping(columnName = "MS SubClass")```
 - Output only derived fields are annotated with ```@ColumnMapping(optionalField = true)```
-- Annotation free properties are both input and output fields
+- Annotation free read/write properties are both input and output fields
 - Default values are marked with ``` @ColumnMapping(defaultValue = "-1")```
 - Annotations can be
   combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```

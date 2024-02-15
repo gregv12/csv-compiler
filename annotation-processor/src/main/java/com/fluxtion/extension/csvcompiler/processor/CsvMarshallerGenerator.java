@@ -186,6 +186,7 @@ public class CsvMarshallerGenerator implements Processor {
         if (e.asType().getKind() == TypeKind.ARRAY) {
             Name variableName = e.getSimpleName();
             String fqn = e.asType().toString();
+            boolean previousEscapeFlag = csvMetaModel.isProcessEscapeSequence();
             csvMetaModel.setProcessEscapeSequence(true);
 //            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "array type:" + fqn);
             switch (fqn) {
@@ -211,6 +212,7 @@ public class CsvMarshallerGenerator implements Processor {
                     csvMetaModel.setFieldConverter(variableName.toString(), ArrayStringConverter.class.getCanonicalName());
                     break;
                 default:
+                    csvMetaModel.setProcessEscapeSequence(previousEscapeFlag);
             }
         }
     }
@@ -219,6 +221,7 @@ public class CsvMarshallerGenerator implements Processor {
         if (e.asType().getKind() == TypeKind.DECLARED && e.getKind() == ElementKind.FIELD) {
             Name variableName = e.getSimpleName();
             String fqn = e.asType().toString();
+            boolean previousEscapeFlag = csvMetaModel.isProcessEscapeSequence();
             csvMetaModel.setProcessEscapeSequence(true);
 //            processingEnv.getMessager().printMessage(Kind.WARNING, "variableName:" + variableName + "list type:" + fqn);
             switch (fqn) {
@@ -244,6 +247,7 @@ public class CsvMarshallerGenerator implements Processor {
                     csvMetaModel.setFieldConverter(variableName.toString(), ListStringConverter.class.getCanonicalName());
                     break;
                 default:
+                    csvMetaModel.setProcessEscapeSequence(previousEscapeFlag);
             }
         }
     }
