@@ -44,7 +44,6 @@ Supported features:
     <dependency>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-processor</artifactId>
-        <version>1.0-SNAPSHOT</version>
         <version>0.1.16</version>
     </dependency>
 </dependency>
@@ -117,9 +116,10 @@ A sample output that should be generated
 Solving this problem requires two steps; firstly annotate a POJO's fields
 with [```@CsvMarshaller```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java),
 secondly use the utility
-method [```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159)
-that loads the input file, transforms/filters records with a
-java.util.stream.Stream and then finally writes records to an output file.
+method [```RowMarshaller.transform()```](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java#L159).
+
+The transform function performs the folllowing operations, loads the input file from the supplied path, transforms/filters records with a
+java.util.stream.Stream provided by the user and then finally writes records to an output file from the supplied path.
 
 ### Csv record file
 
@@ -158,8 +158,9 @@ public class HouseSaleRecord {
 ```
 
 - Input only fields are annotated with ```@ColumnMapping(outputField = false)```
+- Input column names are mapped with ```@ColumnMapping(columnName = "MS SubClass")```
 - Output only derived fields are annotated with ```@ColumnMapping(optionalField = true)```
-- Column names are mapped with ```@ColumnMapping(columnName = "MS SubClass")```
+- Annotation free properties are both input and output fields
 - Default values are marked with ``` @ColumnMapping(defaultValue = "-1")```
 - Annotations can be
   combined - ```@ColumnMapping(outputField = false, columnName = "Lot Frontage", defaultValue = "-1")```
@@ -262,14 +263,14 @@ steps to process a CSV source:
 6. Stream from a reader or a String to the marshaller add a consumer that will process marshalled instances
    ```.stream(Consumer<[Bean.class]>, [Reader])```
 
-## Performance
+# Performance
 
 The CSV compiler annotation processor generates a marshaller during compilation. When deployed as a stateless function
 in the cloud the only cpu cycles billed are used to parse the data. For smaller documents CSV compiler can
 finish well before interpreting parsers have completed. Combined with Graal native results in
 low startup times as marshalling code is statically compiled AOT.
 
-### Example for calculating a sum of doubles in a column. Single column and 10 Columns
+## Example for calculating a sum of doubles in a column. Single column and 10 Columns
 
 ![](docs/images/CsvCompilerPerformanceGraphRelative.png)
 
