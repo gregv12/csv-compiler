@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>0.1.19-SNAPSHOT</version>
+        <version>0.1.20-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>csv-compiler-example</artifactId>
-    <version>0.1.19-SNAPSHOT</version>
+    <version>0.1.20-SNAPSHOT</version>
     <name>csv-compiler :: example</name>
 
     <properties>
@@ -18,6 +18,36 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
+
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <artifactId>maven-assembly-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <finalName>exampleDataPipeline</finalName>-->
+<!--                    <outputDirectory>${project.basedir}/dist</outputDirectory>-->
+<!--                    <appendAssemblyId>false</appendAssemblyId>-->
+<!--                    <archive>-->
+<!--                        <manifest>-->
+<!--                            <mainClass>com.fluxtion.extension.csvcompiler.example.AmesHousingCsvPipeline</mainClass>-->
+<!--                        </manifest>-->
+<!--                    </archive>-->
+<!--                    <descriptorRefs>-->
+<!--                        <descriptorRef>jar-with-dependencies</descriptorRef>-->
+<!--                    </descriptorRefs>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>make-assembly</id> &lt;!&ndash; this is used for inheritance merges &ndash;&gt;-->
+<!--                        <phase>package</phase> &lt;!&ndash; bind to the packaging phase &ndash;&gt;-->
+<!--                        <goals>-->
+<!--                            <goal>single</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
     <dependencies>
         <dependency>
