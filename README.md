@@ -287,6 +287,57 @@ Person problem pushing 'not a number' from row:'4' fieldIndex:'1' targetMethod:'
 Max age:43
 ```
 
+## Single message parse
+This example converts a single message into a single bean instance
+
+### StreamBeans code
+
+Mark a java bean with annotation `@CSVMarshaller` use lombok `@Data` to remove the boilerplate getter/setter
+methods. The [RowMarshaller](runtime/src/main/java/com/fluxtion/extension/csvcompiler/RowMarshaller.java) is generated
+at compile time by the csv-compiler annotation processor.
+
+```java
+
+@Data
+@CsvMarshaller
+public class Person {
+    private String name;
+    private int age;
+}
+```
+
+The `RowMarshaller.parser(Person.class)` loads a SingleRowMarshaller for the Person javaBean.
+
+
+A call to `SingleRowMarshaller.parse` will generate a single instance of Person if the message can be parsed. Validation
+loggers can inject into the flow if called before the parser method.
+
+
+```java
+
+public class SingleMessageParse {
+
+    public static void main(String[] args) {
+        SingleRowMarshaller<Person> parser = RowMarshaller.parser(Person.class);
+        //headers - no output
+        parser.parse("name,age\n");
+
+        System.out.println("parsed:" + parser.parse("Jane,56\n"));
+        System.out.println("parsed:" + parser.parse("Isiah,12\n"));
+        System.out.println("parsed:" + parser.parse("Sky,42\n"));
+    }
+}
+```
+
+
+Application execution output:
+
+```text
+parsed:SingleMessageParse.Person(name=Jane, age=56)
+parsed:SingleMessageParse.Person(name=Isiah, age=12)
+parsed:SingleMessageParse.Person(name=Sky, age=42)
+```
+
 # Performance
 
 The CSV compiler annotation processor generates a marshaller during compilation. When deployed as a stateless function
