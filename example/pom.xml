@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.fluxtion.csv-compiler</groupId>
         <artifactId>csv-compiler-parentpom</artifactId>
-        <version>0.2.0-SNAPSHOT</version>
+        <version>0.2.1-SNAPSHOT</version>
         <relativePath>../parent-pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>csv-compiler-example</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
     <name>csv-compiler :: example</name>
 
     <properties>
