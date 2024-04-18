@@ -148,6 +148,14 @@ public interface RowMarshaller<T> {
     }
 
     /**
+     * Creates a SingleRowMarshaller for this {@link RowMarshaller}
+     * @return SingleRowMarshaller
+     */
+    default SingleRowMarshaller<T> parser(){
+        return new SingleRowMarshaller<>(this);
+    }
+
+    /**
      * Transforms a masrshalled bean using an injected {@link Stream} operation. The input is read from reader path
      * and written to the writer path, The internal reader and writer are close when this operation terminates.
      *
@@ -191,6 +199,10 @@ public interface RowMarshaller<T> {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    static <T> SingleRowMarshaller<T> parser(Class<T> dataClass){
+        return load(dataClass).parser();
     }
 
     @SneakyThrows
