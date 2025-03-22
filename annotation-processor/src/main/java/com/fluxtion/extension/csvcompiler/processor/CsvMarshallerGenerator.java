@@ -114,10 +114,27 @@ public class CsvMarshallerGenerator implements Processor {
         csvMetaModel.buildModel();
         //apply field customisations
         processingEnv.getElementUtils().getAllMembers(typeElement).forEach(e -> {
+
+            boolean ignoreMember = true;
+            switch (e.getKind()) {
+                case ENUM_CONSTANT:
+                case FIELD:
+                case PARAMETER:
+                case LOCAL_VARIABLE:
+                case EXCEPTION_PARAMETER:
+                case RESOURCE_VARIABLE: {
+                    ignoreMember = false;
+                }
+            }
+            if (ignoreMember) {
+                return;
+            }
+
             ColumnMapping columnMapping = e.getAnnotation(ColumnMapping.class);
             Name variableName = e.getSimpleName();
             checkArrayConversion(e, csvMetaModel);
             checkList(e, csvMetaModel);
+            checkEnum(e, csvMetaModel);
             if (columnMapping != null) {
                 validateFieldName(csvMetaModel, variableName.toString());
                 if (!StringUtils.isBlank(columnMapping.columnName())) {
@@ -180,6 +197,16 @@ public class CsvMarshallerGenerator implements Processor {
         });
 
         return csvMetaModel;
+    }
+
+    private void checkEnum(Element element, CsvMetaModel csvMetaModel) {
+        TypeMirror elementType = element.asType();
+        Element element1 = processingEnv.getTypeUtils().asElement(elementType);
+
+        if (element1 != null && element1.getKind() == ElementKind.ENUM) {
+            Name variableName = element.getSimpleName();
+            csvMetaModel.setEnumField(variableName.toString());
+        }
     }
 
     private void checkArrayConversion(Element e, CsvMetaModel csvMetaModel) {
@@ -311,7 +338,7 @@ public class CsvMarshallerGenerator implements Processor {
                         }
                         String prefix = type.equalsIgnoreCase("boolean") ? "is" : "get";
                         String getMethodName = el.getSimpleName().toString();
-                        String fieldName = StringUtils.uncapitalize(StringUtils.remove(getMethodName, prefix));
+                        String fieldName = StringUtils.uncapitalize(StringUtils.removeStart(getMethodName, prefix));
                         csvMetaModel.registerFieldType(fieldName, type);
                         return getMethodName;
                     })

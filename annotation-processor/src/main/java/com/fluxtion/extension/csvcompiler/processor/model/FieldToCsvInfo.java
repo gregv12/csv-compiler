@@ -51,6 +51,10 @@ public class FieldToCsvInfo {
             return "";
         }
         String writeStatement;
+        String sourceMethodOriginal = sourceMethod;
+        if(enumField){
+            sourceMethod += "().name";
+        }
         if (converterId == null) {
             writeStatement = "builder.append(target." + sourceMethod + "());";
         } else {
@@ -65,6 +69,7 @@ public class FieldToCsvInfo {
         if(escapeOutputField){
             writeStatement = "builder.append(\"\\\"\");\n\t\t" + writeStatement  + "\n\t\tbuilder.append(\"\\\"\");";
         }
+        sourceMethod = sourceMethodOriginal;
         return writeStatement;
     }
 

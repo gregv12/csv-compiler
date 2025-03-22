@@ -64,7 +64,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
     public void registerSetMethod(String methodName) {
         String fieldName = methodName;
         if(methodName.startsWith("set")){
-            fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, "set"));
+            fieldName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, "set"));
         }
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setSetterMethod(methodName);
     }
@@ -73,7 +73,7 @@ public class CsvMetaModel implements CodeGeneratorModel {
         String fieldName = methodName;
         if(methodName.startsWith("get") || methodName.startsWith("is")){
             String prefix = methodName.startsWith("is") ? "is" : "get";
-            fieldName = StringUtils.uncapitalize(StringUtils.remove(methodName, prefix));
+            fieldName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, prefix));
         }
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setGetterMethod(methodName);
     }
@@ -139,6 +139,10 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
     public void setNullWriteValue(String fieldName, String nullValue) {
         fieldMap.computeIfAbsent(fieldName, FieldModel::of).setNullWriteValue(nullValue);
+    }
+
+    public void setEnumField(String fieldName) {
+        fieldMap.computeIfAbsent(fieldName, FieldModel::of).setEnumField();
     }
 
     public void buildModel() {
@@ -260,6 +264,15 @@ public class CsvMetaModel implements CodeGeneratorModel {
 
         public void setDerived(boolean derived) {
             csvToFieldInfo.setDerived(derived);
+        }
+
+        public void setEnumField() {
+            if(fieldToCsvInfoInfo != null) {
+                fieldToCsvInfoInfo.setEnumField(true);
+            }
+            if(csvToFieldInfo != null) {
+                csvToFieldInfo.setTargetIsEnum(true);
+            }
         }
     }
 

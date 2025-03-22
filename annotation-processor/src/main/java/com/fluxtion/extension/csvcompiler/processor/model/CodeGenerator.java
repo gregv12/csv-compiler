@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 public class CodeGenerator {
 
     private static final String CODE_TEMPLATE_DECLARATIONS = "package %1$s;\n" +
-            "\n" +
             "%2$s\n" +
+            "import static %1$s.%4$s.*;\n" +
             "\n" +
             "@AutoService(RowMarshaller.class)\n" +
             "public final class %3$s extends BaseMarshaller<%4$s>{\n" +
