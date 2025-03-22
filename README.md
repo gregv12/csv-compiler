@@ -5,7 +5,9 @@ stream of java beans for processing within an application, equivalent to a handw
 The annotation processor generates a CSV marshaller at build time for any class annotated with 
 [`@CsvMarshaller`](runtime/src/main/java/com/fluxtion/extension/csvcompiler/annotations/CsvMarshaller.java).
 
-Supported features:
+### [Wiki user manual](https://github.com/gregv12/csv-compiler/wiki/Csv%E2%80%90compiler-user-manual)
+
+## Supported features:
 
 - Simple to use annotations, automatically map CSV to POJO fields
 - Fully [RC4180](https://tools.ietf.org/html/rfc4180) compliant csv parser for reading and writing csv

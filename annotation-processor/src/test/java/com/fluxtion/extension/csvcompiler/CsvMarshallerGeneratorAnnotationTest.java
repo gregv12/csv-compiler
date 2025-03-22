@@ -22,7 +22,6 @@ package com.fluxtion.extension.csvcompiler;
 import com.fluxtion.extension.csvcompiler.annotations.ColumnMapping;
 import com.fluxtion.extension.csvcompiler.processor.Util;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class CsvMarshallerGeneratorAnnotationTest {
@@ -63,7 +62,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
 
     @Test
     @SneakyThrows
-    public void fluentCapitalNames(){
+    public void fluentCapitalNames() {
         String code = "package com.fluxtion.extension.csvcompiler;\n" +
                 "\n" +
                 "import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
@@ -112,6 +111,7 @@ public class CsvMarshallerGeneratorAnnotationTest {
                         "        String name;\n" +
                         "        String classification;\n" +
                         "        int age;\n" +
+                        "        String assetName;\n" +
                         "\n" +
                         "        @Override\n" +
                         "        public void run() {\n" +
@@ -129,6 +129,15 @@ public class CsvMarshallerGeneratorAnnotationTest {
                         "        public int getAge(){\n" +
                         "            return age;\n" +
                         "        }\n" +
+                        "\n" +
+                        "        public String getAssetName(){\n" +
+                        "            return assetName;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        public void setAssetName(String name){\n" +
+                        "            this.assetName = assetName;\n" +
+                        "        }\n" +
+
                         "\n" +
                         "    }\n");
         runner.run();
@@ -163,6 +172,27 @@ public class CsvMarshallerGeneratorAnnotationTest {
 //        MYTestClass.MyNestedClass x = new MYTestClass.MyNestedClass();
     }
 
+//    @Test
+    public void testAssetName(){
+        Util.compileInstance("com.fluxtion.extension.csvcompiler.BeanWitSt",
+                "package com.fluxtion.extension.csvcompiler;\n" +
+                        "import com.fluxtion.extension.csvcompiler.annotations.CsvMarshaller;\n" +
+                        "import com.fluxtion.extension.csvcompiler.beans.TestEnum;\n" +
+                        "\n" +
+                        "@CsvMarshaller\n" +
+                        "public class BeanWitSt {\n" +
+                        "    private TestEnum assetName;\n" +
+                        "\n" +
+                        "    public TestEnum getAssetName() {\n" +
+                        "        return assetName;\n" +
+                        "    }\n" +
+                        "\n" +
+                        "    public void setAssetName(TestEnum assetName) {\n" +
+                        "        this.assetName = assetName;\n" +
+                        "    }\n" +
+                        "}");
+    }
+
     public static class MYTestClass {
 
         @ColumnMapping(columnName = "myname", defaultValue = "WHO ARE YOU")
@@ -171,5 +201,6 @@ public class CsvMarshallerGeneratorAnnotationTest {
         public static class MyNestedClass {
         }
     }
+
 
 }
